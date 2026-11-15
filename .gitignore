@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.*
+.netrc
+.aws/
+*.pem
+*.key
+*.p12
+__pycache__/
+*.py[cod]
+.venv/
+/dist/

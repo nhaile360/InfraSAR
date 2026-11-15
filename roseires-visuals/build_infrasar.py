@@ -42,6 +42,9 @@ def main():
     cli.add_argument("--august-scl", type=Path, help="Original aligned 36PXT classification")
     cli.add_argument("--october-scl", type=Path, help="Original aligned 36PXT classification")
     cli.add_argument("--patch", type=Path, help="Original aligned outlined patch mask")
+    cli.add_argument("--trend", type=Path,
+                     default=HERE.parent / "roseires-trends" / "power-analysis.json",
+                     help="Verified precipitation analysis from analyze_power.py")
     cli.add_argument("--output", type=Path, default=HERE / "roseires-shoreline-comparator.html")
     args = cli.parse_args()
 
@@ -75,9 +78,12 @@ def main():
 
     src = HERE / "src"
     payload = {"grid": grid, "bundles": [pilot, *(processed_bundle(path, grid) for path in args.observations)],
-               "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text())}
+               "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
+               "trend": json.loads(args.trend.read_text())}
     replacements = {"/* INFRASAR_STYLE */": (src / "atlas.css").read_text(),
-                    "/* INFRASAR_SCRIPT */": "\n".join((src / name).read_text() for name in ("data.js", "tiff.js", "atlas.js")),
+                    "/* INFRASAR_SCRIPT */": "\n".join(
+                        (src / name).read_text() for name in ("data.js", "tiff.js", "atlas.js", "trend.js")
+                    ),
                     "__INFRASAR_DATA__": json.dumps(payload, separators=(",", ":")).replace("<", "\\u003c")}
     html = (src / "index.html").read_text()
     for marker, content in replacements.items():

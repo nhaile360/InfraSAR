@@ -101,6 +101,8 @@
             <p class="note">DAHITI estimate</p>
           </div>
           <button type="button" id="follow-up" class="follow-up">Some nearby land also got darker in the radar image. Compare the two spots to see what the water map shows. <span aria-hidden="true">→</span></button>
+          <p id="pilot-score" class="note" hidden></p>
+          <a href="#trend-investigation" id="trend-link" class="follow-up trend-link" hidden>Investigate historical rainfall <span aria-hidden="true">→</span></a>
         </section>
         <section class="point-section" id="point-section" hidden aria-labelledby="points-title">
           <h2 id="points-title">Compare two spots</h2>
@@ -115,6 +117,55 @@
         <section class="selection" id="selection" hidden aria-live="polite"></section>
       </aside>
     </div>
+  </section>
+  <section id="trend-investigation" class="trend" aria-labelledby="trend-title" hidden>
+    <header>
+      <h2 id="trend-title">Has rainfall changed near Roseires?</h2>
+      <p>The inlet comparison shows a shoreline change between two dates in 2026. Use NASA precipitation estimates through 2024 to investigate how rainfall has changed in the grid cell around Roseires.</p>
+    </header>
+    <form id="trend-controls" class="trend-controls">
+      <label>Variable
+        <select id="trend-variable">
+          <option value="precipitation">Corrected precipitation</option>
+          <option disabled>Reservoir surface area (MODIS) · data pending</option>
+        </select>
+      </label>
+      <label>Region <select id="trend-region"><option value="roseires">Grid cell near Roseires, Sudan</option></select></label>
+      <label>Period <select id="trend-period"></select></label>
+    </form>
+    <p id="trend-scope" class="note"></p>
+    <div class="trend-results" aria-live="polite">
+      <div class="trend-metric"><h3>Change in annual total</h3><strong id="trend-slope"></strong></div>
+      <div class="trend-metric"><h3>95% confidence interval</h3><strong id="trend-interval"></strong></div>
+      <div class="trend-metric"><h3>Statistical significance</h3><strong id="trend-significance"></strong><span id="trend-p"></span></div>
+    </div>
+    <p id="trend-interpretation"></p>
+    <div class="segments trend-scale" aria-label="Precipitation chart">
+      <button type="button" data-trend-scale="annual" aria-pressed="true">Annual totals</button>
+      <button type="button" data-trend-scale="monthly" aria-pressed="false">Monthly estimates</button>
+    </div>
+    <div class="trend-figure">
+      <div id="trend-chart-unit"></div>
+      <canvas id="trend-chart" role="img" aria-describedby="trend-chart-key"></canvas>
+      <p id="trend-chart-key" class="note"></p>
+    </div>
+    <details class="trend-details">
+      <summary>Read the plotted values</summary>
+      <div class="trend-table">
+        <table>
+          <caption id="trend-table-title"></caption>
+          <thead id="trend-table-head"></thead>
+          <tbody id="trend-table-body"></tbody>
+        </table>
+      </div>
+    </details>
+    <details class="trend-details">
+      <summary>Data and method</summary>
+      <p id="trend-method"></p>
+      <p id="trend-diagnostics"></p>
+      <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Local rainfall, upstream inflow, reservoir operations, and reservoir area are distinct. The MODIS area trend still needs an Earthdata download and a quality review.</p>
+      <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
+    </details>
   </section>
   <details id="data-details">
     <summary>Data details</summary>
@@ -132,7 +183,7 @@
       </div>
     </div>
   </details>
-  <p class="footer">NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI</p>
+  <p class="footer">NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER</p>
 </main>
 <script type="application/json" id="data">__INFRASAR_DATA__</script>
 <script>/* INFRASAR_SCRIPT */</script>

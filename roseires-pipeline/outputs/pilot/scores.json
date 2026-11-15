@@ -1,0 +1,69 @@
+{
+  "pair": "pilot",
+  "metrics": {
+    "fixed": {
+      "usable_optical_pixels": 269220,
+      "usable_optical_fraction": 0.8489905583621881,
+      "radar_abstentions_on_usable_optical": 0,
+      "unverified_radar_change_pixels": 10628,
+      "optical_states": {
+        "Persistent land": 50918,
+        "Persistent water": 212103,
+        "Land to water": 5823,
+        "Water to land": 376,
+        "Outside tile coverage": 0,
+        "Cloud": 18222,
+        "Cloud shadow": 0,
+        "Ambiguous": 29655,
+        "No observation": 0,
+        "Tile overlap disagreement": 9
+      },
+      "gain": {
+        "hits": 663,
+        "misses": 5160,
+        "false_alarms": 7969,
+        "precision": 0.07680722891566265,
+        "recall": 0.11385883565172591
+      },
+      "loss": {
+        "hits": 211,
+        "misses": 165,
+        "false_alarms": 64735,
+        "precision": 0.0032488528931727896,
+        "recall": 0.5611702127659575
+      }
+    },
+    "local": {
+      "usable_optical_pixels": 269220,
+      "usable_optical_fraction": 0.8489905583621881,
+      "radar_abstentions_on_usable_optical": 13056,
+      "unverified_radar_change_pixels": 2039,
+      "optical_states": {
+        "Persistent land": 50918,
+        "Persistent water": 212103,
+        "Land to water": 5823,
+        "Water to land": 376,
+        "Outside tile coverage": 0,
+        "Cloud": 18222,
+        "Cloud shadow": 0,
+        "Ambiguous": 29655,
+        "No observation": 0,
+        "Tile overlap disagreement": 9
+      },
+      "gain": {
+        "hits": 85,
+        "misses": 5738,
+        "false_alarms": 10230,
+        "precision": 0.008240426563257392,
+        "recall": 0.014597286622016143
+      },
+      "loss": {
+        "hits": 0,
+        "misses": 376,
+        "false_alarms": 125,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    }
+  }
+}

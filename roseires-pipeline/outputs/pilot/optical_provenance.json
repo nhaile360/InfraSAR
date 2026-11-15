@@ -1,0 +1,64 @@
+{
+  "grid": {
+    "width": 711,
+    "height": 446,
+    "west": 647085.1044029767,
+    "north": 1303758.0249756854,
+    "epsg": 32636,
+    "pixel_m": 20
+  },
+  "bounds_utm": [
+    647085.1044029767,
+    1294838.0249756854,
+    661305.1044029767,
+    1303758.0249756854
+  ],
+  "sources": {
+    "2026-08-29": {
+      "36PXT": {
+        "id": "S2C_36PXT_20260826_0_L2A",
+        "datetime": "2026-08-26T08:16:57.978000+00:00",
+        "tile": "36PXT",
+        "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/P/XT/2026/8/S2C_36PXT_20260826_0_L2A/SCL.tif"
+      },
+      "36PXU": {
+        "id": "S2C_36PXU_20260826_0_L2A",
+        "datetime": "2026-08-26T08:16:43.517000+00:00",
+        "tile": "36PXU",
+        "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/P/XU/2026/8/S2C_36PXU_20260826_0_L2A/SCL.tif"
+      }
+    },
+    "2026-10-16": {
+      "36PXT": {
+        "id": "S2C_36PXT_20261015_0_L2A",
+        "datetime": "2026-10-15T08:17:01.563000+00:00",
+        "tile": "36PXT",
+        "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/P/XT/2026/10/S2C_36PXT_20261015_0_L2A/SCL.tif"
+      },
+      "36PXU": {
+        "id": "S2C_36PXU_20261015_0_L2A",
+        "datetime": "2026-10-15T08:16:47.091000+00:00",
+        "tile": "36PXU",
+        "scl": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/36/P/XU/2026/10/S2C_36PXU_20261015_0_L2A/SCL.tif"
+      }
+    }
+  },
+  "resampling": "nearest neighbor",
+  "mosaic": "usable class wins; usable land/water disagreement remains unknown",
+  "coverage": {
+    "36PXT_only": {
+      "usable_both_dates": 0.5020624018467011,
+      "outside_tile_on_either_date": 0.4192825112107623
+    },
+    "36PXT_and_36PXU": {
+      "usable_both_dates": 0.8489905583621881,
+      "outside_tile_on_either_date": 0.0
+    }
+  },
+  "raw_scl": {
+    "255": "outside source coverage",
+    "254": "tile disagreement",
+    "0": "source no data",
+    "7": "low-probability cloud or unclassified"
+  }
+}
