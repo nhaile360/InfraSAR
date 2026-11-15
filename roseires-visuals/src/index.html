@@ -17,30 +17,59 @@
 <main id="top" class="wrap">
   <header class="intro">
     <h1>Where did the water<br class="hero-break"> move at Roseires?</h1>
-    <p>Roseires Dam holds back part of the Blue Nile in Sudan. Explore how its reservoir shoreline changed between August and October 2026.</p>
+    <p>Compare two views of the Roseires shoreline in 2026, then look at decades of NASA rainfall estimates to see whether rainfall near the reservoir shows a trend.</p>
   </header>
-  <section class="workspace" aria-label="Roseires shoreline explorer">
-    <nav class="view-tabs" aria-label="Map views">
-      <button type="button" data-view="swipe" aria-pressed="true"><span aria-hidden="true">◧</span> Swipe dates</button>
-      <button type="button" data-view="change" aria-pressed="false"><span aria-hidden="true">◩</span> Change map</button>
-      <button type="button" data-view="points" aria-pressed="false"><span aria-hidden="true">⊙</span> Compare points</button>
-      <button type="button" data-view="timeline" aria-pressed="false"><span aria-hidden="true">≋</span> Timeline</button>
-    </nav>
+  <nav id="investigations" class="investigations" aria-label="Investigations">
+    <a href="#shoreline" data-investigation aria-current="location"><strong>2026 shoreline</strong><span>What changed at Roseires?</span></a>
+    <a href="#trend-investigation" data-investigation><strong>Long-term rainfall</strong><span>What does the historical record show?</span></a>
+  </nav>
+  <section id="shoreline" class="workspace" aria-labelledby="shoreline-title">
+    <h2 id="shoreline-title" class="sr-only" tabindex="-1">What changed at Roseires in 2026?</h2>
+    <div class="view-tabs" role="group" aria-label="Shoreline views">
+      <button type="button" data-view="swipe" aria-pressed="true">Swipe dates</button>
+      <button type="button" data-view="change" aria-pressed="false">Map changes</button>
+      <button type="button" data-view="points" aria-pressed="false">Compare locations</button>
+      <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
+    </div>
+    <p id="view-help" class="view-help">Drag the divider to compare August and October. Switch layers to see how radar and optical observations differ.</p>
     <div class="workspace-grid">
       <div class="map-column">
         <div class="map-tools">
-          <div id="layers" class="segments" aria-label="Map layer"></div>
+          <div id="layers" class="segments" role="group" aria-label="Map layer"></div>
           <div class="map-actions">
             <button id="extent" class="outline" type="button">Show reservoir</button>
             <button id="context-only" class="outline" type="button" aria-pressed="false">Hide study layers</button>
+          </div>
+        </div>
+        <div id="point-controls" class="point-controls" hidden>
+          <div class="point-actions">
+            <div class="segments pin-select" role="group" aria-label="Location to move">
+              <button type="button" data-point="A" aria-pressed="true">Move Point A</button>
+              <button type="button" data-point="B" aria-pressed="false">Move Point B</button>
+            </div>
+            <button type="button" class="text-button" id="fit-points">Show both</button>
+            <button type="button" class="text-button" id="reset-points">Reset examples</button>
+          </div>
+          <p id="point-status" role="status"></p>
+          <p id="point-keyboard" class="sr-only">Press Enter on the map to place the active point at the center. Use arrow keys on a marker to move it one cell.</p>
+        </div>
+        <div id="timeline" class="timeline-controls" hidden>
+          <div class="timeline-top">
+            <label class="scrub" for="scrubber"><span id="scrub-date"></span><input type="range" id="scrubber" min="0" max="0" value="0" aria-label="Timeline date"></label>
+            <div class="playback"><button class="outline" type="button" id="play">Play</button><button class="outline" type="button" id="pause" disabled>Pause</button></div>
+          </div>
+          <p id="time-status" role="status"></p>
+          <div id="timeline-pair" class="timeline-pair" hidden>
+            <div><button class="outline" type="button" id="select-date">Select this date</button> <button class="primary" type="button" id="open-swipe" disabled>Compare these dates</button> <button class="text-button" type="button" id="clear-dates" hidden>Clear dates</button></div>
+            <p id="pair-message" role="status"></p>
           </div>
         </div>
         <div class="date-corners" id="dates" aria-live="polite"><span id="before"></span><span id="after"></span></div>
         <div id="map-frame" class="map-frame">
           <canvas id="map" tabindex="0" aria-label="Roseires reservoir map. Use arrow keys to pan and plus or minus to zoom."></canvas>
           <div class="map-compass" aria-hidden="true"><span>▲</span> N</div>
-          <button type="button" id="pin-a" class="pin a" aria-label="Move Point A" hidden>A</button>
-          <button type="button" id="pin-b" class="pin b" aria-label="Move Point B" hidden>B</button>
+          <button type="button" id="pin-a" class="pin a" aria-label="Point A marker" aria-describedby="point-keyboard" hidden>A</button>
+          <button type="button" id="pin-b" class="pin b" aria-label="Point B marker" aria-describedby="point-keyboard" hidden>B</button>
           <div id="tip" class="map-tip" hidden></div>
           <div id="divider" class="divider" aria-hidden="true"></div>
           <button type="button" id="drag" class="drag" role="slider" aria-label="Drag to compare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="56" aria-valuetext="56% left, 44% right" aria-orientation="horizontal">
@@ -57,37 +86,8 @@
           <div class="map-credit" id="credit">HydroLAKES · geographic reference</div>
         </div>
         <div id="legend" class="legend" aria-label="Map legend"></div>
-        <section id="timeline" class="timeline" hidden aria-labelledby="timeline-heading">
-          <div class="timeline-top">
-            <div><h2 id="timeline-heading">Follow the observations</h2><p id="time-count"></p></div>
-            <div class="playback">
-              <button class="outline" type="button" id="play">Play</button>
-              <button class="outline" type="button" id="pause" disabled>Pause</button>
-            </div>
-          </div>
-          <label class="scrub" for="scrubber"><span id="scrub-date"></span><input type="range" id="scrubber" min="0" max="0" value="0" aria-label="Timeline date"></label>
-          <p class="timeline-status" id="time-status" aria-live="polite"></p>
-          <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
-          <div id="charts"></div>
-          <fieldset class="date-select">
-            <legend>Send two observations to Swipe dates</legend>
-            <label>Layer <select id="date-layer"><option value="radar">Radar image</option><option value="water">Water map</option></select></label>
-            <label>Left date <select id="date-start"></select></label>
-            <label>Right date <select id="date-end"></select></label>
-            <button class="primary" type="button" id="open-swipe">Compare dates</button>
-            <p id="pair-message" role="status"></p>
-          </fieldset>
-        </section>
       </div>
       <aside class="side">
-        <section class="locator-card" aria-labelledby="locator-title">
-          <div class="locator-top"><h2 id="locator-title">Roseires Reservoir</h2><span aria-hidden="true">N ↑</span></div>
-          <canvas id="locator" aria-label="Locator map showing the Blue Nile, Roseires Dam, and the inlet southeast of the dam."></canvas>
-          <div class="locator-actions">
-            <button type="button" id="loc-dam"><i aria-hidden="true"></i> Full reservoir</button>
-            <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
-          </div>
-        </section>
         <section class="evidence" id="evidence" aria-label="Evidence at the inlet">
           <h2 id="evidence-title">Water reached farther into this inlet.</h2>
           <div class="finding">
@@ -104,38 +104,49 @@
             <p>The reservoir rose about <strong>1.15 m</strong> between the radar passes.</p>
             <p class="note">DAHITI estimate</p>
           </div>
-          <button type="button" id="follow-up" class="follow-up">Some nearby land also got darker in the radar image. Compare the two spots to see what the water map shows. <span aria-hidden="true">→</span></button>
-          <p id="pilot-score" class="note" hidden></p>
-          <a href="#trend-investigation" id="trend-link" class="follow-up trend-link" hidden>Investigate historical rainfall <span aria-hidden="true">→</span></a>
+          <p id="pilot-score" class="pilot-score" hidden></p>
+          <button type="button" id="follow-up" class="follow-up">Compare the inlet with nearby dry land <span aria-hidden="true">→</span></button>
+          <details class="sensor-method">
+            <summary>Why use radar and optical imagery?</summary>
+            <p>NISAR sends microwaves and measures the signal that bounces back, called backscatter. It can observe through clouds and in darkness. Water, wet soil, and changes in surface roughness can all affect the return.</p>
+            <p>Sentinel‑2 uses reflected sunlight to classify land and water where the scene is clear. Comparing the two helps check whether a change in radar return matches a change in the water map.</p>
+            <p><a href="https://science.nasa.gov/mission/nisar/mission-concept/">How NISAR observes Earth</a></p>
+          </details>
         </section>
         <section class="point-section" id="point-section" hidden aria-labelledby="points-title">
-          <h2 id="points-title">Compare two spots</h2>
-          <p>Choose a point, then tap the map or drag its pin.</p>
-          <div class="segments pin-select" aria-label="Point to move">
-            <button type="button" data-point="A" aria-pressed="true">Point A</button>
-            <button type="button" data-point="B" aria-pressed="false">Point B</button>
-          </div>
-          <div id="points" aria-live="polite"></div>
-          <button type="button" class="text-button" id="reset-points">Reset example points</button>
+          <h2 id="points-title">Location readings</h2>
+          <p id="example-explanation">In the examples, the radar return weakened at both locations. Sentinel‑2 mapped a water gain at A and land on both dates at B.</p>
+          <div id="points"></div>
+        </section>
+        <section class="timeline" id="timeline-readings" hidden aria-labelledby="timeline-heading">
+          <h2 id="timeline-heading">Observation readings</h2>
+          <p id="time-count"></p>
+          <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
+          <div id="charts"></div>
         </section>
         <section class="selection" id="selection" hidden aria-live="polite"></section>
+        <section class="locator-card" aria-labelledby="locator-title">
+          <div class="locator-top"><h2 id="locator-title">Roseires Reservoir</h2><span aria-hidden="true">N ↑</span></div>
+          <canvas id="locator" aria-label="Locator map showing the Blue Nile, Roseires Dam, and the study inlet southeast of the dam."></canvas>
+          <div class="locator-actions">
+            <button type="button" id="loc-dam"><i aria-hidden="true"></i> Full reservoir</button>
+            <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
+          </div>
+        </section>
       </aside>
+    </div>
+    <div class="trend-bridge">
+      <p>Two dates show a local shoreline change. Decades of observations let you test whether rainfall near the reservoir changed consistently over time.</p>
+      <a class="primary" href="#trend-investigation" data-investigation>Explore long-term rainfall <span aria-hidden="true">→</span></a>
     </div>
   </section>
   <section id="trend-investigation" class="trend" aria-labelledby="trend-title" hidden>
     <header>
-      <h2 id="trend-title">Has rainfall changed near Roseires?</h2>
-      <p>The inlet comparison shows a shoreline change between two dates in 2026. Use NASA precipitation estimates through 2024 to investigate how rainfall has changed in the grid cell around Roseires.</p>
+      <h2 id="trend-title" tabindex="-1">Has rainfall changed near Roseires?</h2>
+      <p>Use NASA rainfall estimates from 1981 to 2024 to test a trend for the grid cell around Roseires. This record ends before the 2026 shoreline observation.</p>
     </header>
     <form id="trend-controls" class="trend-controls">
-      <label>Variable
-        <select id="trend-variable">
-          <option value="precipitation">Corrected precipitation</option>
-          <option disabled>Reservoir surface area (MODIS) · data pending</option>
-        </select>
-      </label>
-      <label>Region <select id="trend-region"><option value="roseires">Grid cell near Roseires, Sudan</option></select></label>
-      <label>Period <select id="trend-period"></select></label>
+      <label>Analysis period <select id="trend-period"></select></label>
     </form>
     <p id="trend-scope" class="note"></p>
     <div class="trend-results" aria-live="polite">
@@ -167,17 +178,18 @@
       <summary>Data and method</summary>
       <p id="trend-method"></p>
       <p id="trend-diagnostics"></p>
-      <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Local rainfall, upstream inflow, reservoir operations, and reservoir area are distinct. The MODIS area trend still needs an Earthdata download and a quality review.</p>
+      <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Evaluating why the shoreline moved in 2026 would also require observations of upstream inflow and reservoir operations from that period.</p>
       <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
     </details>
+    <p class="return-link"><a href="#shoreline" data-investigation>Return to the 2026 shoreline</a></p>
   </section>
   <details id="data-details">
     <summary>Data details</summary>
     <div class="details-grid">
       <div><h3>Acquisitions and methods</h3><div id="methods"></div></div>
       <div><h3>Map context</h3>
-        <p>The locator shows the dam and the study inlet. Terrain loads when connected. The shaded river footprint uses the latest available water map, or the October radar candidate map for orientation.</p>
-        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer" target="_blank" rel="noopener">Esri terrain and basemap attribution</a></p>
+        <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
+        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
         <h3>Load more observations</h3>
         <p>Choose a processed pipeline comparator HTML file or the two SCL GeoTIFFs with the inlet mask. Files are read on this device.</p>
         <label for="add-data" class="file-label">Processed comparator or inlet GeoTIFFs</label>
@@ -187,7 +199,7 @@
       </div>
     </div>
   </details>
-  <p class="footer">NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER</p>
+  <footer class="footer"><p>InfraSAR applies the <a href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps Earth System Trend Detective challenge</a> to Roseires. Explore observations, estimate a rate of change, and examine its uncertainty.</p><p>NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER</p></footer>
 </main>
 <script type="application/json" id="data">__INFRASAR_DATA__</script>
 <script>/* INFRASAR_SCRIPT */</script>

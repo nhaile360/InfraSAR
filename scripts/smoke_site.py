@@ -61,8 +61,9 @@ def check_basemap(chromium, url):
         west, east = bounds(zoomed.value)
         assert east - west < inlet_width * .8, "Zooming must request a closer view"
 
+        page.get_by_role("button", name="Show reservoir").click()
         with page.expect_request(export) as overview:
-            page.get_by_role("button", name="Show reservoir").click()
+            page.get_by_role("button", name="Zoom in").click()
         west, east = bounds(overview.value)
         page.wait_for_function("west => viewportBasemap?.bounds.west === west", arg=west)
         assert east - west > 40000, "The request must cover areas outside the former detail image"
@@ -79,6 +80,10 @@ def check_basemap(chromium, url):
 
 
 def check_swipe(page, offline):
+    expect(page.locator("#before")).to_contain_text("26 Aug 2026")
+    radar = page.get_by_role("button", name="Radar image", exact=True)
+    radar.press("Enter")
+    expect(radar).to_be_focused()
     expect(page.locator("#before")).to_contain_text("Left · NISAR HH · 29 Aug 2026")
     expect(page.locator("#after")).to_contain_text("Right · NISAR HH · 16 Oct 2026")
     divider = page.get_by_role("slider", name="Drag to compare")
@@ -123,10 +128,11 @@ def check_swipe(page, offline):
         return indexAt(t.location(...t.xy(pointFrom(i)))) === i;
     }""")
 
-    page.get_by_role("button", name="Water map", exact=True).click()
+    page.get_by_role("button", name="Optical water map", exact=True).click()
     expect(page.locator("#before")).to_contain_text("26 Aug 2026")
     expect(page.locator("#after")).to_contain_text("15 Oct 2026")
-    page.get_by_role("button", name="Radar vs optical change").click()
+    page.get_by_role("button", name="Map changes").click()
+    page.get_by_role("button", name="Compare change maps").click()
     expect(page.locator("#before")).to_contain_text("NISAR candidates")
     expect(page.locator("#after")).to_contain_text("Sentinel‑2 change")
     expect(page.locator("#legend")).to_contain_text("threshold-based")
@@ -156,22 +162,95 @@ def check_swipe(page, offline):
         }"""), "No-data cells must be transparent and observed cloud must remain visible"
 
 
+def check_points(page):
+    page.get_by_role("button", name="Compare the inlet with nearby dry land").click()
+    expect(page.get_by_role("heading", name="Location readings")).to_be_visible()
+    a, b = (page.locator(f'[data-point-card="{key}"]') for key in ("A", "B"))
+    expect(a).to_contain_text("Land → Water")
+    expect(b).to_contain_text("Land → Land")
+    expect(a).to_contain_text("NISAR HH")
+    expect(b).to_contain_text("Radar change")
+    a_index = page.evaluate("toolState.points.A")
+    b_index = page.evaluate("toolState.points.B")
+    move = page.get_by_role("button", name="Move Point B", exact=True)
+    move.press("Enter")
+    expect(move).to_have_attribute("aria-pressed", "true")
+    expect(b).to_have_attribute("data-active", "true")
+    pin = page.get_by_role("button", name="Point B marker")
+    expect(pin).to_have_attribute("aria-pressed", "true")
+    expect(page.get_by_role("button", name="Point A marker")).to_be_visible()
+
+    canvas = page.locator("#map")
+    box = canvas.bounding_box()
+    canvas.click(position={"x": box["width"] * .35, "y": box["height"] * .58})
+    expect(page.locator("#point-status")).to_contain_text("Point B moved")
+    changed = page.evaluate("toolState.points.B")
+    assert changed != b_index and page.evaluate("toolState.points.A") == a_index
+    assert page.evaluate("""() => {
+        const cell = toolState.points.B;
+        const [before, after] = pilotRadar();
+        const reading = dbText(after.raw[cell] - before.raw[cell], 2);
+        return document.querySelector('[data-point-card="B"]').textContent.includes(reading);
+    }"""), "The card must show the new cell's radar change"
+    pin.press("ArrowRight")
+    assert page.evaluate("toolState.points.B") == changed + 1
+
+    pin.scroll_into_view_if_needed()
+    handle = pin.bounding_box()
+    x, y = handle["x"] + handle["width"] / 2, handle["y"] + handle["height"] / 2
+    expected = page.evaluate("Math.round(60 / (cell * (map.clientWidth / toolState.cam.span)))")
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.move(x + 60, y, steps=6)
+    page.mouse.up()
+    assert abs(page.evaluate("toolState.points.B") - (changed + 1) - expected) <= 1
+
+    page.get_by_role("button", name="Show reservoir").click()
+    canvas.click(position={"x": 13, "y": canvas.bounding_box()["height"] * .75})
+    expect(page.locator("#point-status")).to_contain_text("inside the dashed study boundary")
+    page.get_by_role("button", name="Show both").click()
+    expect(pin).to_be_visible()
+    expect(page.get_by_role("button", name="Point A marker")).to_be_visible()
+    page.get_by_role("button", name="Reset examples").click()
+    expect(page.locator("#point-status")).to_contain_text("Example locations restored")
+    assert page.evaluate("toolState.points.A === toolState.examples.A && toolState.points.B === toolState.examples.B")
+    expect(a).to_have_attribute("data-active", "true")
+
+
 def check_other_views(page):
-    page.get_by_role("button", name="Change map").click()
+    page.get_by_role("button", name="Map changes").click()
     page.get_by_role("button", name="Agreement", exact=True).click()
     expect(page.locator("#legend")).to_contain_text("Radar change")
-    page.get_by_role("button", name="Compare points").click()
-    expect(page.get_by_role("heading", name="Compare two spots")).to_be_visible()
-    expect(page.locator("#points")).to_contain_text("Point A")
+    page.get_by_role("button", name="Radar change", exact=True).click()
+    expect(page.locator("#legend")).to_contain_text("October minus August")
+    page.get_by_role("button", name="Optical change", exact=True).click()
+    expect(page.locator("#legend")).to_contain_text("Land in August, water in October")
+    check_points(page)
     page.get_by_role("button", name="Timeline").click()
-    expect(page.get_by_role("heading", name="Follow the observations")).to_be_visible()
-    page.locator("#scrubber").press("ArrowRight")
+    expect(page.get_by_role("heading", name="Observation readings")).to_be_visible()
+    expect(page.get_by_role("button", name="Compare these dates")).to_be_hidden()
+    scrubber = page.get_by_role("slider", name="Timeline date")
+    scrubber.press("ArrowRight")
     expect(page.locator("#time-status")).not_to_be_empty()
+    assert page.locator("#before").inner_text() == scrubber.get_attribute("aria-valuetext")
+    canvas = page.locator("#radar-chart")
+    canvas.click(position={"x": 50, "y": 22})
+    assert scrubber.input_value() == "0"
+    page.get_by_role("button", name="Play", exact=True).click()
+    expect(page.get_by_role("button", name="Pause", exact=True)).to_be_enabled()
+    stage = page.get_by_role("link", name="Long-term rainfall")
+    stage.press("Enter")
+    expect(stage).to_have_attribute("aria-current", "location")
+    expect(page.locator("#shoreline")).to_be_hidden()
+    expect(page.get_by_role("heading", name="Has rainfall changed near Roseires?")).to_be_focused()
+    assert page.evaluate("toolState.timer === null")
+    page.go_back()
+    expect(page.locator("#timeline")).to_be_visible()
     page.get_by_role("button", name="Swipe dates").click()
 
     expect(page.locator("#pilot-score")).to_contain_text("7.68%")
     expect(page.locator("#pilot-score")).to_contain_text("0.82%")
-    page.get_by_role("link", name="Investigate historical rainfall").click()
+    page.get_by_role("link", name="Explore long-term rainfall").click()
     expect(page.locator("#trend-chart")).to_be_visible()
     expect(page.locator("#trend-slope")).to_have_text("+1.52 mm/year")
     expect(page.locator("#trend-significance")).to_have_text("Inconclusive")
@@ -181,6 +260,52 @@ def check_other_views(page):
     page.locator("#trend-period").select_option("2")
     expect(page.locator("#trend-table-body tr")).to_have_count(264)
     expect(page.locator("#trend-slope")).to_have_text("+48.17 mm/year")
+    page.get_by_role("link", name="Return to the 2026 shoreline").click()
+    expect(page.locator("#shoreline")).to_be_visible()
+    expect(page.get_by_role("button", name="Swipe dates")).to_have_attribute("aria-pressed", "true")
+
+
+def check_imported_dates(page):
+    # Exercise the import UI with a test-only bundle on the original grid.
+    payload = page.evaluate("""() => {
+        const bundle = structuredClone(seed.bundles.find(item => item.pair === "pilot"));
+        bundle.pair = "holdout";
+        bundle.optical_sources = {};
+        bundle.radar.radar[0].datetime = "2026-08-18T03:20:00Z";
+        bundle.radar.radar[1].datetime = "2026-10-02T03:20:00Z";
+        return '<script type="application/json" id="data">'+JSON.stringify(bundle)+'</script>';
+    }""")
+    page.get_by_text("Data details", exact=True).click()
+    page.locator("#add-data").set_input_files({
+        "name": "test-holdout.html", "mimeType": "text/html", "buffer": payload.encode()
+    })
+    expect(page.locator("#import-status")).to_contain_text("usable water or land class")
+    assert page.evaluate("loaded.radar.size === 4")
+    page.get_by_role("button", name="Timeline").click()
+    scrubber = page.get_by_role("slider", name="Timeline date")
+    select = page.get_by_role("button", name="Select this date")
+    compare = page.get_by_role("button", name="Compare these dates")
+
+    def seek(date):
+        index = page.evaluate("(day) => toolState.events.findIndex(event => event.record?.time.startsWith(day))", date)
+        assert index >= 0
+        scrubber.press("Home")
+        for _ in range(index):
+            scrubber.press("ArrowRight")
+
+    seek("2026-10-02")
+    select.press("Enter")
+    expect(select).to_be_disabled()
+    expect(compare).to_be_disabled()
+    seek("2026-08-26")
+    expect(select).to_be_disabled()
+    seek("2026-08-18")
+    select.press("Enter")
+    expect(compare).to_be_focused()
+    compare.press("Enter")
+    expect(page.locator("#before")).to_contain_text("18 Aug 2026")
+    expect(page.locator("#after")).to_contain_text("2 Oct 2026")
+    expect(page.get_by_role("slider",name="Drag to compare")).to_be_visible()
 
 
 def check_touch(chromium, url, offline):
@@ -219,8 +344,17 @@ def check_touch(chromium, url, offline):
 
         page.get_by_role("button", name="Show reservoir").tap()
         check_reservoir_extent(page)
-        page.get_by_role("button", name="Water map", exact=True).tap()
+        page.get_by_role("button", name="Optical water map", exact=True).tap()
         expect(page.locator("#after")).to_contain_text("Sentinel‑2")
+        page.get_by_role("button", name="Show inlet").tap()
+        page.get_by_role("button", name="Compare locations").tap()
+        page.get_by_role("button", name="Move Point B",exact=True).tap()
+        canvas.tap(position={"x": 80, "y": 170})
+        expect(page.locator("#point-status")).to_contain_text("Point B moved")
+        expect(page.locator('[data-point-card="B"]')).to_have_attribute("data-active","true")
+        page.get_by_role("link",name="Long-term rainfall").tap()
+        expect(page.locator("#trend-chart")).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Horizontal overflow on mobile trends"
         assert not errors, errors
 
 
@@ -245,6 +379,8 @@ def main():
         assert not errors, errors
         check_touch(browser, url, offline)
         if offline:
+            check_imported_dates(page)
+            assert not errors, errors
             check_basemap(browser, url)
         browser.close()
     print("Desktop, keyboard, mouse and mobile touch smoke tests passed for " + url)

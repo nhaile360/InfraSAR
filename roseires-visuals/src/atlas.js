@@ -1,10 +1,16 @@
 const map=$("map"), mapBox=$("map-frame"), context=map.getContext("2d");
 const mini=$("locator"), miniContext=mini.getContext("2d");
-const toolState={view:"swipe",layer:"radar",change:"water",rule:"local",split:56,overview:false,
-  swipeChange:false,radarDisplay:"smooth",showRasters:true,
+const toolState={view:"swipe",layer:"water",change:"water",rule:"local",split:56,overview:false,
+  radarDisplay:"smooth",showRasters:true,
   focus:"A",points:{A:null,B:null},examples:{A:null,B:null},chosen:null,patch:null,cam:{...inlet,span:4300},
-  pairByLayer:{},time:0,events:[],timer:null,ready:false};
-const mapNames={radar:"Radar image",water:"Water map",delta:"Radar signal change",agreement:"Agreement"};
+  pairByLayer:{},timelinePair:[],time:0,events:[],timer:null,ready:false};
+const mapNames={radar:"Radar image",water:"Optical water map",delta:"Radar change",agreement:"Agreement"};
+const guidance={
+  swipe:"Drag the divider to compare the two dates. Switch layers to check how the same area looks in radar and optical imagery.",
+  change:"Find where the optical map shows a water gain or loss. Compare it with the radar change to see where the evidence agrees.",
+  points:"Choose a point to move, then click or tap the map. You can also drag either marker directly.",
+  timeline:"Move through the available observations. The map and charts follow the selected date."
+};
 const radarRange={min:-24,max:0};
 const historicalWater={fill:"#bedce5b0",stroke:"#467b8b"};
 const shoreline=new Path2D();
@@ -273,7 +279,7 @@ function requestDraw(){
 }
 function drawSwipe(c,t){
   let sides;
-  if(toolState.swipeChange){
+  if(showsChangePair()){
     const change=changes();
     sides=[{type:"candidate",raw:change.radar[toolState.rule]},{type:"water",states:change.water}];
   }else sides=selectedPair(toolState.layer);
@@ -294,7 +300,7 @@ function draw(){
   scheduleBasemap(t,view);
   const basemapVisible=drawContext(context,t,view);
   if(toolState.showRasters){
-    if(toolState.view==="swipe")drawSwipe(context,t);
+    if(toolState.view==="swipe"||showsChangePair())drawSwipe(context,t);
     else if(toolState.view==="change")drawGeo(context,t,rasterImage(changeLayer(),toolState.change),crop);
     else if(toolState.view==="timeline")displayRaster(context,t,toolState.events[toolState.time]?.record);
     else displayRaster(context,t,toolState.layer==="water"?pilotWater()[1]:pilotRadar()[1]);
@@ -314,6 +320,7 @@ function draw(){
     pin.hidden=!xy||xy[0]<12||xy[0]>width-12||xy[1]<18||xy[1]>height-8;
     if(pin.hidden)continue;
     pin.style.left=xy[0]+"px";pin.style.top=xy[1]+"px";pin.dataset.active=String(toolState.focus===key);
+    pin.setAttribute("aria-pressed",pin.dataset.active);
   }
   const meters=[50,100,200,500,1000,2000,5000,10000,20000,40000].filter(x=>x*t.factor<width*.24).at(-1)||50;
   $("scale").textContent=meters>=1000?meters/1000+" km":meters+" m";
@@ -407,7 +414,6 @@ function visibleLayer(){
   if(!toolState.showRasters)return null;
   if(toolState.view==="change")return toolState.change;
   if(toolState.view==="timeline")return toolState.events[toolState.time]?.record?.type;
-  if(toolState.view==="swipe"&&toolState.swipeChange)return "paired-change";
   return toolState.layer;
 }
 function currentCoverage(){
@@ -420,30 +426,26 @@ function currentCoverage(){
 }
 function makeLayerButtons(){
   const parent=$("layers"), available=pilotWater().length===2;
+  const returnFocus=parent.contains(document.activeElement)?document.activeElement.dataset.layer:null;
   parent.replaceChildren();
   const candidates=loaded.pairs.get("pilot").candidates;
   let buttons=[];
   if(toolState.view==="swipe"||toolState.view==="points"){
-    buttons=[["radar",mapNames.radar,true],["water",mapNames.water,available]];
-    if(toolState.view==="swipe")buttons.push(["paired-change","Radar vs optical change",available&&Boolean(candidates.local||candidates.fixed)]);
+    buttons=[["water",mapNames.water,toolState.view==="swipe"?selectedPair("water").length===2:available],["radar",mapNames.radar,true]];
   }else if(toolState.view==="change"){
-    buttons=[["water","Water map change",available],["delta",mapNames.delta,true]];
-    if(available&&(candidates.local||candidates.fixed))buttons.push(["agreement",mapNames.agreement,true]);
+    buttons=[["water","Optical change",available],["delta",mapNames.delta,true]];
+    if(available&&(candidates.local||candidates.fixed))buttons.push(["paired-change","Compare change maps",true],["agreement",mapNames.agreement,true]);
   }
-  if(toolState.view==="timeline"){
-    parent.append(node("span","Map follows the selected date","note"));return;
-  }
+  parent.hidden=toolState.view==="timeline";
   for(const [key,label,enabled] of buttons){
     const button=node("button",label);
     button.type="button";button.disabled=!enabled;
-    const selected=toolState.view==="change"?toolState.change:toolState.view==="swipe"&&toolState.swipeChange?"paired-change":toolState.layer;
+    button.dataset.layer=key;
+    const selected=toolState.view==="change"?toolState.change:toolState.layer;
     button.setAttribute("aria-pressed",String(key===selected));
     button.addEventListener("click",()=>{
       if(toolState.view==="change")toolState.change=key;
-      else{
-        toolState.swipeChange=key==="paired-change";
-        if(!toolState.swipeChange)toolState.layer=key;
-      }
+      else toolState.layer=key;
       toolState.showRasters=true;
       refreshControls();requestDraw();
     });
@@ -451,19 +453,23 @@ function makeLayerButtons(){
   }
   if(selectedRuleLayer()&&candidates.local&&candidates.fixed){
     const button=node("button",toolState.rule==="local"?"Rule: local":"Rule: fixed");
-    button.type="button";button.title="Switch the radar classification rule";
+    button.type="button";button.dataset.layer="rule";button.title="Switch the radar classification rule";
     button.addEventListener("click",()=>{toolState.rule=toolState.rule==="local"?"fixed":"local";refreshControls();requestDraw()});
     parent.append(button);
   }
+  if(returnFocus)Array.from(parent.children).find(button=>button.dataset.layer===returnFocus)?.focus({preventScroll:true});
+}
+function showsChangePair(){
+  return toolState.view==="change"&&toolState.change==="paired-change";
 }
 function selectedRuleLayer(){
-  return toolState.view==="change"&&toolState.change==="agreement"||toolState.view==="swipe"&&toolState.swipeChange;
+  return toolState.view==="change"&&toolState.change==="agreement"||showsChangePair();
 }
 function updateDates(){
   const a=$("before"), b=$("after");
   if(!toolState.showRasters){
     a.textContent="Geographic context";b.textContent="";
-  }else if(toolState.view==="swipe"&&toolState.swipeChange){
+  }else if(showsChangePair()){
     a.textContent="Left · NISAR candidates · "+pilotRadar().map(r=>formatShort(r.time)).join(" → ")+" 2026";
     b.textContent="Right · Sentinel‑2 change · "+pilotWater().map(r=>formatShort(r.time)).join(" → ")+" 2026";
   }else if(toolState.view==="swipe"){
@@ -476,7 +482,10 @@ function updateDates(){
     a.textContent=current?formatDate(current.date):"";
     b.textContent=current?.record?(current.record.type==="water"?"Sentinel‑2":"NISAR"):"DAHITI";
   }else{
-    a.textContent=toolState.view==="points"?"October · "+mapNames[toolState.layer]:"August → October 2026";
+    if(toolState.view==="points"){
+      const observation=(toolState.layer==="water"?pilotWater():pilotRadar())[1];
+      a.textContent=observation?formatDate(observation.time)+" · "+mapNames[toolState.layer]:"Optical water map unavailable";
+    }else a.textContent="August → October 2026";
     b.textContent="";
   }
 }
@@ -490,8 +499,10 @@ function pointCompare(){
   for(const key of ["A","B"]){
     const i=toolState.points[key], same=i===toolState.examples[key];
     const section=node("section",null,"point-card"), title=node("h3","Point "+key,key.toLowerCase()+"-label");
+    section.dataset.pointCard=key;
+    section.dataset.active=String(key===toolState.focus);
     if(i!==null&&same&&key==="A"&&toolState.patch)title.append(" · Inlet");
-    if(i!==null&&same&&key==="B")title.append(" · Stayed dry");
+    if(i!==null&&same&&key==="B")title.append(" · Land on both dates");
     section.append(title);
     if(i===null){
       section.append(node("p","Choose Point "+key+" and tap the map."));parent.append(section);continue;
@@ -501,10 +512,13 @@ function pointCompare(){
       const card=node("div"), r=radar[k], w=water[k];
       card.append(node("strong",k?"October":"August"),node("span",w?stateNames[stateAt(w,i)]:"Water map unavailable"),
         node("small",w?"Sentinel‑2 · "+formatShort(w.time):"Sentinel‑2"),
-        node("span",dbText(r.raw[i],2)),node("small","NISAR · "+formatShort(r.time)));
+        node("span",dbText(r.raw[i],2)),node("small","NISAR HH · "+formatShort(r.time)));
       matrix.append(card);
     }
-    section.append(matrix);parent.append(section);
+    const delta=radar[1].raw[i]-radar[0].raw[i], classes=water.map(row=>stateAt(row,i));
+    const optical=classes.length===2&&classes.every(isClear)?" · "+stateNames[classes[0]]+" → "+stateNames[classes[1]]:" · Optical change unavailable";
+    const radarChange=Number.isFinite(delta)?(delta>0?"+":"")+dbText(delta,2):"Unavailable";
+    section.append(matrix,node("p","Radar change "+radarChange+optical,"point-delta"));parent.append(section);
   }
 }
 function details(){
@@ -564,6 +578,7 @@ function updateEvidence(){
       ?"The original Sentinel‑2 classification mapped this patch as land in August and water in October. The current mosaic adds observations from the neighboring tile."
       :"The pilot’s Sentinel‑2 classification mapped the outlined study patch as land in August and water in October.";
   $("follow-up").disabled=toolState.examples.B===null;
+  $("example-explanation").hidden=toolState.examples.B===null;
   if(toolState.examples.B===null)$("follow-up").title="Load Sentinel‑2 water maps to verify a dry comparison point.";
   else $("follow-up").removeAttribute("title");
 }
@@ -579,16 +594,21 @@ function showSelected(){
 }
 function refreshControls(){
   const view=toolState.view;
+  $("view-help").textContent=guidance[view];
   for(const b of document.querySelectorAll("[data-view]"))b.setAttribute("aria-pressed",String(b.dataset.view===view));
-  $("divider").hidden=$("drag").hidden=view!=="swipe"||!toolState.showRasters;
+  $("divider").hidden=$("drag").hidden=(view!=="swipe"&&!showsChangePair())||!toolState.showRasters;
   $("context-only").textContent=toolState.showRasters?"Hide study layers":"Show study layers";
   $("context-only").setAttribute("aria-pressed",String(!toolState.showRasters));
   $("radar-display").hidden=visibleLayer()!=="radar";
   $("timeline").hidden=view!=="timeline";
+  $("timeline-readings").hidden=view!=="timeline";
+  $("point-controls").hidden=view!=="points";
   $("point-section").hidden=view!=="points";
-  $("evidence").hidden=view==="points";
+  $("evidence").hidden=view==="points"||view==="timeline";
   $("map").dataset.pick=String(view==="points"||view==="timeline");
-  for(const b of document.querySelectorAll("[data-point]"))b.setAttribute("aria-pressed",String(b.dataset.point===toolState.focus));
+  if(view==="points")map.setAttribute("aria-describedby","point-keyboard");
+  else map.removeAttribute("aria-describedby");
+  updateActivePoint();
   makeLayerButtons();updateDates();updateLegend();showSelected();
   if(view==="points")pointCompare();
   if(view==="timeline")updateTimeline();
@@ -599,8 +619,13 @@ function setView(view){
   toolState.view=view;
   toolState.showRasters=true;
   if(view==="change"){
-    if(!pilotWater().length&&toolState.change==="water")toolState.change="delta";
-    if(toolState.change==="agreement"&&!changes().compare[toolState.rule])toolState.change=pilotWater().length?"water":"delta";
+    if(pilotWater().length!==2&&toolState.change==="water")toolState.change="delta";
+    if(selectedRuleLayer()&&!changes().compare[toolState.rule])toolState.change=pilotWater().length?"water":"delta";
+  }
+  if(view==="points"){
+    if(toolState.layer==="water"&&pilotWater().length!==2)toolState.layer="radar";
+    $("point-status").textContent="";
+    fitPointsIfOffscreen();
   }
   refreshControls();requestDraw();
 }
@@ -608,14 +633,53 @@ function openData(){
   $("data-details").open=true;
   $("add-data").focus();
 }
-function setPoint(which,i){
-  if(i<0||i>=size)return;
-  toolState.focus=which;toolState.points[which]=i;
-  for(const b of document.querySelectorAll("[data-point]"))b.setAttribute("aria-pressed",String(b.dataset.point===which));
+function updateActivePoint(){
+  for(const b of document.querySelectorAll("[data-point]"))b.setAttribute("aria-pressed",String(b.dataset.point===toolState.focus));
+  for(const card of document.querySelectorAll("[data-point-card]"))card.dataset.active=String(card.dataset.pointCard===toolState.focus);
+}
+function pointStatus(text){
+  if(toolState.view==="points")$("point-status").textContent=text;
+  else if(toolState.view==="timeline")flash(text);
+}
+function announcePoint(which){
+  const i=toolState.points[which], readings=pilotRadar().map(row=>row.raw[i]);
+  const delta=readings[1]-readings[0];
+  const change=Number.isFinite(delta)?"Radar change "+(delta>0?"+":"")+dbText(delta,2)+".":"Radar change unavailable.";
+  pointStatus("Point "+which+" moved to cell "+(i%grid.width+1)+", "+(Math.floor(i/grid.width)+1)+". "+change);
+}
+function selectPoint(which){
+  toolState.focus=which;updateActivePoint();requestDraw();
+}
+function setPoint(which,i,{announce=true}={}){
+  if(!Number.isInteger(i)||i<0||i>=size){
+    if(announce)pointStatus("Choose a location inside the dashed study boundary.");
+    return;
+  }
+  selectPoint(which);
+  if(toolState.points[which]===i)return;
+  toolState.points[which]=i;
   if(toolState.view==="points")pointCompare();
   if(toolState.view==="timeline")updateTimeline();
   if($("data-details").open)details();
-  requestDraw();
+  if(announce)announcePoint(which);
+}
+function fitPointsIfOffscreen(){
+  const t=transform(toolState.cam,map.clientWidth,map.clientHeight);
+  if(Object.values(toolState.points).some(i=>{
+    if(i===null)return false;
+    const [x,y]=t.xy(pointFrom(i));
+    return x<30||x>t.width-30||y<45||y>t.height-24;
+  }))fitPoints();
+}
+function fitPoints(){
+  const points=Object.values(toolState.points).filter(i=>i!==null).map(pointFrom);
+  if(!points.length)return;
+  const xs=points.map(p=>p.x), ys=points.map(p=>p.y);
+  const west=Math.min(...xs),east=Math.max(...xs),south=Math.min(...ys),north=Math.max(...ys);
+  toolState.cam={x:(west+east)/2,y:(south+north)/2,span:fitSpan(
+    Math.max(east-west+750,1500),Math.max(north-south+750,1500),map.clientWidth,map.clientHeight
+  )};
+  toolState.overview=false;$("extent").textContent="Show reservoir";boundedCamera();requestDraw();
 }
 
 function rebuildEvents(){
@@ -632,19 +696,41 @@ function rebuildEvents(){
   const desired=toolState.events.findIndex(e=>e.date===(prior||pilotRadar()[0].time));
   toolState.time=Math.max(0,desired);
   $("scrubber").max=toolState.events.length-1;
-  setDateOptions();
+  toolState.timelinePair=toolState.timelinePair.filter(({type,time})=>loaded[type].has(time));
+  updateDateComparison();
 }
-function setDateOptions(){
-  const kind=$("date-layer").value, records=ordered(kind);
-  for(const [i,id] of ["date-start","date-end"].entries()){
-    const selector=$(id);selector.replaceChildren();
-    for(const r of records){
-      const opt=node("option",formatDate(r.time));opt.value=r.time;selector.append(opt);
-    }
-    const preferred=selectedPair(kind)[i];
-    if(preferred)selector.value=preferred.time;
-  }
-  $("open-swipe").disabled=records.length<2;
+function updateDateComparison(){
+  const section=$("timeline-pair"), pair=toolState.timelinePair, record=toolState.events[toolState.time]?.record;
+  const extended=loaded.radar.size>2||loaded.water.size>2;
+  section.hidden=!extended;
+  if(!extended)return;
+  const type=pair[0]?.type, kind=type==="radar"?"NISAR radar":"Sentinel‑2 optical";
+  const canSelect=record&&loaded[record.type].size>2&&(!type||record.type===type)&&
+    pair.length<2&&!pair.some(({time})=>time===record.time);
+  $("select-date").disabled=!canSelect;
+  $("open-swipe").disabled=pair.length!==2;
+  $("clear-dates").hidden=!pair.length;
+  const selected=pair.map(({time})=>formatDate(time)).join(" and ");
+  if(pair.length===2)$("pair-message").textContent=kind+" selected · "+selected+".";
+  else if(type)$("pair-message").textContent="Selected "+selected+". Choose another "+kind+" date.";
+  else if(!record)$("pair-message").textContent="This date has a height reading. Choose a date with an image to compare.";
+  else $("pair-message").textContent="Select two dates from the same sensor using the timeline.";
+}
+function selectTimelineDate(){
+  const record=toolState.events[toolState.time]?.record;
+  if(!record||$("select-date").disabled)return;
+  toolState.timelinePair.push({type:record.type,time:record.time});
+  toolState.timelinePair.sort((a,b)=>utc(a.time)-utc(b.time));
+  updateDateComparison();
+  $(toolState.timelinePair.length===2?"open-swipe":"scrubber").focus({preventScroll:true});
+}
+function compareTimelineDates(){
+  const [a,b]=toolState.timelinePair;
+  if(!a||!b||a.type!==b.type||utc(a.time)>=utc(b.time)||
+    !loaded[a.type].has(a.time)||!loaded[b.type].has(b.time))return;
+  toolState.pairByLayer[a.type]=[a.time,b.time];toolState.layer=a.type;
+  setView("swipe");
+  $("drag").focus({preventScroll:true});
 }
 function createCharts(){
   const definitions=[
@@ -661,7 +747,7 @@ function createCharts(){
       const {first,last}=timeDomain();
       const target=first+clamp((event.clientX-box.left-49)/(box.width-64),0,1)*(last-first);
       const i=toolState.events.reduce((idx,row,j)=>Math.abs(utc(row.date)-target)<Math.abs(utc(toolState.events[idx].date)-target)?j:idx,0);
-      goToTime(i);
+      pause();goToTime(i);
     });
     wrapper.append(h,c,node("p",note));$("charts").append(wrapper);
   }
@@ -772,6 +858,7 @@ function updateTimeline(){
   if(!e.record)messages.push("No radar or water map at this observation time");
   if(e.height)messages.push("DAHITI "+e.height.meters.toFixed(2)+" m"+(e.height.estimated?" estimated":""));
   $("time-status").textContent=messages.join(" · ");
+  updateDateComparison();
   drawCharts();
 }
 function goToTime(index){
@@ -803,8 +890,7 @@ function refreshData({recenter=false}={}){
   for(const key of ["A","B"]){
     if(toolState.points[key]===null||toolState.points[key]===previous[key])toolState.points[key]=toolState.examples[key];
   }
-  if(rows.length!==2&&toolState.layer==="water")toolState.layer="radar";
-  if(rows.length!==2)toolState.swipeChange=false;
+  if(toolState.layer==="water"&&(toolState.view==="swipe"?selectedPair("water").length!==2:rows.length!==2))toolState.layer="radar";
   rebuildEvents();updateEvidence();details();refreshControls();
   if(recenter)resetCamera(false);
   requestDraw();
@@ -843,8 +929,7 @@ function zoomTo(span,anchor,at){
 function selectCell(where){
   const i=indexAt(where);
   if(toolState.view==="points"||toolState.view==="timeline"){
-    if(i>=0)setPoint(toolState.focus,i);
-    else flash("Choose a spot inside the outlined study area.");
+    setPoint(toolState.focus,i);
     return;
   }
   toolState.chosen=i>=0?i:null;
@@ -931,15 +1016,26 @@ function activateMap(){
   });
   for(const key of ["A","B"]){
     const pin=$("pin-"+key.toLowerCase());
-    let active=null;
+    let movement=null;
     pin.addEventListener("pointerdown",e=>{
-      active=e.pointerId;pin.setPointerCapture(e.pointerId);
-      toolState.focus=key;requestDraw();
+      if(e.button!==0||movement)return;
+      const index=toolState.points[key], start=pointFrom(index), where=mapWorld(e);
+      movement={id:e.pointerId,index,dx:start.x-where.x,dy:start.y-where.y,outside:false};
+      pin.setPointerCapture(e.pointerId);selectPoint(key);
     });
-    pin.addEventListener("pointermove",e=>{if(e.pointerId===active)setPoint(key,indexAt(mapWorld(e)))});
-    pin.addEventListener("pointerup",()=>active=null);
-    pin.addEventListener("pointercancel",()=>active=null);
-    pin.addEventListener("click",()=>setPoint(key,toolState.points[key]));
+    pin.addEventListener("pointermove",e=>{
+      if(e.pointerId!==movement?.id)return;
+      const where=mapWorld(e), i=indexAt({x:where.x+movement.dx,y:where.y+movement.dy});
+      movement.outside=i<0;
+      setPoint(key,i,{announce:false});
+    });
+    for(const name of ["pointerup","pointercancel","lostpointercapture"])pin.addEventListener(name,e=>{
+      if(e.pointerId!==movement?.id)return;
+      if(movement.outside)pointStatus("Choose a location inside the dashed study boundary.");
+      else if(toolState.points[key]!==movement.index)announcePoint(key);
+      movement=null;
+    });
+    pin.addEventListener("click",()=>selectPoint(key));
     pin.addEventListener("keydown",e=>{
       const p=arrows(e.key), i=toolState.points[key];
       if(!p||i===null)return;
@@ -977,7 +1073,7 @@ function activateMap(){
   $("extent").addEventListener("click",()=>resetCamera(!toolState.overview));
   $("loc-inlet").addEventListener("click",()=>{
     resetCamera(false);
-    if(toolState.patch)selectCell(pointFrom(toolState.examples.A));
+    if(toolState.patch&&["swipe","change"].includes(toolState.view))selectCell(pointFrom(toolState.examples.A));
   });
   $("loc-dam").addEventListener("click",()=>resetCamera(true));
   $("zoom-in").addEventListener("click",()=>zoom(.72));
@@ -1054,7 +1150,7 @@ async function loadSentinel(){
     }
     status.textContent=currentCoverage();
     if(pilotWater().length===2&&toolState.view==="swipe"&&document.activeElement===button){
-      toolState.layer="water";toolState.swipeChange=false;refreshControls();requestDraw();
+      toolState.layer="water";refreshControls();requestDraw();
     }
   }catch{
     status.textContent="Public Sentinel‑2 scenes could not be loaded. Choose the scored comparator HTML from the pipeline to use your processed observations.";
@@ -1069,12 +1165,13 @@ async function init(){
   activateMap();
   for(const button of document.querySelectorAll("[data-view]"))button.addEventListener("click",()=>setView(button.dataset.view));
   for(const button of document.querySelectorAll("[data-point]"))button.addEventListener("click",()=>{
-    toolState.focus=button.dataset.point;
-    for(const b of document.querySelectorAll("[data-point]"))b.setAttribute("aria-pressed",String(b===button));
-    requestDraw();
+    selectPoint(button.dataset.point);pointStatus("Point "+toolState.focus+" is ready to move.");
   });
+  $("fit-points").addEventListener("click",fitPoints);
   $("reset-points").addEventListener("click",()=>{
-    toolState.points={...toolState.examples};toolState.focus="A";pointCompare();resetCamera(false);refreshControls();details();
+    toolState.points={...toolState.examples};toolState.focus="A";
+    resetCamera(false);fitPointsIfOffscreen();refreshControls();details();
+    pointStatus("Example locations restored.");
   });
   $("follow-up").addEventListener("click",()=>{
     toolState.points={...toolState.examples};toolState.layer="water";
@@ -1089,13 +1186,11 @@ async function init(){
   $("scrubber").addEventListener("input",e=>{pause();goToTime(Number(e.target.value))});
   $("play").addEventListener("click",play);
   $("pause").addEventListener("click",pause);
-  $("date-layer").addEventListener("change",()=>{$("pair-message").textContent="";setDateOptions()});
-  $("open-swipe").addEventListener("click",()=>{
-    const start=$("date-start").value,end=$("date-end").value,kind=$("date-layer").value;
-    if(!start||!end||utc(start)>=utc(end)){$("pair-message").textContent="Choose an earlier left date and a later right date.";return}
-    $("pair-message").textContent="";
-    toolState.pairByLayer[kind]=[start,end];toolState.layer=kind;toolState.swipeChange=false;setView("swipe");
+  $("select-date").addEventListener("click",selectTimelineDate);
+  $("clear-dates").addEventListener("click",()=>{
+    toolState.timelinePair=[];updateDateComparison();$("scrubber").focus({preventScroll:true});
   });
+  $("open-swipe").addEventListener("click",compareTimelineDates);
   toolState.ready=true;
   refreshData({recenter:true});
   loadBasemap(overviewBasemap.bounds,1536,1536,image=>{overviewBasemap.image=image;requestDraw()});

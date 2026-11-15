@@ -1,6 +1,8 @@
 # InfraSAR at Roseires
 
-Open `InfraSAR-Roseires.html` at the repository root or use the [deployed explorer](https://nhaile360.github.io/InfraSAR/). The explorer opens on the August and October NISAR passes. Drag the divider or use its arrow keys, Home and End. Drag the map to pan, use the zoom buttons or pinch on touch screens. **Show reservoir** fits the full shoreline reference, and **Hide study layers** shows the context alone. **Investigate historical rainfall** opens the NASA POWER analysis.
+Open `InfraSAR-Roseires.html` at the repository root or use the [deployed explorer](https://nhaile360.github.io/InfraSAR/). **2026 shoreline** opens the August and October Sentinel‑2 water maps. Switch to **Radar image** to compare the NISAR passes. Drag the divider or use its arrow keys, Home and End. Drag the map to pan, use the zoom buttons or pinch on touch screens. **Show reservoir** fits the full shoreline reference, and **Hide study layers** shows the context alone. **Long-term rainfall** opens the NASA POWER analysis.
+
+**Compare locations** starts with the inlet and a nearby spot classified as land on both dates. Choose which point to move, then tap the map or drag a marker. The active card shows that location's HH backscatter, optical classes and change between dates. Use **Show both** to fit the two points or **Reset examples** to restore the original comparison. The **Timeline** controls the map and reading charts. When more than two observations from one sensor are loaded, select two dates from that sensor on the timeline to open them in **Swipe dates**.
 
 The standalone HTML carries the 20 m NISAR radar values in dB, frozen radar classifications, both Sentinel‑2 tiles for each optical date, the scored pilot, the original inlet mask, DAHITI station 216 values, the HydroLAKES shoreline, and the [NASA POWER analysis](../roseires-trends/README.md). **Data details** links to the original HH power GeoTIFFs and accepts scientific observations. Imported HTML is read as raster data. When online, the main map requests Esri World Topographic Map imagery for the visible extent and zoom level. It draws the cached overview as you pan into areas that are still loading. The shoreline, footprint and location markers remain available offline.
 
@@ -18,7 +20,7 @@ ASF lists 10 m GCOV posting for 40 MHz acquisitions. It is not available from th
 
 The bundled [shoreline geometry](src/roseires-reservoir.json) is HydroLAKES v1.0 feature **1543**, Roseires Reservoir ([Messager et al., 2016](https://doi.org/10.1038/ncomms13603), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). It is derived from the SRTM Water Body Data layer and depicts a historical shoreline. The query recorded in the file requests its rings in EPSG:32636 with 20 m display generalization and coordinates rounded to a meter. The yellow outline is the original 108-cell inlet mask. It becomes a location marker when the exact outline is too small to read. The dashed rectangle marks the local study raster, which covers part of the reservoir.
 
-**Radar vs optical change** compares a NISAR threshold-based water-change candidate map with the Sentinel‑2 scene-class changes. The side labels show each sensor's actual observation dates. The two indicators are independent and can disagree.
+In **Map changes**, **Compare change maps** pairs a NISAR threshold-based water-change candidate map with the Sentinel‑2 scene-class changes. The side labels show each sensor's actual observation dates. The two indicators are independent and can disagree.
 
 ## Make an offline copy with the processed pilot observations
 

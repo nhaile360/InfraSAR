@@ -141,8 +141,6 @@ function setupTrend(investigation) {
       refresh();
     });
   }
-  section.hidden = false;
-  $("trend-link").hidden = false;
   new ResizeObserver(draw).observe(chart);
   refresh();
 }
@@ -151,11 +149,40 @@ const frozenPilotScores = seed.bundles.find(bundle => bundle.pair === "pilot")?.
 if (frozenPilotScores?.fixed?.gain && frozenPilotScores?.local?.gain) {
   const score = $("pilot-score");
   const percent = value => (100 * value).toFixed(2) + "%";
-  score.textContent = "Across the crop, radar-only water-gain precision against Sentinel‑2 was "
-    + percent(frozenPilotScores.fixed.gain.precision) + " for the fixed rule and "
+  score.textContent = "Across the study area, only "
+    + percent(frozenPilotScores.fixed.gain.precision) + " of radar water-gain flags (fixed rule) and "
     + percent(frozenPilotScores.local.gain.precision)
-    + " for the local rule. Most radar water-gain flags on cells with usable optical data were false alarms against this reference.";
+    + " (local rule) matched a water gain in the usable Sentinel‑2 data. Radar darkening alone was an unreliable guide to new water in this pilot.";
   score.hidden = false;
 }
 
+function showInvestigation(hash, focus=false) {
+  const historical = hash === "#trend-investigation";
+  $("shoreline").hidden = historical;
+  $("trend-investigation").hidden = !historical;
+  for (const item of $("investigations").querySelectorAll("a")) {
+    if (item.hash === (historical ? "#trend-investigation" : "#shoreline")) item.setAttribute("aria-current","location");
+    else item.removeAttribute("aria-current");
+  }
+  if (historical) pause();
+  else requestDraw();
+  if (focus) {
+    const nav = $("investigations");
+    const rect = nav.getBoundingClientRect();
+    if (rect.top < 0 || rect.bottom > innerHeight) nav.scrollIntoView({block:"start",behavior:"instant"});
+    const target = historical ? $("trend-title") : document.querySelector('[data-view][aria-pressed="true"]');
+    target?.focus({preventScroll:true});
+  }
+}
+
 setupTrend(seed.trend);
+for (const item of document.querySelectorAll("a[data-investigation]")) {
+  item.addEventListener("click", event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (location.hash !== item.hash) history.pushState(null,"",item.hash);
+    showInvestigation(item.hash,true);
+  });
+}
+window.addEventListener("hashchange",()=>showInvestigation(location.hash));
+showInvestigation(location.hash);
