@@ -30,27 +30,31 @@
       <div class="map-column">
         <div class="map-tools">
           <div id="layers" class="segments" aria-label="Map layer"></div>
-          <button id="extent" class="outline" type="button">Show reservoir</button>
+          <div class="map-actions">
+            <button id="extent" class="outline" type="button">Show reservoir</button>
+            <button id="context-only" class="outline" type="button" aria-pressed="false">Hide study layers</button>
+          </div>
         </div>
+        <div class="date-corners" id="dates" aria-live="polite"><span id="before"></span><span id="after"></span></div>
         <div id="map-frame" class="map-frame">
           <canvas id="map" tabindex="0" aria-label="Roseires reservoir map. Use arrow keys to pan and plus or minus to zoom."></canvas>
-          <div class="date-corners" id="dates" aria-live="polite"><span id="before"></span><span id="after"></span></div>
           <div class="map-compass" aria-hidden="true"><span>▲</span> N</div>
           <button type="button" id="pin-a" class="pin a" aria-label="Move Point A" hidden>A</button>
           <button type="button" id="pin-b" class="pin b" aria-label="Move Point B" hidden>B</button>
           <div id="tip" class="map-tip" hidden></div>
-          <div id="divider" class="divider">
-            <div class="divider-line" aria-hidden="true"></div>
-            <button type="button" id="drag" class="drag" role="slider" aria-label="Drag to compare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="56" aria-orientation="horizontal">
-              <span aria-hidden="true">‹</span><span>Drag to compare</span><span aria-hidden="true">›</span>
-            </button>
-          </div>
+          <div id="divider" class="divider" aria-hidden="true"></div>
+          <button type="button" id="drag" class="drag" role="slider" aria-label="Drag to compare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="56" aria-valuetext="56% left, 44% right" aria-orientation="horizontal">
+            <span aria-hidden="true">‹ ›</span>
+          </button>
           <div class="zoom" aria-label="Map zoom">
             <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
             <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
           </div>
           <div class="scale" id="scale"></div>
-          <div class="map-credit" id="credit">Map context · GeoNames / OpenStreetMap</div>
+        </div>
+        <div class="map-meta">
+          <label id="radar-display">Radar display <select id="radar-rendering"><option value="smooth">Interpolated</option><option value="raw">Original cells</option></select></label>
+          <div class="map-credit" id="credit">HydroLAKES · geographic reference</div>
         </div>
         <div id="legend" class="legend" aria-label="Map legend"></div>
         <section id="timeline" class="timeline" hidden aria-labelledby="timeline-heading">
@@ -77,10 +81,10 @@
       </div>
       <aside class="side">
         <section class="locator-card" aria-labelledby="locator-title">
-          <div class="locator-top"><h2 id="locator-title">Find your bearings</h2><span aria-hidden="true">N ↑</span></div>
+          <div class="locator-top"><h2 id="locator-title">Roseires Reservoir</h2><span aria-hidden="true">N ↑</span></div>
           <canvas id="locator" aria-label="Locator map showing the Blue Nile, Roseires Dam, and the inlet southeast of the dam."></canvas>
           <div class="locator-actions">
-            <button type="button" id="loc-dam"><i aria-hidden="true"></i> Roseires Dam</button>
+            <button type="button" id="loc-dam"><i aria-hidden="true"></i> Full reservoir</button>
             <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
           </div>
         </section>

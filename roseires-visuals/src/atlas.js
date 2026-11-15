@@ -1,9 +1,18 @@
 const map=$("map"), mapBox=$("map-frame"), context=map.getContext("2d");
 const mini=$("locator"), miniContext=mini.getContext("2d");
 const toolState={view:"swipe",layer:"radar",change:"water",rule:"local",split:56,overview:false,
+  swipeChange:false,radarDisplay:"smooth",showRasters:true,
   focus:"A",points:{A:null,B:null},examples:{A:null,B:null},chosen:null,patch:null,cam:{...inlet,span:4300},
   pairByLayer:{},time:0,events:[],timer:null,ready:false};
 const mapNames={radar:"Radar image",water:"Water map",delta:"Radar signal change",agreement:"Agreement"};
+const radarRange={min:-24,max:0};
+const historicalWater={fill:"#bedce5b0",stroke:"#467b8b"};
+const shoreline=new Path2D();
+for(const ring of reservoir.rings){
+  shoreline.moveTo(ring[0][0],-ring[0][1]);
+  for(const [x,y] of ring.slice(1))shoreline.lineTo(x,-y);
+  shoreline.closePath();
+}
 const palettes={
   water:{1:[191,184,149],2:[28,90,111],3:[85,210,204],4:[186,139,201],
     5:[66,85,80],6:[239,236,224],7:[92,82,118],8:[211,161,109],9:[138,148,137],10:[211,161,109]},
@@ -16,17 +25,20 @@ const agreementNames={1:"Both stable",2:"Both show water gain",3:"Both show wate
   8:"Optical reference unavailable",9:"Radar unclear"};
 let rasterCache=new WeakMap(), changeCache=null, baseMask=null, stagedTiffs={}, drawing=0;
 let remoteBusy=false;
-let terrain=null;
+const basemaps=[{bounds:contextBounds},{bounds:{west:635000,east:675000,south:1282000,north:1322000}}];
 const drawFont = '700 12px "DM Sans","Avenir Next",system-ui,sans-serif';
 
 function baseImages(){
-  const server="https://services.arcgisonline.com/ArcGIS/rest/services/";
-  const w=contextBounds.east-contextBounds.west,h=contextBounds.north-contextBounds.south;
-  const p=new URLSearchParams({bbox:[contextBounds.west,contextBounds.south,contextBounds.east,contextBounds.north].join(","),
-    bboxSR:"32636",imageSR:"32636",size:"1100,"+Math.round(1100*h/w),format:"jpg",f:"image"});
-  const image=new Image();
-  image.onload=()=>{terrain=image;requestDraw()};
-  image.src=server+"World_Shaded_Relief/MapServer/export?"+p;
+  const service="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export";
+  for(const layer of basemaps){
+    const {west,south,east,north}=layer.bounds;
+    const params=new URLSearchParams({bbox:[west,south,east,north].join(","),
+      bboxSR:String(grid.epsg),imageSR:String(grid.epsg),size:"1536,1536",format:"jpg",f:"image"});
+    const image=new Image();
+    image.crossOrigin="anonymous";
+    image.onload=()=>{layer.image=image;requestDraw()};
+    image.src=service+"?"+params;
+  }
 }
 function redrawTo(canvas){
   const ratio=Math.min(devicePixelRatio||1,2);
@@ -44,15 +56,20 @@ function transform(cam,width,height){
   return {width,height,factor, xy:p=>[width/2+(p.x-cam.x)*factor,height/2-(p.y-cam.y)*factor],
     location:(x,y)=>({x:cam.x+(x-width/2)/factor,y:cam.y-(y-height/2)/factor})};
 }
-function fitSpan(widthMeters,heightMeters,w,h){return Math.max(widthMeters,heightMeters*w/h)}
+function fitSpan(widthMeters,heightMeters,w,h){return Math.max(widthMeters,heightMeters*w/Math.max(h,1))}
+function reservoirCamera(width,height){
+  const {west,east,south,north}=reservoirBounds;
+  return {x:(west+east)/2,y:(south+north)/2,span:fitSpan(east-west,north-south,width,height)};
+}
 function resetCamera(reservoir){
   toolState.overview=reservoir;
   if(reservoir){
-    toolState.cam={x:653500,y:1300220,span:fitSpan(17900,13200,map.clientWidth,map.clientHeight)};
+    toolState.cam=reservoirCamera(map.clientWidth,map.clientHeight);
   }else{
     toolState.cam={...(toolState.patch?.center||inlet),span:fitSpan(3650,2850,map.clientWidth,map.clientHeight)};
   }
   $("extent").textContent=reservoir?"Show inlet":"Show reservoir";
+  boundedCamera();
   requestDraw();
 }
 function rasterImage(data,kind){
@@ -63,25 +80,26 @@ function rasterImage(data,kind){
   const canvas=document.createElement("canvas");
   canvas.width=grid.width;canvas.height=grid.height;
   const ctx=canvas.getContext("2d"), image=ctx.createImageData(grid.width,grid.height);
+  let hasGaps=false;
   for(let i=0;i<size;i++){
     const value=data[i], factor=i*4, x=i%grid.width, y=Math.floor(i/grid.width);
-    let rgb, opacity=255, pattern;
+    let rgb, pattern;
     if(kind==="radar"){
       if(Number.isFinite(value)){
-        const level=clamp((value+24)/19,0,1);
+        const level=clamp((value-radarRange.min)/(radarRange.max-radarRange.min),0,1);
         rgb=[Math.round(25+level*213),Math.round(32+level*204),Math.round(32+level*197)];
-      }else{rgb=palettes.water[5];pattern="cross"}
+      }else{hasGaps=true;continue}
     }else if(kind==="delta"){
-      if(!Number.isFinite(value)){rgb=palettes.water[5];pattern="cross"}
-      else{
-        const neutral=[230,225,197], strength=clamp((Math.abs(value)-.7)/11.3,0,1);
-        const end=value<0?[37,101,156]:[171,74,34];
-        rgb=neutral.map((v,k)=>Math.round(v+(end[k]-v)*strength));
-      }
-    }else if(kind==="context"){
-      if(value!==2){opacity=0;rgb=[0,0,0]}
-      else{rgb=[101,154,163];opacity=195}
+      if(!Number.isFinite(value))continue;
+      const neutral=[230,225,197], strength=clamp((Math.abs(value)-.7)/11.3,0,1);
+      const end=value<0?[37,101,156]:[171,74,34];
+      rgb=neutral.map((v,k)=>Math.round(v+(end[k]-v)*strength));
+    }else if(kind==="candidate"){
+      if(value===0||value===5||value===9)continue;
+      rgb=palettes.water[value]||palettes.water[8];
+      pattern=patterns[value];
     }else{
+      if(value===0||(kind==="water"&&(value===5||value===9)))continue;
       rgb=palettes[kind][value]||palettes.water[8];
       pattern=kind==="water"?patterns[value]:({7:"diag",8:"cross",9:"dots"})[value];
     }
@@ -89,15 +107,35 @@ function rasterImage(data,kind){
       pattern==="diag"?(x+y)%7<2:pattern==="cross"&&((x+y)%9===0||(x-y+900)%9===0);
     const shift=marked?(rgb[0]>150?-48:63):0;
     image.data[factor]=rgb[0]+shift;image.data[factor+1]=rgb[1]+shift;image.data[factor+2]=rgb[2]+shift;
-    image.data[factor+3]=opacity;
+    image.data[factor+3]=255;
+  }
+  if(hasGaps){
+    // Clip smoothed radar at actual cell edges so interpolation cannot extend coverage.
+    const observed=new Path2D();
+    for(let y=0;y<grid.height;y++){
+      let start=-1;
+      for(let x=0;x<=grid.width;x++){
+        if(x<grid.width&&Number.isFinite(data[y*grid.width+x])){
+          if(start<0)start=x;
+        }else if(start>=0){
+          observed.rect(start,y,x-start,1);
+          start=-1;
+        }
+      }
+    }
+    canvas.observed=observed;
   }
   ctx.putImageData(image,0,0);styles[kind]=canvas;return canvas;
 }
-function drawGeo(c,t,image,box,opacity=1){
+function drawGeo(c,t,image,box,smooth=false){
   if(!image)return;
   const [x,y]=t.xy({x:box.west,y:box.north});
-  c.save();c.globalAlpha=opacity;
-  c.drawImage(image,x,y,(box.east-box.west)*t.factor,(box.north-box.south)*t.factor);
+  c.save();
+  c.imageSmoothingEnabled=smooth;
+  if(smooth&&image.observed){
+    c.translate(x,y);c.scale(cell*t.factor,cell*t.factor);
+    c.clip(image.observed);c.drawImage(image,0,0);
+  }else c.drawImage(image,x,y,(box.east-box.west)*t.factor,(box.north-box.south)*t.factor);
   c.restore();
 }
 function mapText(c,text,x,y,{color="#234643",font=drawFont,align="left",background=true}={}){
@@ -108,17 +146,26 @@ function mapText(c,text,x,y,{color="#234643",font=drawFont,align="left",backgrou
   }
   c.fillStyle=color;c.fillText(text,x,y);c.restore();
 }
-function drawContext(c,t,isMini=false){
-  c.fillStyle="#dce2d5";c.fillRect(0,0,t.width,t.height);
-  c.imageSmoothingEnabled=true;
-  drawGeo(c,t,terrain,contextBounds,.52);
-  const water=pilotWater()[1]?.states||loaded.pairs.get("pilot")?.candidates.local;
-  c.imageSmoothingEnabled=false;
-  drawGeo(c,t,rasterImage(water,"context"),crop);
-  c.strokeStyle="#536c5f95";c.setLineDash([4,4]);c.lineWidth=1;
+function drawContext(c,t){
+  c.fillStyle="#e4e9dc";c.fillRect(0,0,t.width,t.height);
+  const northwest=t.location(0,0), southeast=t.location(t.width,t.height);
+  const basemap=basemaps.findLast(({image,bounds})=>image&&northwest.x>=bounds.west&&
+    northwest.y<=bounds.north&&southeast.x<=bounds.east&&southeast.y>=bounds.south)||basemaps[0];
+  drawGeo(c,t,basemap.image,basemap.bounds,true);
+  const [ox,oy]=t.xy({x:0,y:0});
+  c.save();
+  c.translate(ox,oy);c.scale(t.factor,t.factor);
+  c.fillStyle=historicalWater.fill;c.fill(shoreline,"evenodd");
+  c.strokeStyle=historicalWater.stroke;c.lineWidth=1.2/t.factor;c.stroke(shoreline);
+  c.restore();
+  return Boolean(basemap.image);
+}
+function drawFootprint(c,t){
   const [x,y]=t.xy({x:crop.west,y:crop.north});
-  if(!isMini)c.strokeRect(x,y,(crop.east-crop.west)*t.factor,(crop.north-crop.south)*t.factor);
-  c.setLineDash([]);
+  const width=(crop.east-crop.west)*t.factor,height=(crop.north-crop.south)*t.factor;
+  c.save();c.strokeStyle="#f7f4e9";c.lineWidth=3;c.strokeRect(x,y,width,height);
+  c.strokeStyle="#304b49";c.lineWidth=1.5;c.setLineDash([5,4]);c.strokeRect(x,y,width,height);
+  c.restore();
 }
 function drawContextLabels(c,t,isMini=false){
   const [dx,dy]=t.xy(dam), [tx,ty]=t.xy(town);
@@ -132,17 +179,24 @@ function drawContextLabels(c,t,isMini=false){
     c.fillStyle="#56726a";c.beginPath();c.arc(tx,ty,3,0,Math.PI*2);c.fill();
     mapText(c,"Ad Damazin",tx-7,ty+9,{align:"right"});
   }
-  if(isMini||toolState.overview){
-    c.beginPath();c.arc(ix,iy,4,0,Math.PI*2);c.fillStyle="#2a7b70";c.fill();
-    c.strokeStyle="#fff";c.stroke();
+  if(isMini||t.factor<.004){
+    drawInletMarker(c,ix,iy);
     mapText(c,"Study inlet",ix-8,iy+9,{align:"right",font:isMini?'700 10px system-ui':drawFont});
-    const [wx,wy]=t.xy({x:653900,y:1301800});
+    const [wx,wy]=t.xy({x:665400,y:1280450});
     mapText(c,"Blue Nile",wx,wy,{color:"#275e73",font:isMini?'italic 10px system-ui':'italic 12px system-ui'});
   }
 }
+function drawInletMarker(c,x,y){
+  c.beginPath();c.arc(x,y,5,0,Math.PI*2);c.fillStyle="#ffcf71";c.fill();
+  c.strokeStyle="#303229";c.lineWidth=1.5;c.stroke();
+}
 function patchOutline(c,t){
   const patch=toolState.patch;
-  if(!patch||toolState.overview||t.factor<.08)return;
+  if(!patch)return;
+  if(cell*t.factor<1.5){
+    if(t.factor>=.004)drawInletMarker(c,...t.xy(patch.center));
+    return;
+  }
   const n=grid.width;
   c.beginPath();
   for(const i of patch.cells){
@@ -160,16 +214,21 @@ function selectedPair(kind){
   return kind==="radar"?pilotRadar():pilotWater();
 }
 function displayRaster(c,t,row){
-  if(row)drawGeo(c,t,rasterImage(row.type==="water"?row.states:row.raw,row.type),crop);
+  if(row)drawGeo(c,t,rasterImage(row.type==="water"?row.states:row.raw,row.type),crop,
+    row.type==="radar"&&toolState.radarDisplay==="smooth");
 }
 function changes(){
   if(changeCache)return changeCache;
   const [a,b]=pilotRadar(), rows=pilotWater();
   const delta=Float32Array.from(b.raw,(value,i)=>value-a.raw[i]), water=rows.length===2?waterChange(...rows):null;
   const {candidates}=loaded.pairs.get("pilot");
-  const compare={};
-  if(water)for(const rule of ["fixed","local"])if(candidates[rule])compare[rule]=agreement(candidates[rule],water);
-  changeCache={delta,water,compare};return changeCache;
+  const compare={}, radar={};
+  for(const rule of ["fixed","local"]){
+    if(!candidates[rule])continue;
+    radar[rule]=radarCandidateChange(candidates[rule],a,b);
+    if(water)compare[rule]=agreement(candidates[rule],water).map((value,i)=>radar[rule][i]===0?0:value);
+  }
+  changeCache={delta,water,compare,radar};return changeCache;
 }
 function changeLayer(){
   const c=changes(), kind=toolState.change;
@@ -180,27 +239,33 @@ function changeLayer(){
 function requestDraw(){
   if(!drawing)drawing=requestAnimationFrame(draw);
 }
+function drawSwipe(c,t){
+  let sides;
+  if(toolState.swipeChange){
+    const change=changes();
+    sides=[{type:"candidate",raw:change.radar[toolState.rule]},{type:"water",states:change.water}];
+  }else sides=selectedPair(toolState.layer);
+  const split=toolState.split*t.width/100;
+  for(const [index,[x,width]] of [[0,split],[split,t.width-split]].entries()){
+    if(width<=0)continue;
+    c.save();c.beginPath();c.rect(x,0,width,t.height);c.clip();displayRaster(c,t,sides[index]);c.restore();
+  }
+  mapBox.style.setProperty("--split",toolState.split+"%");
+}
 function draw(){
   drawing=0;
   if(!toolState.ready)return;
   const frame=redrawTo(map);
   if(!frame)return;
   const t=transform(toolState.cam,frame.width,frame.height), width=t.width,height=t.height;
-  drawContext(context,t);
-  if(toolState.view==="swipe"){
-    const [a,b]=selectedPair(toolState.layer), split=toolState.split*width/100;
-    context.save();context.beginPath();context.rect(0,0,split,height);context.clip();displayRaster(context,t,a);context.restore();
-    context.save();context.beginPath();context.rect(split,0,width-split,height);context.clip();displayRaster(context,t,b);context.restore();
-    $("divider").style.left=toolState.split+"%";
-  }else if(toolState.view==="change"){
-    drawGeo(context,t,rasterImage(changeLayer(),toolState.change),crop);
-  }else if(toolState.view==="timeline"){
-    const current=toolState.events[toolState.time];
-    if(current?.record)displayRaster(context,t,current.record);
-  }else{
-    const rows=pilotWater();
-    displayRaster(context,t,toolState.layer==="water"?rows[1]:pilotRadar()[1]);
+  const basemapVisible=drawContext(context,t);
+  if(toolState.showRasters){
+    if(toolState.view==="swipe")drawSwipe(context,t);
+    else if(toolState.view==="change")drawGeo(context,t,rasterImage(changeLayer(),toolState.change),crop);
+    else if(toolState.view==="timeline")displayRaster(context,t,toolState.events[toolState.time]?.record);
+    else displayRaster(context,t,toolState.layer==="water"?pilotWater()[1]:pilotRadar()[1]);
   }
+  drawFootprint(context,t);
   drawContextLabels(context,t);
   patchOutline(context,t);
   if(toolState.chosen!==null&&toolState.view!=="points"){
@@ -216,18 +281,19 @@ function draw(){
     if(pin.hidden)continue;
     pin.style.left=xy[0]+"px";pin.style.top=xy[1]+"px";pin.dataset.active=String(toolState.focus===key);
   }
-  const meters=[50,100,200,500,1000,2000,5000,10000].filter(x=>x*t.factor<width*.25).at(-1)||50;
+  const meters=[50,100,200,500,1000,2000,5000,10000,20000,40000].filter(x=>x*t.factor<width*.24).at(-1)||50;
   $("scale").textContent=meters>=1000?meters/1000+" km":meters+" m";
   $("scale").style.width=meters*t.factor+"px";
-  $("credit").textContent=terrain?"Map context · Esri, USGS, GeoNames, OpenStreetMap":"Map context · GeoNames, OpenStreetMap";
+  $("credit").textContent=basemapVisible?"Esri World Topographic Map and contributors · HydroLAKES":"HydroLAKES · geographic reference";
   drawLocator();
 }
 function drawLocator(){
   const dim=redrawTo(mini);
   if(!dim)return;
-  const cam={x:654400,y:1300260,span:fitSpan(16600,12300,dim.width,dim.height)};
+  const cam=reservoirCamera(dim.width,dim.height);
   const t=transform(cam,dim.width,dim.height);
-  drawContext(miniContext,t,true);
+  drawContext(miniContext,t);
+  drawFootprint(miniContext,t);
   drawContextLabels(miniContext,t,true);
   if(map.clientWidth){
     const cam=toolState.cam, hz=cam.span/2, vt=hz*map.clientHeight/map.clientWidth;
@@ -258,15 +324,15 @@ function legendChip(label,swatch,pattern){
 function updateLegend(){
   const legend=$("legend"), isChange=toolState.view==="change";
   const current=toolState.events[toolState.time];
-  const kind=isChange?toolState.change:toolState.view==="timeline"?current?.record?.type:toolState.layer;
+  const kind=visibleLayer();
   const note=text=>node("span",text,"line-note");
   legend.replaceChildren();
   if(kind==="radar"||kind==="delta"){
     const ramp=node("span",null,"ramp");
     if(kind==="radar"){
       ramp.style.background="linear-gradient(90deg,#192020,#ececde)";
-      legend.append(node("strong","Radar image"),node("span","Weaker return · −24 dB"),ramp,node("span","Stronger return · −5 dB"),
-        note("Radar return is how much of the signal bounced back to the satellite."));
+      legend.append(node("strong","NISAR HH backscatter"),node("span","Weaker · −24 dB"),ramp,node("span","Stronger · 0 dB"),
+        note(toolState.radarDisplay==="smooth"?"Interpolated display of 20 m cells. Cell readings are unchanged.":"Original 20 m cells shown without interpolation."));
     }else{
       ramp.style.background="linear-gradient(90deg,#25659c,#e6e1c5,#ab4a22)";
       legend.append(node("strong","Radar signal change"),node("span","Weaker · −12 dB"),ramp,node("span","Stronger · +12 dB"),
@@ -276,14 +342,24 @@ function updateLegend(){
     legend.append(node("strong","Radar candidates vs. the water map"),...([2,3,4,5,6,7,8,9,1].map(i=>
       legendChip(agreementNames[i],palettes.agreement[i],({7:"diag",8:"cross",9:"dots"})[i]))),
     note(toolState.rule==="local"?"Radar rule uses a cutoff estimated from local reference areas.":"Radar rule marks returns at or below −17 dB as candidate water."));
-  }else if(kind==="water"){
-    const keys=isChange?[3,4,2,1,6,7,8,5,9]:[1,2,6,7,8,5,9];
-    const label=i=>i===1&&isChange?"Land both dates":i===2&&isChange?"Water both dates":stateNames[i];
-    legend.append(node("strong",isChange?"Water map change":"Water map"),...keys.map(i=>legendChip(label(i),palettes.water[i],patterns[i])));
+  }else if(kind==="water"||kind==="paired-change"){
+    const changeMap=isChange||kind==="paired-change";
+    const keys=changeMap?[3,4,2,1,6,7,8,10]:[1,2,6,7,8,10];
+    const label=i=>i===1&&changeMap?"Land both dates":i===2&&changeMap?"Water both dates":stateNames[i];
+    legend.append(node("strong",kind==="paired-change"?"Change from August to October":changeMap?"Water map change":"Sentinel‑2 scene classes"),
+      ...keys.map(i=>legendChip(label(i),palettes.water[i],patterns[i])));
+    if(kind==="paired-change")legend.append(note("Left: NISAR threshold-based water-change candidates. Right: Sentinel‑2 scene-class changes. Similar colors let you compare the two indicators."));
   }else{
-    legend.append(node("strong","Map context"),note("There is a reservoir height reading on this date. The map shows location only."));
+    legend.append(node("strong","Map context"));
+    if(current?.height&&toolState.view==="timeline"&&toolState.showRasters)legend.append(note("There is a reservoir height reading on this date. The map shows location only."));
   }
+  const background=legendChip("Historical shoreline · HydroLAKES",historicalWater.fill);
+  background.firstChild.style.borderColor=historicalWater.stroke;
+  const footprint=legendChip("Study raster extent","transparent");
+  footprint.firstChild.style.border="1.5px dashed #304b49";
+  legend.append(background,footprint);
   if(toolState.patch)legend.append(legendChip("Outlined inlet patch","#ffcf71"));
+  if(kind)legend.append(note("Background shows through cells with no coverage or no measurement."));
   if((isChange&&kind!=="delta")||toolState.view==="points") {
     if(pilotWater().length===2)legend.append(note(currentCoverage()));
   }
@@ -292,6 +368,13 @@ function updateLegend(){
     button.type="button";button.addEventListener("click",openData);
     legend.append(button);
   }
+}
+function visibleLayer(){
+  if(!toolState.showRasters)return null;
+  if(toolState.view==="change")return toolState.change;
+  if(toolState.view==="timeline")return toolState.events[toolState.time]?.record?.type;
+  if(toolState.view==="swipe"&&toolState.swipeChange)return "paired-change";
+  return toolState.layer;
 }
 function currentCoverage(){
   const rows=pilotWater();
@@ -308,6 +391,7 @@ function makeLayerButtons(){
   let buttons=[];
   if(toolState.view==="swipe"||toolState.view==="points"){
     buttons=[["radar",mapNames.radar,true],["water",mapNames.water,available]];
+    if(toolState.view==="swipe")buttons.push(["paired-change","Radar vs optical change",available&&Boolean(candidates.local||candidates.fixed)]);
   }else if(toolState.view==="change"){
     buttons=[["water","Water map change",available],["delta",mapNames.delta,true]];
     if(available&&(candidates.local||candidates.fixed))buttons.push(["agreement",mapNames.agreement,true]);
@@ -318,26 +402,41 @@ function makeLayerButtons(){
   for(const [key,label,enabled] of buttons){
     const button=node("button",label);
     button.type="button";button.disabled=!enabled;
-    button.setAttribute("aria-pressed",String(key===(toolState.view==="change"?toolState.change:toolState.layer)));
+    const selected=toolState.view==="change"?toolState.change:toolState.view==="swipe"&&toolState.swipeChange?"paired-change":toolState.layer;
+    button.setAttribute("aria-pressed",String(key===selected));
     button.addEventListener("click",()=>{
-      if(toolState.view==="change")toolState.change=key;else toolState.layer=key;
+      if(toolState.view==="change")toolState.change=key;
+      else{
+        toolState.swipeChange=key==="paired-change";
+        if(!toolState.swipeChange)toolState.layer=key;
+      }
+      toolState.showRasters=true;
       refreshControls();requestDraw();
     });
     parent.append(button);
   }
-  if(toolState.view==="change"&&toolState.change==="agreement"&&candidates.local&&candidates.fixed){
+  if(selectedRuleLayer()&&candidates.local&&candidates.fixed){
     const button=node("button",toolState.rule==="local"?"Rule: local":"Rule: fixed");
     button.type="button";button.title="Switch the radar classification rule";
     button.addEventListener("click",()=>{toolState.rule=toolState.rule==="local"?"fixed":"local";refreshControls();requestDraw()});
     parent.append(button);
   }
 }
+function selectedRuleLayer(){
+  return toolState.view==="change"&&toolState.change==="agreement"||toolState.view==="swipe"&&toolState.swipeChange;
+}
 function updateDates(){
   const a=$("before"), b=$("after");
-  if(toolState.view==="swipe"){
+  if(!toolState.showRasters){
+    a.textContent="Geographic context";b.textContent="";
+  }else if(toolState.view==="swipe"&&toolState.swipeChange){
+    a.textContent="Left · NISAR candidates · "+pilotRadar().map(r=>formatShort(r.time)).join(" → ")+" 2026";
+    b.textContent="Right · Sentinel‑2 change · "+pilotWater().map(r=>formatShort(r.time)).join(" → ")+" 2026";
+  }else if(toolState.view==="swipe"){
     const [before,after]=selectedPair(toolState.layer);
-    a.textContent=before?formatDate(before.time):"";
-    b.textContent=after?formatDate(after.time):"";
+    const source=toolState.layer==="radar"?"NISAR HH":"Sentinel‑2";
+    a.textContent=before?"Left · "+source+" · "+formatDate(before.time):"";
+    b.textContent=after?"Right · "+source+" · "+formatDate(after.time):"";
   }else if(toolState.view==="timeline"){
     const current=toolState.events[toolState.time];
     a.textContent=current?formatDate(current.date):"";
@@ -382,9 +481,18 @@ function details(){
   for(const r of ordered("radar"))list.append(node("li","NISAR · "+showTime(r.time)+" · "+r.id));
   for(const w of ordered("water"))for(const r of w.sources)list.append(node("li","Sentinel‑2 · "+showTime(r.datetime||r.date)+" · "+r.id));
   const sources=node("p");
-  sources.append(link("NISAR GCOV guide","https://hyp3-docs.asf.alaska.edu/nisar-docs/gcov/"),
-    " · ",link("Sentinel‑2 processing and scene classes","https://sentiwiki.copernicus.eu/web/s2-processing"));
+  sources.append(link("NISAR GCOV guide","https://nisar-docs.asf.alaska.edu/gcov/"),
+    " · ",link("Sentinel‑2 processing and scene classes","https://sentiwiki.copernicus.eu/web/s2-processing"),
+    " · ",link("Historical HydroLAKES shoreline",reservoir.url),
+    " · ",link("Esri basemap credits","https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"));
   parent.append(list,sources);
+  const shorelineCredit=node("p","Historical reservoir geometry from HydroLAKES v1.0 (Messager et al., 2016), projected to UTM 36N and generalized for display. ");
+  shorelineCredit.append(link("CC BY 4.0","https://creativecommons.org/licenses/by/4.0/"));
+  parent.append(shorelineCredit);
+  const downloads=node("p","Original HH power crops (GeoTIFF) · ");
+  const repository="https://raw.githubusercontent.com/nhaile360/InfraSAR/main/roseires-crops/roseires_";
+  downloads.append(link("29 Aug 2026",repository+"2026-08-29_HHHH.tif")," · ",link("16 Oct 2026",repository+"2026-10-16_HHHH.tif"));
+  parent.append(downloads);
   if(pair.candidates.local||pair.candidates.fixed){
     parent.append(node("p","Radar candidates were generated from NISAR HH alone. The fixed rule uses −17 dB. The local rule uses a 3×3 median and compares reference water and land, with a 0.75 dB uncertainty band."));
   }
@@ -438,7 +546,10 @@ function showSelected(){
 function refreshControls(){
   const view=toolState.view;
   for(const b of document.querySelectorAll("[data-view]"))b.setAttribute("aria-pressed",String(b.dataset.view===view));
-  $("divider").hidden=view!=="swipe";
+  $("divider").hidden=$("drag").hidden=view!=="swipe"||!toolState.showRasters;
+  $("context-only").textContent=toolState.showRasters?"Hide study layers":"Show study layers";
+  $("context-only").setAttribute("aria-pressed",String(!toolState.showRasters));
+  $("radar-display").hidden=visibleLayer()!=="radar";
   $("timeline").hidden=view!=="timeline";
   $("point-section").hidden=view!=="points";
   $("evidence").hidden=view==="points";
@@ -452,6 +563,7 @@ function setView(view){
   if(!toolState.ready)return;
   if(toolState.view==="timeline"&&view!=="timeline")pause();
   toolState.view=view;
+  toolState.showRasters=true;
   if(view==="change"){
     if(!pilotWater().length&&toolState.change==="water")toolState.change="delta";
     if(toolState.change==="agreement"&&!changes().compare[toolState.rule])toolState.change=pilotWater().length?"water":"delta";
@@ -631,6 +743,7 @@ function updateTimeline(){
 function goToTime(index){
   if(!toolState.events.length)return;
   toolState.time=clamp(index,0,toolState.events.length-1);
+  $("radar-display").hidden=visibleLayer()!=="radar";
   updateTimeline();updateDates();updateLegend();requestDraw();
 }
 function pause(){
@@ -657,6 +770,7 @@ function refreshData({recenter=false}={}){
     if(toolState.points[key]===null||toolState.points[key]===previous[key])toolState.points[key]=toolState.examples[key];
   }
   if(rows.length!==2&&toolState.layer==="water")toolState.layer="radar";
+  if(rows.length!==2)toolState.swipeChange=false;
   rebuildEvents();updateEvidence();details();refreshControls();
   if(recenter)resetCamera(false);
   requestDraw();
@@ -671,16 +785,25 @@ function mapWorld(e){
 }
 function boundedCamera(){
   const c=toolState.cam;
-  c.x=clamp(c.x,contextBounds.west,contextBounds.east);
-  c.y=clamp(c.y,contextBounds.south,contextBounds.north);
+  const aspect=map.clientHeight/Math.max(map.clientWidth,1);
+  const {west,east,south,north}=contextBounds;
+  c.span=clamp(c.span,520,Math.min(east-west,(north-south)/aspect));
+  const horizontal=c.span/2, vertical=horizontal*aspect;
+  c.x=clamp(c.x,west+horizontal,east-horizontal);
+  c.y=clamp(c.y,south+vertical,north-vertical);
 }
 function zoom(amount,at){
   const t=transform(toolState.cam,map.clientWidth,map.clientHeight), c=toolState.cam;
   const origin=at?t.location(at.x,at.y):{x:c.x,y:c.y};
-  const factor=clamp(c.span*amount,520,35000)/c.span;
-  c.span*=factor;
-  c.x=origin.x+(c.x-origin.x)*factor;
-  c.y=origin.y+(c.y-origin.y)*factor;
+  zoomTo(c.span*amount,origin,at||{x:t.width/2,y:t.height/2});
+}
+function zoomTo(span,anchor,at){
+  const c=toolState.cam;
+  c.span=span;
+  boundedCamera();
+  const metersPerPixel=c.span/map.clientWidth;
+  c.x=anchor.x-(at.x-map.clientWidth/2)*metersPerPixel;
+  c.y=anchor.y+(at.y-map.clientHeight/2)*metersPerPixel;
   boundedCamera();requestDraw();
 }
 function selectCell(where){
@@ -711,28 +834,50 @@ function arrows(key){
   return ({ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]})[key];
 }
 function activateMap(){
-  let drag=null;
+  const active=new Map();
+  let drag=null, pinch=null;
+  function midpoint(){
+    const [a,b]=active.values();
+    return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,distance:Math.hypot(a.x-b.x,a.y-b.y)};
+  }
+  function startDrag(p,moved=false){
+    drag={p,x:toolState.cam.x,y:toolState.cam.y,moved};
+  }
   map.addEventListener("pointerdown",e=>{
-    if(!toolState.ready||e.button>0||drag)return;
+    if(!toolState.ready||e.button>0||active.size>=2||(active.size&&e.pointerType!=="touch"))return;
     const p=mapPosition(e);
-    drag={id:e.pointerId,p,x:toolState.cam.x,y:toolState.cam.y,moved:false};
+    active.set(e.pointerId,p);
     map.setPointerCapture(e.pointerId);
+    if(active.size===1)startDrag(p);
+    else{
+      const mid=midpoint(), t=transform(toolState.cam,map.clientWidth,map.clientHeight);
+      pinch={span:toolState.cam.span,distance:Math.max(mid.distance,1),anchor:t.location(mid.x,mid.y)};
+    }
   });
   map.addEventListener("pointermove",e=>{
-    if(drag?.id!==e.pointerId)return;
-    const p=mapPosition(e), dx=p.x-drag.p.x,dy=p.y-drag.p.y;
+    if(!active.has(e.pointerId))return;
+    const p=mapPosition(e);
+    active.set(e.pointerId,p);
+    if(pinch){
+      const mid=midpoint();
+      zoomTo(pinch.span*pinch.distance/Math.max(mid.distance,1),pinch.anchor,mid);
+      return;
+    }
+    const dx=p.x-drag.p.x,dy=p.y-drag.p.y;
     if(!drag.moved&&Math.hypot(dx,dy)<6)return;
     drag.moved=true;
     const t=toolState.cam.span/map.clientWidth;
     toolState.cam.x=drag.x-dx*t;toolState.cam.y=drag.y+dy*t;
     boundedCamera();requestDraw();
   });
-  map.addEventListener("pointerup",e=>{
-    if(drag?.id!==e.pointerId)return;
-    if(!drag.moved)selectCell(mapWorld(e));
-    drag=null;
-  });
-  map.addEventListener("pointercancel",()=>drag=null);
+  function finishPointer(e){
+    if(!active.delete(e.pointerId))return;
+    if(!pinch&&!drag.moved&&e.type==="pointerup")selectCell(mapWorld(e));
+    pinch=null;
+    if(active.size)startDrag(active.values().next().value,true);
+    else drag=null;
+  }
+  for(const event of ["pointerup","pointercancel","lostpointercapture"])map.addEventListener(event,finishPointer);
   map.addEventListener("wheel",e=>{
     if(!toolState.ready||!(e.ctrlKey||e.metaKey))return;
     e.preventDefault();zoom(e.deltaY>0?1.22:.82,mapPosition(e));
@@ -771,24 +916,27 @@ function activateMap(){
   }
   const handle=$("drag");
   function moveSplit(value){
-    toolState.split=clamp(value,7,93);
-    handle.setAttribute("aria-valuenow",Math.round(toolState.split));
-    handle.setAttribute("aria-valuetext",Math.round(toolState.split)+"% left image");
+    toolState.split=clamp(value,0,100);
+    const left=Math.round(toolState.split);
+    handle.setAttribute("aria-valuenow",left);
+    handle.setAttribute("aria-valuetext",left+"% left, "+(100-left)+"% right");
     requestDraw();
   }
   let dividerPointer=null;
   handle.addEventListener("pointerdown",e=>{
+    if(e.button>0||dividerPointer!==null)return;
     dividerPointer=e.pointerId;handle.setPointerCapture(e.pointerId);
-    e.preventDefault();handle.focus();
+    e.preventDefault();handle.focus({preventScroll:true});
   });
   handle.addEventListener("pointermove",e=>{if(e.pointerId===dividerPointer)moveSplit(mapPosition(e).x/map.clientWidth*100)});
-  handle.addEventListener("pointerup",()=>dividerPointer=null);
-  handle.addEventListener("pointercancel",()=>dividerPointer=null);
+  for(const event of ["pointerup","pointercancel","lostpointercapture"])handle.addEventListener(event,e=>{
+    if(e.pointerId===dividerPointer)dividerPointer=null;
+  });
   handle.addEventListener("keydown",e=>{
     if(e.key==="ArrowLeft")moveSplit(toolState.split-3);
     else if(e.key==="ArrowRight")moveSplit(toolState.split+3);
-    else if(e.key==="Home")moveSplit(7);
-    else if(e.key==="End")moveSplit(93);
+    else if(e.key==="Home")moveSplit(0);
+    else if(e.key==="End")moveSplit(100);
     else return;
     e.preventDefault();
   });
@@ -800,7 +948,13 @@ function activateMap(){
   $("loc-dam").addEventListener("click",()=>resetCamera(true));
   $("zoom-in").addEventListener("click",()=>zoom(.72));
   $("zoom-out").addEventListener("click",()=>zoom(1.4));
-  new ResizeObserver(()=>{requestDraw();drawCharts()}).observe(mapBox);
+  $("context-only").addEventListener("click",()=>{
+    toolState.showRasters=!toolState.showRasters;refreshControls();requestDraw();
+  });
+  $("radar-rendering").addEventListener("change",e=>{
+    toolState.radarDisplay=e.target.value;updateLegend();requestDraw();
+  });
+  new ResizeObserver(()=>{boundedCamera();requestDraw();drawCharts()}).observe(mapBox);
 }
 
 function bundleFromHtml(html){
@@ -865,7 +1019,9 @@ async function loadSentinel(){
       addWater(results);refreshData();
     }
     status.textContent=currentCoverage();
-    if(pilotWater().length===2&&toolState.view==="swipe"&&document.activeElement===button){toolState.layer="water";refreshControls()}
+    if(pilotWater().length===2&&toolState.view==="swipe"&&document.activeElement===button){
+      toolState.layer="water";toolState.swipeChange=false;refreshControls();requestDraw();
+    }
   }catch{
     status.textContent="Public Sentinel‑2 scenes could not be loaded. Choose the scored comparator HTML from the pipeline to use your processed observations.";
   }finally{
@@ -904,7 +1060,7 @@ async function init(){
     const start=$("date-start").value,end=$("date-end").value,kind=$("date-layer").value;
     if(!start||!end||utc(start)>=utc(end)){$("pair-message").textContent="Choose an earlier left date and a later right date.";return}
     $("pair-message").textContent="";
-    toolState.pairByLayer[kind]=[start,end];toolState.layer=kind;setView("swipe");
+    toolState.pairByLayer[kind]=[start,end];toolState.layer=kind;toolState.swipeChange=false;setView("swipe");
   });
   toolState.ready=true;
   refreshData({recenter:true});

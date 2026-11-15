@@ -8,7 +8,11 @@ const crop = {west:grid.west, east:grid.west + grid.width * cell, north:grid.nor
 const inlet = {x:659903.152, y:1296948.257};
 const dam = {x:651167.115, y:1304597.962};
 const town = {x:648088.118, y:1303591.824};
-const contextBounds = {west:644000, east:665500, south:1292500, north:1308600};
+const reservoir = seed.reservoir;
+const [lakeWest,lakeSouth,lakeEast,lakeNorth] = reservoir.bounds;
+const reservoirBounds = {west:Math.min(town.x,lakeWest)-2500,east:lakeEast+2500,
+  south:lakeSouth-2500,north:Math.max(dam.y,lakeNorth)+2500};
+const contextBounds = {west:580000,east:740000,south:1200000,north:1360000};
 const tiles = ["36PXT", "36PXU"];
 const clamp = (n,a,b) => Math.min(b, Math.max(a,n));
 const utc = value => Date.parse(value);
@@ -55,6 +59,9 @@ function agreement(radar,water) {
     data[i]=o>=5 ? (rc?7:8) : r===o && oc ? (r===3?2:3) : rc&&oc ? 6 : oc ? 4 : rc ? 5 : r>=5 ? 9 : 1;
   }
   return data;
+}
+function radarCandidateChange(radar, before, after) {
+  return radar?.map((value,i)=>Number.isFinite(before.raw[i])&&Number.isFinite(after.raw[i])?value:0);
 }
 async function inflate(bytes) {
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate"));

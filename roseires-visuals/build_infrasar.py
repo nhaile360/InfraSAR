@@ -77,9 +77,12 @@ def main():
         patch = roseires.encode(mask)
 
     src = HERE / "src"
+    reservoir = json.loads((src / "roseires-reservoir.json").read_text())
+    if reservoir["epsg"] != grid["epsg"]:
+        raise ValueError("Reservoir geometry must use the study grid projection")
     payload = {"grid": grid, "bundles": [pilot, *(processed_bundle(path, grid) for path in args.observations)],
                "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
-               "trend": json.loads(args.trend.read_text())}
+               "reservoir": reservoir, "trend": json.loads(args.trend.read_text())}
     replacements = {"/* INFRASAR_STYLE */": (src / "atlas.css").read_text(),
                     "/* INFRASAR_SCRIPT */": "\n".join(
                         (src / name).read_text() for name in ("data.js", "tiff.js", "atlas.js", "trend.js")
