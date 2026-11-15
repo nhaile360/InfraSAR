@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InfraSAR · Roseires shoreline change</title>
+<style>
+  :root{color-scheme:light;--paper:#f6f7f2;--ink:#1e322d;--muted:#4b625a;--rule:#ccd6ce;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "DM Sans",system-ui,sans-serif}
+  main{width:min(1200px,92%);margin:36px auto 50px}
+  h1{font:400 clamp(2.3rem,6vw,4rem)/1.04 "Instrument Serif",Georgia,serif;margin:.2em 0}
+  h2,h3{line-height:1.2;margin:0 0 .65em}
+  p{margin:.35em 0 .8em}
+  .muted,caption,summary{color:var(--muted)}
+  .controls,.maps{display:flex;gap:18px;flex-wrap:wrap;margin:20px 0}
+  label{display:grid;gap:5px;font-size:.9rem;font-weight:600}
+  select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:.45em 1em}
+  .maps>section{flex:1 1 330px;min-width:0}
+  .frame{position:relative;width:100%;aspect-ratio:711/446;background:#e9eee8}
+  canvas{display:block;width:100%;height:100%;image-rendering:pixelated;cursor:crosshair}
+  :focus-visible{outline:3px solid #3067ab;outline-offset:3px}
+  .cross{position:absolute;width:13px;height:13px;border:2px solid white;outline:1px solid #20312b;transform:translate(-50%,-50%);pointer-events:none}
+  .legend{list-style:none;display:flex;flex-wrap:wrap;gap:.4em 1em;padding:0;margin:.65em 0;font-size:.84rem}
+  .legend li{display:flex;align-items:center;gap:.4em}
+  .swatch{width:.9em;height:.9em;border:1px solid #68786e}
+  .inspector,.score{border-top:1px solid var(--rule);padding:18px 0}
+  .tables{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))}
+  table{text-align:left;width:100%;border-collapse:collapse;font-size:.88rem;table-layout:auto}
+  th,td{padding:.4em .55em;border-bottom:1px solid var(--rule);vertical-align:top}
+  td{overflow-wrap:anywhere}
+  caption{text-align:left;padding:.25em 0}
+  [hidden]{display:none!important}
+  [role=alert]{color:#862f20}
+  @media(max-width:600px){main{margin-top:22px}.controls{gap:12px}.maps{margin-top:12px}}
+</style>
+</head>
+<body>
+<main>
+  <p class="muted">InfraSAR · Roseires Reservoir, Sudan</p>
+  <h1>Shoreline change</h1>
+  <p id="dates" class="muted"></p>
+  <p id="error" role="alert" hidden></p>
+  <div class="controls">
+    <label>Radar rule<select id="rule"><option value="local">Local calibration</option><option value="fixed">Fixed HH cutoff</option></select></label>
+    <label>View<select id="view"><option value="maps">Change maps</option><option value="agreement">Agreement and coverage</option></select></label>
+  </div>
+  <div class="maps">
+    <section id="radar-panel"><h2>NISAR candidates</h2><div class="frame"><canvas tabindex="0" aria-label="Radar change map. Click or use the arrow keys to inspect a pixel."></canvas><div class="cross" hidden></div></div></section>
+    <section id="optical-panel"><h2>Sentinel-2 reference</h2><div class="frame"><canvas tabindex="0" aria-label="Optical change map. Click or use the arrow keys to inspect a pixel."></canvas><div class="cross" hidden></div></div></section>
+    <section id="agreement-panel" hidden><h2>Where the maps agree</h2><div class="frame"><canvas tabindex="0" aria-label="Agreement map. Click or use the arrow keys to inspect a pixel."></canvas><div class="cross" hidden></div></div></section>
+  </div>
+  <ul id="legend" class="legend" aria-label="Map legend"></ul>
+  <section class="inspector">
+    <h2>Pixel evidence</h2>
+    <p id="selection" aria-live="polite">Select a location on either map.</p>
+    <div id="readout" class="tables"></div>
+  </section>
+  <section class="score">
+    <h2>Benchmark</h2>
+    <p id="coverage" class="muted"></p>
+    <p id="tile-coverage" class="muted"></p>
+    <div id="metrics" class="tables"></div>
+  </section>
+  <details>
+    <summary>Acquisitions and grid</summary>
+    <div id="sources"></div>
+  </details>
+</main>
+<script type="application/json" id="data">__ROSEIRES_DATA__</script>
+<script>
+(async () => {
+  'use strict';
+  const el = id => document.getElementById(id);
+  const fail = error => {el('error').textContent = error.message; el('error').hidden = false;};
+  try {
+    const bundle = JSON.parse(el('data').textContent);
+    const arrays = {};
+    for (const [name, item] of Object.entries(bundle.arrays)) {
+      const bytes = Uint8Array.from(atob(item.payload), c => c.charCodeAt(0));
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
+      const decoded = await new Response(stream).arrayBuffer();
+      arrays[name] = item.type === 'float32' ? new Float32Array(decoded) : new Uint8Array(decoded);
+      if (arrays[name].length !== bundle.grid.width * bundle.grid.height) throw Error('Invalid grid length.');
+    }
+    const {width, height, west, north, pixel_m: size} = bundle.grid;
+    const radarDates = bundle.radar.radar;
+    const dates = Object.values(bundle.optical_sources);
+    const palette = {1:'#d8dfc8',2:'#367f9f',3:'#217754',4:'#b85731',5:'#929ba2',
+      6:'#f2eade',7:'#5b596c',8:'#b69a70',9:'#3e4954',10:'#8e527f'};
+    const agreement = {1:'#ccd6b9',2:'#217754',3:'#367f9f',4:'#d39b3c',5:'#b85731',
+      6:'#963b7f',7:'#554493',8:'#929ba2',9:'#5b596c'};
+    const panels = ['radar-panel','optical-panel','agreement-panel'].map(id => el(id));
+    let picked = null;
+    const first = () => el('rule').value;
+    const isAgreement = () => el('view').value === 'agreement';
+    const state = (labels, code) => labels[code] || 'Unknown';
+    const radarValue = v => Number.isFinite(v) ? v.toFixed(2) + ' dB · power ' + (10 ** (v / 10)).toPrecision(4) : 'No observation';
+    const sclValue = v => v === 255 ? 'Outside tile coverage' : v === 254 ? 'Tile overlap disagreement' : 'SCL ' + v;
+    const opticalState = v => v === 1 ? 'Land' : v === 2 ? 'Water' : state(bundle.labels, v);
+    const opticalDate = i => dates[i]['36PXT'].datetime;
+
+    function cell(tag, text) {
+      const e = document.createElement(tag); e.textContent = text; return e;
+    }
+    function table(title, columns, values) {
+      const t = document.createElement('table');
+      t.append(cell('caption',title));
+      const head = t.createTHead().insertRow();
+      for (const c of columns) head.append(cell('th',c));
+      const body = t.createTBody();
+      for (const valuesRow of values) {
+        const row = body.insertRow();
+        for (const value of valuesRow) row.append(cell('td',String(value)));
+      }
+      return t;
+    }
+    function color(hex) {return hex.slice(1).match(/../g).map(x=>parseInt(x,16));}
+    function paint(panel, grid, keys) {
+      const c = panel.querySelector('canvas');
+      c.width = width; c.height = height;
+      const ctx = c.getContext('2d');
+      const im = ctx.createImageData(width,height);
+      const rgb = Object.fromEntries(Object.entries(keys).map(([k,v])=>[k,color(v)]));
+      for (let i=0;i<grid.length;i++) {
+        const rgbValue = rgb[grid[i]];
+        const j = i*4;
+        im.data[j]=rgbValue[0]; im.data[j+1]=rgbValue[1]; im.data[j+2]=rgbValue[2]; im.data[j+3]=255;
+      }
+      ctx.putImageData(im,0,0);
+    }
+    function positionCross() {
+      for (const panel of panels) {
+        const cross = panel.querySelector('.cross');
+        cross.hidden = !picked;
+        if (picked) {
+          cross.style.left = ((picked.x+.5)/width*100)+'%';
+          cross.style.top = ((picked.y+.5)/height*100)+'%';
+        }
+      }
+    }
+    function readPixel(x,y) {
+      const i=y*width+x, rule=first();
+      const m=arrays['agreement_'+rule][i];
+      picked = {x,y};
+      positionCross();
+      el('selection').textContent = 'UTM 36N ' + (west+(x+.5)*size).toFixed(1) + ' E, ' +
+        (north-(y+.5)*size).toFixed(1) + ' N · ' + state(bundle.agreement,m);
+      const radars=radarDates.map((r,j)=>[r.datetime,radarValue(arrays[j ? 'hh_after' : 'hh_before'][i])]);
+      const optical=dates.map((_,j)=>[opticalDate(j),opticalState(arrays[j ? 'opt_after' : 'opt_before'][i]),
+        sclValue(arrays['tile_'+j+'_36PXT'][i]),sclValue(arrays['tile_'+j+'_36PXU'][i])]);
+      el('readout').replaceChildren(
+        table('NISAR · '+state(bundle.labels,arrays[rule][i]),['Acquired (UTC)','HH backscatter'],radars),
+        table('Sentinel-2 · '+state(bundle.labels,arrays.optical[i]),['Acquired (UTC)','Merged state','36PXT','36PXU'],optical)
+      );
+    }
+    function update() {
+      const rule=first(), compare=isAgreement();
+      panels[0].hidden=panels[1].hidden=compare;
+      panels[2].hidden=!compare;
+      if(compare) paint(panels[2],arrays['agreement_'+rule],agreement);
+      else {
+        paint(panels[0],arrays[rule],palette);
+        paint(panels[1],arrays.optical,palette);
+      }
+      const colors=compare ? agreement : palette;
+      const labels=compare ? bundle.agreement : bundle.labels;
+      el('legend').replaceChildren(...Object.entries(colors).map(([k,v])=>{
+        const item=cell('li',labels[k]), color=cell('span','');
+        color.className='swatch';color.style.background=v; item.prepend(color);return item;
+      }));
+      const metrics=bundle.metrics[rule];
+      el('coverage').textContent=(100*metrics.usable_optical_fraction).toFixed(1)+'% of the crop has usable optical evidence on both dates. '+
+        metrics.unverified_radar_change_pixels.toLocaleString()+' radar change pixels lack optical verification. '+
+        metrics.radar_abstentions_on_usable_optical.toLocaleString()+' radar abstentions fall within usable optical coverage.';
+      el('metrics').replaceChildren(table(bundle.pair==='holdout'?'Separate radar pair':'Pilot radar pair',
+        ['Transition','Hits','Misses','False alarms'],
+        [['Land to water',metrics.gain.hits,metrics.gain.misses,metrics.gain.false_alarms],
+         ['Water to land',metrics.loss.hits,metrics.loss.misses,metrics.loss.false_alarms]]));
+      if(picked) readPixel(picked.x,picked.y);
+    }
+    for(const panel of panels) {
+      const c=panel.querySelector('canvas');
+      c.addEventListener('click',e=>{
+        const b=c.getBoundingClientRect();
+        readPixel(Math.min(width-1, Math.max(0, Math.floor((e.clientX-b.left)/b.width*width))),
+          Math.min(height-1, Math.max(0, Math.floor((e.clientY-b.top)/b.height*height))));
+      });
+      c.addEventListener('keydown',e=>{
+        const directions={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+        if(!directions[e.key]) return;
+        e.preventDefault();
+        const {x,y}=picked||{x:Math.floor(width/2),y:Math.floor(height/2)};
+        const [dx,dy]=directions[e.key];
+        readPixel(Math.max(0,Math.min(width-1,x+dx)),Math.max(0,Math.min(height-1,y+dy)));
+      });
+    }
+    el('dates').textContent='Radar: '+radarDates.map(r=>r.date).join(' → ')+' · Optical: '+
+      [0,1].map(i=>opticalDate(i).slice(0,10)).join(' → ')+' · 20 m grid';
+    const only = bundle.tile_coverage['36PXT_only'], both = bundle.tile_coverage['36PXT_and_36PXU'];
+    const percent = value => (100*value).toFixed(1)+'%';
+    el('tile-coverage').textContent='Usable optical coverage with 36PXT alone: '+percent(only.usable_both_dates)+
+      '. With 36PXU: '+percent(both.usable_both_dates)+'.';
+    el('sources').append(table('Source scenes', ['Source','Acquired (UTC)','Scene ID'],
+      [...radarDates.map(r=>['NISAR',r.datetime,r.id]),
+       ...dates.flatMap(epoch=>Object.values(epoch).map(s=>[s.tile,s.datetime,s.id]))]));
+    el('rule').addEventListener('change',update);
+    el('view').addEventListener('change',update);
+    update();
+  } catch(error) { fail(error); }
+})();
+</script>
+</body>
+</html>

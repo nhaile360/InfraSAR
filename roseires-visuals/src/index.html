@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InfraSAR · Where did the water move at Roseires?</title>
+<meta name="description" content="Compare real radar and water maps to follow the changing shoreline of Roseires Reservoir in Sudan.">
+<style>/* INFRASAR_STYLE */</style>
+</head>
+<body>
+<header class="sitebar">
+  <div class="wrap sitebar-inner">
+    <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>InfraSAR</a>
+    <span class="place">Blue Nile, Sudan</span>
+  </div>
+</header>
+<main id="top" class="wrap">
+  <header class="intro">
+    <h1>Where did the water<br class="hero-break"> move at Roseires?</h1>
+    <p>Roseires Dam holds back part of the Blue Nile in Sudan. Explore how its reservoir shoreline changed between August and October 2026.</p>
+  </header>
+  <section class="workspace" aria-label="Roseires shoreline explorer">
+    <nav class="view-tabs" aria-label="Map views">
+      <button type="button" data-view="swipe" aria-pressed="true"><span aria-hidden="true">◧</span> Swipe dates</button>
+      <button type="button" data-view="change" aria-pressed="false"><span aria-hidden="true">◩</span> Change map</button>
+      <button type="button" data-view="points" aria-pressed="false"><span aria-hidden="true">⊙</span> Compare points</button>
+      <button type="button" data-view="timeline" aria-pressed="false"><span aria-hidden="true">≋</span> Timeline</button>
+    </nav>
+    <div class="workspace-grid">
+      <div class="map-column">
+        <div class="map-tools">
+          <div id="layers" class="segments" aria-label="Map layer"></div>
+          <button id="extent" class="outline" type="button">Show reservoir</button>
+        </div>
+        <div id="map-frame" class="map-frame">
+          <canvas id="map" tabindex="0" aria-label="Roseires reservoir map. Use arrow keys to pan and plus or minus to zoom."></canvas>
+          <div class="date-corners" id="dates" aria-live="polite"><span id="before"></span><span id="after"></span></div>
+          <div class="map-compass" aria-hidden="true"><span>▲</span> N</div>
+          <button type="button" id="pin-a" class="pin a" aria-label="Move Point A" hidden>A</button>
+          <button type="button" id="pin-b" class="pin b" aria-label="Move Point B" hidden>B</button>
+          <div id="tip" class="map-tip" hidden></div>
+          <div id="divider" class="divider">
+            <div class="divider-line" aria-hidden="true"></div>
+            <button type="button" id="drag" class="drag" role="slider" aria-label="Drag to compare" aria-valuemin="0" aria-valuemax="100" aria-valuenow="56" aria-orientation="horizontal">
+              <span aria-hidden="true">‹</span><span>Drag to compare</span><span aria-hidden="true">›</span>
+            </button>
+          </div>
+          <div class="zoom" aria-label="Map zoom">
+            <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+          </div>
+          <div class="scale" id="scale"></div>
+          <div class="map-credit" id="credit">Map context · GeoNames / OpenStreetMap</div>
+        </div>
+        <div id="legend" class="legend" aria-label="Map legend"></div>
+        <section id="timeline" class="timeline" hidden aria-labelledby="timeline-heading">
+          <div class="timeline-top">
+            <div><h2 id="timeline-heading">Follow the observations</h2><p id="time-count"></p></div>
+            <div class="playback">
+              <button class="outline" type="button" id="play">Play</button>
+              <button class="outline" type="button" id="pause" disabled>Pause</button>
+            </div>
+          </div>
+          <label class="scrub" for="scrubber"><span id="scrub-date"></span><input type="range" id="scrubber" min="0" max="0" value="0" aria-label="Timeline date"></label>
+          <p class="timeline-status" id="time-status" aria-live="polite"></p>
+          <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
+          <div id="charts"></div>
+          <fieldset class="date-select">
+            <legend>Send two observations to Swipe dates</legend>
+            <label>Layer <select id="date-layer"><option value="radar">Radar image</option><option value="water">Water map</option></select></label>
+            <label>Left date <select id="date-start"></select></label>
+            <label>Right date <select id="date-end"></select></label>
+            <button class="primary" type="button" id="open-swipe">Compare dates</button>
+            <p id="pair-message" role="status"></p>
+          </fieldset>
+        </section>
+      </div>
+      <aside class="side">
+        <section class="locator-card" aria-labelledby="locator-title">
+          <div class="locator-top"><h2 id="locator-title">Find your bearings</h2><span aria-hidden="true">N ↑</span></div>
+          <canvas id="locator" aria-label="Locator map showing the Blue Nile, Roseires Dam, and the inlet southeast of the dam."></canvas>
+          <div class="locator-actions">
+            <button type="button" id="loc-dam"><i aria-hidden="true"></i> Roseires Dam</button>
+            <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
+          </div>
+        </section>
+        <section class="evidence" id="evidence" aria-label="Evidence at the inlet">
+          <h2 id="evidence-title">Water reached farther into this inlet.</h2>
+          <div class="finding">
+            <h3><span class="evidence-icon water-icon" aria-hidden="true"></span> Water map</h3>
+            <p id="evidence-water">Sentinel‑2 mapped this patch as land in August and water in October.</p>
+          </div>
+          <div class="finding">
+            <h3><span class="evidence-icon radar-icon" aria-hidden="true"></span> Radar</h3>
+            <p>The radar return over the outlined patch was weaker in October.</p>
+            <p class="metric"><strong id="patch-db">−4.3 dB</strong> median change <span id="patch-count">· 108 cells</span></p>
+          </div>
+          <div class="finding">
+            <h3><span class="evidence-icon height-icon" aria-hidden="true"></span> Reservoir level</h3>
+            <p>The reservoir rose about <strong>1.15 m</strong> between the radar passes.</p>
+            <p class="note">DAHITI estimate</p>
+          </div>
+          <button type="button" id="follow-up" class="follow-up">Some nearby land also got darker in the radar image. Compare the two spots to see what the water map shows. <span aria-hidden="true">→</span></button>
+        </section>
+        <section class="point-section" id="point-section" hidden aria-labelledby="points-title">
+          <h2 id="points-title">Compare two spots</h2>
+          <p>Choose a point, then tap the map or drag its pin.</p>
+          <div class="segments pin-select" aria-label="Point to move">
+            <button type="button" data-point="A" aria-pressed="true">Point A</button>
+            <button type="button" data-point="B" aria-pressed="false">Point B</button>
+          </div>
+          <div id="points" aria-live="polite"></div>
+          <button type="button" class="text-button" id="reset-points">Reset example points</button>
+        </section>
+        <section class="selection" id="selection" hidden aria-live="polite"></section>
+      </aside>
+    </div>
+  </section>
+  <details id="data-details">
+    <summary>Data details</summary>
+    <div class="details-grid">
+      <div><h3>Acquisitions and methods</h3><div id="methods"></div></div>
+      <div><h3>Map context</h3>
+        <p>The locator shows the dam and the study inlet. Terrain loads when connected. The shaded river footprint uses the latest available water map, or the October radar candidate map for orientation.</p>
+        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer" target="_blank" rel="noopener">Esri terrain and basemap attribution</a></p>
+        <h3>Load more observations</h3>
+        <p>Choose a processed pipeline comparator HTML file or the two SCL GeoTIFFs with the inlet mask. Files are read on this device.</p>
+        <label for="add-data" class="file-label">Processed comparator or inlet GeoTIFFs</label>
+        <input id="add-data" type="file" accept=".html,.tif,.tiff" multiple>
+        <p id="import-status" role="status"></p>
+        <button class="outline" type="button" id="load-sentinel">Load Sentinel‑2 scenes</button>
+      </div>
+    </div>
+  </details>
+  <p class="footer">NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI</p>
+</main>
+<script type="application/json" id="data">__INFRASAR_DATA__</script>
+<script>/* INFRASAR_SCRIPT */</script>
+</body>
+</html>

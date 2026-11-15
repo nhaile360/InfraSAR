@@ -1,0 +1,11 @@
+name: roseires-pipeline
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - numpy
+  - tifffile
+  - imagecodecs
+  - libgdal-core>=3.9
+  - libgdal-hdf5

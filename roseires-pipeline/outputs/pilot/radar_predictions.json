@@ -1,0 +1,69 @@
+{
+  "policy": {
+    "fixed_cutoff_db": -17.0,
+    "local_uncertainty_db": 0.75,
+    "water_control_utm": [
+      651500,
+      1297900,
+      653200,
+      1300500
+    ],
+    "land_control_utm": [
+      647600,
+      1301800,
+      648200,
+      1302800
+    ],
+    "local_rule": "3\u00d73 median; midpoint of open-water P90 and land P10 per date; abstain if the controls overlap"
+  },
+  "grid": {
+    "width": 711,
+    "height": 446,
+    "west": 647085.1044029767,
+    "north": 1303758.0249756854,
+    "epsg": 32636,
+    "pixel_m": 20
+  },
+  "bounds_utm": [
+    647085.1044029767,
+    1294838.0249756854,
+    661305.1044029767,
+    1303758.0249756854
+  ],
+  "calibrations": [
+    {
+      "water_p90_db": -14.745739555358886,
+      "land_p10_db": -2.7036311626434326,
+      "threshold_db": -8.72468535900116
+    },
+    {
+      "water_p90_db": -13.145917320251465,
+      "land_p10_db": -4.497302055358887,
+      "threshold_db": -8.821609687805175
+    }
+  ],
+  "radar": [
+    {
+      "date": "2026-08-29",
+      "id": "NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001",
+      "datetime": "2026-08-29T03:19:01+00:00",
+      "url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001.h5",
+      "band": "Frequency A HHHH",
+      "resampling": "nearest neighbor",
+      "sha256": "9426639216303124d60077b47d1b1532bb833c209024a92605b644e0140187b0"
+    },
+    {
+      "date": "2026-10-16",
+      "id": "NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001",
+      "datetime": "2026-10-16T03:19:01+00:00",
+      "url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001.h5",
+      "band": "Frequency A HHHH",
+      "resampling": "nearest neighbor",
+      "sha256": "8c41b60640326f5c2ae173c9abaa13386925fff64036a96af6cb08a881d0421e"
+    }
+  ],
+  "predictions": {
+    "fixed": "16e1692a5529da07632878a472b38b35d76fddb952080eb3188c4166a25ea7ac",
+    "local": "86a6bf8e6e59aedca0dc77710078f3db04f96cdd4b5c18617fbeb00cf853e99c"
+  }
+}
