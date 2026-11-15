@@ -238,7 +238,7 @@ def check_other_views(page):
     assert scrubber.input_value() == "0"
     page.get_by_role("button", name="Play", exact=True).click()
     expect(page.get_by_role("button", name="Pause", exact=True)).to_be_enabled()
-    stage = page.get_by_role("link", name="Long-term rainfall")
+    stage = page.locator("#investigations").get_by_role("link", name="Long-term rainfall")
     stage.press("Enter")
     expect(stage).to_have_attribute("aria-current", "location")
     expect(page.locator("#shoreline")).to_be_hidden()
@@ -352,7 +352,7 @@ def check_touch(chromium, url, offline):
         canvas.tap(position={"x": 80, "y": 170})
         expect(page.locator("#point-status")).to_contain_text("Point B moved")
         expect(page.locator('[data-point-card="B"]')).to_have_attribute("data-active","true")
-        page.get_by_role("link",name="Long-term rainfall").tap()
+        page.locator("#investigations").get_by_role("link",name="Long-term rainfall").tap()
         expect(page.locator("#trend-chart")).to_be_visible()
         assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Horizontal overflow on mobile trends"
         assert not errors, errors
