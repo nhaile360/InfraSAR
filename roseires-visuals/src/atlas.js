@@ -25,20 +25,51 @@ const agreementNames={1:"Both stable",2:"Both show water gain",3:"Both show wate
   8:"Optical reference unavailable",9:"Radar unclear"};
 let rasterCache=new WeakMap(), changeCache=null, baseMask=null, stagedTiffs={}, drawing=0;
 let remoteBusy=false;
-const basemaps=[{bounds:contextBounds},{bounds:{west:635000,east:675000,south:1282000,north:1322000}}];
+const basemapService="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export";
+const overviewBasemap={bounds:contextBounds,density:1536/(contextBounds.east-contextBounds.west)};
+let viewportBasemap=null, basemapTimer, basemapTarget;
 const drawFont = '700 12px "DM Sans","Avenir Next",system-ui,sans-serif';
 
-function baseImages(){
-  const service="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export";
-  for(const layer of basemaps){
-    const {west,south,east,north}=layer.bounds;
-    const params=new URLSearchParams({bbox:[west,south,east,north].join(","),
-      bboxSR:String(grid.epsg),imageSR:String(grid.epsg),size:"1536,1536",format:"jpg",f:"image"});
-    const image=new Image();
-    image.crossOrigin="anonymous";
-    image.onload=()=>{layer.image=image;requestDraw()};
-    image.src=service+"?"+params;
-  }
+function loadBasemap(bounds,width,height,onLoad){
+  const {west,south,east,north}=bounds;
+  const params=new URLSearchParams({bbox:[west,south,east,north].join(","),
+    bboxSR:String(grid.epsg),imageSR:String(grid.epsg),size:width+","+height,format:"jpg",f:"image"});
+  const image=new Image();
+  image.crossOrigin="anonymous";
+  image.onload=()=>onLoad(image);
+  image.src=basemapService+"?"+params;
+}
+function visibleBounds(t){
+  const upper=t.location(0,0), lower=t.location(t.width,t.height);
+  return {west:upper.x,east:lower.x,south:lower.y,north:upper.y};
+}
+function covers(bounds,view){
+  return bounds.west<=view.west&&bounds.east>=view.east&&bounds.south<=view.south&&bounds.north>=view.north;
+}
+function scheduleBasemap(t,view){
+  const key=[view.west,view.south,view.east,view.north,t.width,t.height,devicePixelRatio].join(",");
+  if(key===basemapTarget)return;
+  basemapTarget=key;
+  clearTimeout(basemapTimer);
+
+  const padding=1.3;
+  const ratio=Math.min(devicePixelRatio||1,2,2048/(padding*Math.max(t.width,t.height)));
+  const density=t.factor*ratio;
+  if(density<=overviewBasemap.density*1.1)return;
+  if(viewportBasemap&&viewportBasemap.density>=density*.9&&covers(viewportBasemap.bounds,view))return;
+
+  const width=Math.round(t.width*padding*ratio), height=Math.round(t.height*padding*ratio);
+  const center=t.location(t.width/2,t.height/2);
+  // Keep the bounding box and image aspect ratios identical so the export stays aligned.
+  const dx=width/(2*density), dy=height/(2*density);
+  const bounds={west:center.x-dx,east:center.x+dx,south:center.y-dy,north:center.y+dy};
+  basemapTimer=setTimeout(()=>{
+    loadBasemap(bounds,width,height,image=>{
+      if(key!==basemapTarget)return;
+      viewportBasemap={bounds,density,image};
+      requestDraw();
+    });
+  },160);
 }
 function redrawTo(canvas){
   const ratio=Math.min(devicePixelRatio||1,2);
@@ -146,19 +177,20 @@ function mapText(c,text,x,y,{color="#234643",font=drawFont,align="left",backgrou
   }
   c.fillStyle=color;c.fillText(text,x,y);c.restore();
 }
-function drawContext(c,t){
+function drawContext(c,t,view){
   c.fillStyle="#e4e9dc";c.fillRect(0,0,t.width,t.height);
-  const northwest=t.location(0,0), southeast=t.location(t.width,t.height);
-  const basemap=basemaps.findLast(({image,bounds})=>image&&northwest.x>=bounds.west&&
-    northwest.y<=bounds.north&&southeast.x<=bounds.east&&southeast.y>=bounds.south)||basemaps[0];
-  drawGeo(c,t,basemap.image,basemap.bounds,true);
+  const bounds=viewportBasemap?.bounds;
+  const detail=view&&bounds&&view.west<bounds.east&&view.east>bounds.west&&
+    view.south<bounds.north&&view.north>bounds.south;
+  if(!detail||!covers(bounds,view))drawGeo(c,t,overviewBasemap.image,overviewBasemap.bounds,true);
+  if(detail)drawGeo(c,t,viewportBasemap.image,bounds,true);
   const [ox,oy]=t.xy({x:0,y:0});
   c.save();
   c.translate(ox,oy);c.scale(t.factor,t.factor);
   c.fillStyle=historicalWater.fill;c.fill(shoreline,"evenodd");
   c.strokeStyle=historicalWater.stroke;c.lineWidth=1.2/t.factor;c.stroke(shoreline);
   c.restore();
-  return Boolean(basemap.image);
+  return Boolean(detail||overviewBasemap.image);
 }
 function drawFootprint(c,t){
   const [x,y]=t.xy({x:crop.west,y:crop.north});
@@ -258,7 +290,9 @@ function draw(){
   const frame=redrawTo(map);
   if(!frame)return;
   const t=transform(toolState.cam,frame.width,frame.height), width=t.width,height=t.height;
-  const basemapVisible=drawContext(context,t);
+  const view=visibleBounds(t);
+  scheduleBasemap(t,view);
+  const basemapVisible=drawContext(context,t,view);
   if(toolState.showRasters){
     if(toolState.view==="swipe")drawSwipe(context,t);
     else if(toolState.view==="change")drawGeo(context,t,rasterImage(changeLayer(),toolState.change),crop);
@@ -1064,7 +1098,7 @@ async function init(){
   });
   toolState.ready=true;
   refreshData({recenter:true});
-  baseImages();
+  loadBasemap(overviewBasemap.bounds,1536,1536,image=>{overviewBasemap.image=image;requestDraw()});
   if(pilotWater().length<2)loadSentinel();
 }
 init().catch(error=>{

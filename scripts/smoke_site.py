@@ -3,7 +3,7 @@
 
 import argparse
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import parse_qs, urljoin, urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -32,6 +32,50 @@ def check_reservoir_extent(page):
             return sx > 0 && sy > 0 && sx < t.width && sy < t.height;
         }));
     }"""), "The reservoir does not fit in the overview"
+
+
+def check_basemap(chromium, url):
+    # A local fixture exercises the viewport requests without relying on the provider.
+    pixel = bytes.fromhex("47494638396101000100800000ffffffffffff21f90401000001002c00000000010001000002024401003b")
+    export = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export?*"
+
+    def bounds(request):
+        query = parse_qs(urlsplit(request.url).query)
+        assert query["bboxSR"] == query["imageSR"] == ["32636"]
+        west, south, east, north = map(float, query["bbox"][0].split(","))
+        width, height = map(int, query["size"][0].split(","))
+        assert abs((east - west) / (north - south) - width / height) < 1e-7
+        return west, east
+
+    with chromium.new_context(viewport={"width": 1280, "height": 900}) as browser:
+        page = browser.new_page()
+        page.route("https://**/*", lambda route: route.abort())
+        page.route(export, lambda route: route.fulfill(
+            content_type="image/gif", body=pixel, headers={"access-control-allow-origin": "*"}))
+        errors = open_site(page, url, offline=False)
+        page.wait_for_function("viewportBasemap?.image.naturalWidth > 0")
+        inlet_width = page.evaluate("viewportBasemap.bounds.east - viewportBasemap.bounds.west")
+
+        with page.expect_request(export) as zoomed:
+            page.get_by_role("button", name="Zoom in").click()
+        west, east = bounds(zoomed.value)
+        assert east - west < inlet_width * .8, "Zooming must request a closer view"
+
+        with page.expect_request(export) as overview:
+            page.get_by_role("button", name="Show reservoir").click()
+        west, east = bounds(overview.value)
+        page.wait_for_function("west => viewportBasemap?.bounds.west === west", arg=west)
+        assert east - west > 40000, "The request must cover areas outside the former detail image"
+
+        with page.expect_request(export) as panned:
+            for _ in range(3):
+                page.locator("#map").press("ArrowRight")
+        panned_west, _ = bounds(panned.value)
+        assert panned_west > west, "Panning must load basemap imagery for the new area"
+        page.wait_for_function("""() => covers(
+            viewportBasemap.bounds, visibleBounds(transform(toolState.cam, map.clientWidth, map.clientHeight))
+        )""")
+        assert not errors, errors
 
 
 def check_swipe(page, offline):
@@ -200,6 +244,8 @@ def main():
         check_other_views(page)
         assert not errors, errors
         check_touch(browser, url, offline)
+        if offline:
+            check_basemap(browser, url)
         browser.close()
     print("Desktop, keyboard, mouse and mobile touch smoke tests passed for " + url)
 
