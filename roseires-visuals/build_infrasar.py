@@ -9,7 +9,9 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "roseires-pipeline"))
+sys.path.insert(0, str(HERE.parent / "roseires-trends"))
 import pipeline as roseires
+from analyze_modis import CSV_PATH as MODIS_CSV, analyze as analyze_modis
 
 
 def processed_bundle(path, grid):
@@ -45,6 +47,8 @@ def main():
     cli.add_argument("--trend", type=Path,
                      default=HERE.parent / "roseires-trends" / "power-analysis.json",
                      help="Verified precipitation analysis from analyze_power.py")
+    cli.add_argument("--modis-csv", type=Path, default=MODIS_CSV,
+                     help="Derived MODIS monthly surface-area CSV")
     cli.add_argument("--output", type=Path, default=HERE / "roseires-shoreline-comparator.html")
     args = cli.parse_args()
 
@@ -82,7 +86,8 @@ def main():
         raise ValueError("Reservoir geometry must use the study grid projection")
     payload = {"grid": grid, "bundles": [pilot, *(processed_bundle(path, grid) for path in args.observations)],
                "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
-               "reservoir": reservoir, "trend": json.loads(args.trend.read_text())}
+               "reservoir": reservoir, "trend": json.loads(args.trend.read_text()),
+               "modis": analyze_modis(args.modis_csv)}
     replacements = {"/* INFRASAR_STYLE */": (src / "atlas.css").read_text(),
                     "/* INFRASAR_SCRIPT */": "\n".join(
                         (src / name).read_text() for name in ("data.js", "tiff.js", "atlas.js", "trend.js")

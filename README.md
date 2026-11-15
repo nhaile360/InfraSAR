@@ -1,9 +1,9 @@
 # InfraSAR
 NASA Space Apps project exploring reservoir shoreline change at Roseires with NISAR and Sentinel-2.
 
-The static site opens at [index.html](index.html). Start at the 2026 inlet comparison and follow **Investigate historical rainfall** to select a period, view NASA POWER monthly estimates and derived annual totals, and evaluate the trend.
+The static site opens at [index.html](index.html). Start at the 2026 inlet comparison and open **Long-term observations** to investigate reservoir surface area or rainfall.
 
-The bundled long-term investigation uses precipitation from the MERRA-2 grid cell around Roseires. The MODIS reservoir surface-area series awaits authenticated retrieval and quality checks. See the [analysis and provenance](roseires-trends/README.md), [explorer build instructions](roseires-visuals/README.md), and [shoreline processing pipeline](roseires-pipeline/README.md).
+The bundled long-term records include NASA POWER precipitation for the MERRA-2 grid cell near Roseires and NASA Terra MODIS monthly reservoir surface area. See the [analysis and provenance](roseires-trends/README.md), [explorer build instructions](roseires-visuals/README.md), and [shoreline processing pipeline](roseires-pipeline/README.md).
 
 ## Build and publish
 
@@ -15,7 +15,7 @@ python -m unittest discover -s roseires-trends -p 'test_*.py'
 python scripts/build_site.py
 ```
 
-The build writes `dist/index.html` and `dist/version.json`. The version file identifies the commit on GitHub Actions and Cloudflare Pages. Publish only `dist/`. When updating the checked-in standalone copies, copy `dist/index.html` to both `index.html` and `InfraSAR-Roseires.html`.
+The build writes `dist/index.html`, `dist/version.json`, and the derived MODIS CSV. The version file identifies the commit on GitHub Actions and Cloudflare Pages. Publish only `dist/`. When updating the checked-in standalone copies, copy `dist/index.html` to both `index.html` and `InfraSAR-Roseires.html`.
 
 The [GitHub Actions workflow](.github/workflows/pages.yml) builds and browser-tests every push to `main`. Where the repository's plan supports Pages, choose **GitHub Actions** under **Settings → Pages**, then run **Build and deploy InfraSAR** from the Actions tab. Future pushes to `main` deploy automatically. The workflow checks the deployed commit and tests the public site in Chromium.
 

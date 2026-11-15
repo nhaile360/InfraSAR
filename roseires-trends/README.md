@@ -1,8 +1,25 @@
-# Long-term precipitation near Roseires
+# Long-term observations near Roseires
 
-InfraSAR's current long-term investigation uses NASA POWER corrected precipitation for one MERRA-2 grid cell near Roseires, Sudan. The precipitation record covers January 1981 through December 2024. Reservoir surface-area analysis is pending access to the original MODIS granules.
+## MODIS reservoir surface area
 
-## Result
+[NASA Terra MODIS MOD28C3.061](https://modis.gsfc.nasa.gov/data/dataprod/mod28.php) supplies monthly surface area in km² for Roseires (lake ID 111, GRanD ID 4483). The [derived source CSV](roseires_modis_monthly_surface_area.csv) includes the original granule name and its SHA-256 checksum. It contains 235 published values, 77 product fill values, and five months without a granule between March 2000 and July 2026. Fill values and unavailable months appear as gaps.
+
+The January 2013 breakpoint reflects the [recorded dam heightening](https://www.hydropower.org/sediment-management-case-studies/sudan-roseires). The interrupted fit includes a level shift, calendar year centered at 2013, a change in slope at the breakpoint, and calendar-month effects. The separate post-2013 fit estimates a slope with its own calendar-month effects. Both fits use January–May and October–December, when coverage is comparable across the two eras. June is sparsely observed, and July–September has no pre-2013 estimates. The plot shows every published month.
+
+The build reproduces the estimated **+164.07 km²** shift (95% CI 107.55 to 220.59) and **−1.26 km²/year** slope since 2013 (95% CI −3.34 to +0.82, p = .234). Both use Bartlett Newey–West uncertainty with 12 calendar-month lags, the n/(n−k) correction, and a two-sided normal approximation. The post-2013 interval includes zero. The timing alone does not establish the cause of the shift.
+
+```sh
+python roseires-trends/analyze_modis.py
+python scripts/build_site.py
+```
+
+For future extraction, install PyHDF in the analysis environment and run `python roseires-trends/extract_modis.py` from the repository root. It reads the original HDF4 granules from `data/MOD28C3/` and rewrites the derived CSV. Use `--output PATH` for a comparison copy. To check an individual month, run `shasum -a 256 data/MOD28C3/<source_granule>` and compare it with `granule_sha256` in the CSV.
+
+## Long-term precipitation near Roseires
+
+InfraSAR's current long-term investigation uses NASA POWER corrected precipitation for one MERRA-2 grid cell near Roseires, Sudan. The precipitation record covers January 1981 through December 2024.
+
+### Result
 
 | Analysis | Years | Change in annual precipitation total | 95% interval | Two-sided p |
 | --- | ---: | ---: | ---: | ---: |
@@ -12,14 +29,14 @@ InfraSAR's current long-term investigation uses NASA POWER corrected precipitati
 
 The interval for the full record includes zero. The record supports calculating a long-term linear summary, with limited evidence for a steady increase or decrease. The shorter windows are sensitivity views. A level shift within a window can produce an apparent trend under a linear model.
 
-## Source and transformations
+### Source and transformations
 
 - [NASA POWER original monthly request](https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR&community=AG&longitude=34.4673&latitude=11.7285&start=1981&end=2024&format=JSON). Retrieved November 15, 2026. The response identifies API v2.10.0, MERRA-2, local solar time, and PRECTOTCORR in mm/day. The request uses the inlet coordinates. The returned point is 11.729° N, 34.467° E, within POWER’s 0.5° latitude × 0.625° longitude meteorological grid.
 - [nasa-power-roseires.json](nasa-power-roseires.json) preserves all numerical source values and response metadata in formatted JSON. It includes 528 monthly values and 44 source annual summary values with month code `13`. The source sentinel is `−999`. All 528 months passed the completeness check, including legitimate zero values.
 - [power-analysis.json](power-analysis.json) records the source snapshot hash, unaltered monthly rates, the number of calendar days per month, converted monthly totals, calendar-year totals, model fits, and diagnostics. Each monthly mean rate is multiplied by the actual days in the month, including leap days. The analysis fits complete calendar-year totals. Only months 01–12 enter the fit. InfraSAR fills no gaps, removes no outliers, and applies no smoothing.
 - PRECTOTCORR is an observation-corrected reanalysis estimate. It inherits limitations from the model, the underlying observing products, and their spatial support. The regression interval describes sampling uncertainty under the fitted time-series model. It does not include systematic product errors or establish that the estimate is representative of the Blue Nile catchment. [POWER data methodology](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/) · [NASA MERRA-2 documentation](https://ntrs.nasa.gov/api/citations/20160005045/downloads/20160005045.pdf)
 
-## Seasonal and temporal checks
+### Seasonal and temporal checks
 
 June through September accounts for **77.9%** of estimated precipitation. Complete calendar-year totals include each seasonal cycle once. The slope is the change in annual accumulation, measured in millimeters per additional calendar year.
 
@@ -27,15 +44,11 @@ The ordinary least-squares fit has lag-one annual residual autocorrelation of ap
 
 An exploratory screen compares the full-record line with step-plus-line fits. It allows one or two changes in level, keeps at least eight years per segment, and includes two parameters per searched breakpoint in its BIC penalty. The best one-step fit starts a new segment in **2014** (ΔBIC ≈ −29.1). The best two-step fit starts new segments in **2000** and **2014** (ΔBIC ≈ −36.0). This nominal BIC comparison does not adjust for residual dependence or provide a calibrated significance test for the breakpoints. The dates are diagnostic. Their causes have not been established and they do not define the primary fit.
 
-## Relationship to the inlet and status of MODIS
+### Relationship to the inlet
 
 The inlet evidence covers the August–October 2026 NISAR and Sentinel‑2 acquisitions and DAHITI heights. The precipitation record covers a much larger atmospheric grid cell and ends in 2024. The two investigations answer questions about different processes, areas, and periods. The rainfall slope establishes neither a reservoir-area trend in km²/year nor a cause for the observed shoreline change.
 
-NASA's MOD28C3 Collection 6.1 guide assigns Roseires `lake_ID=111`, corresponding to **GRanD ID 4483**. NASA's catalogue lists the collection and 312 monthly granules. Direct data access redirected to Earthdata Login, and the local execution environment could not resolve NASA endpoints. The reservoir time-series portal did not return the Roseires values in this session. No monthly Roseires area values were qualified. [Collection catalogue](https://cmr.earthdata.nasa.gov/search/concepts/C2565791057-LPCLOUD.html) · [Collection 6.1 user guide](https://lpdaac.usgs.gov/documents/1116/MOD28_User_Guide_V61.pdf)
-
-With authenticated access, download one consistent Terra or Aqua collection and retain the granule IDs, production times, dates, and checksums. Read each HDF4 `lake_evaporation` table with an HDF4 Vdata reader and verify the coordinates and ID before extracting `lake_area`. Check the `−9999` fill value, available quality metadata, product-level enhancement and interpolation, and coverage by month. Collection 7 documents a contamination fraction. Confirm the actual field in the chosen collection and preserve published versus locally processed values. Examine the documented 2013 dam heightening as a candidate break before fitting reservoir-area trends. A possible break alone does not establish an operational cause. [Collection 7 user guide](https://modis-land.gsfc.nasa.gov/pdf/MODIS_MOD28_User_Guide_1.3_20260226_C7.pdf) · [Roseires dam heightening](https://www.hydropower.org/sediment-management-case-studies/sudan-roseires)
-
-## Reproduce
+### Reproduce
 
 From the repository root, use the existing `roseires-pipeline` environment with NumPy.
 

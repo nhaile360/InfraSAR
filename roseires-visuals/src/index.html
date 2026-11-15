@@ -17,11 +17,11 @@
 <main id="top" class="wrap">
   <header class="intro">
     <h1>Where did the water<br class="hero-break"> move at Roseires?</h1>
-    <p>Compare two views of the Roseires shoreline in 2026, then look at decades of NASA rainfall estimates to see whether rainfall near the reservoir shows a trend.</p>
+    <p>Compare two views of the Roseires shoreline in 2026, then explore decades of NASA observations for changes in rainfall and reservoir area.</p>
   </header>
   <nav id="investigations" class="investigations" aria-label="Investigations">
     <a href="#shoreline" data-investigation aria-current="location"><strong>2026 shoreline</strong><span>What changed at Roseires?</span></a>
-    <a href="#trend-investigation" data-investigation><strong>Long-term rainfall</strong><span>What does the historical record show?</span></a>
+    <a href="#trend-investigation" data-investigation><strong>Long-term observations</strong><span>What does the historical record show?</span></a>
   </nav>
   <section id="shoreline" class="workspace" aria-labelledby="shoreline-title">
     <h2 id="shoreline-title" class="sr-only" tabindex="-1">What changed at Roseires in 2026?</h2>
@@ -136,26 +136,31 @@
       </aside>
     </div>
     <div class="trend-bridge">
-      <p>Two dates show a local shoreline change. Decades of observations let you test whether rainfall near the reservoir changed consistently over time.</p>
-      <a class="primary" href="#trend-investigation" data-investigation>Explore long-term rainfall <span aria-hidden="true">→</span></a>
+      <p>Two dates show a local shoreline change. Decades of observations let you look for shifts in reservoir area and trends in rainfall.</p>
+      <a class="primary" href="#trend-investigation" data-investigation>Explore long-term observations <span aria-hidden="true">→</span></a>
     </div>
   </section>
   <section id="trend-investigation" class="trend" aria-labelledby="trend-title" hidden>
     <header>
       <h2 id="trend-title" tabindex="-1">Has rainfall changed near Roseires?</h2>
-      <p>Use NASA rainfall estimates from 1981 to 2024 to test a trend for the grid cell around Roseires. This record ends before the 2026 shoreline observation.</p>
+      <p id="trend-context">Use NASA rainfall estimates from 1981 to 2024 to test a trend for the grid cell around Roseires. This record ends before the 2026 shoreline observation.</p>
     </header>
     <form id="trend-controls" class="trend-controls">
-      <label>Analysis period <select id="trend-period"></select></label>
+      <label>Variable <select id="trend-variable">
+        <option value="rainfall">Rainfall (NASA POWER)</option>
+        <option value="modis">Reservoir surface area (MODIS)</option>
+      </select></label>
+      <label id="trend-period-field">Analysis period <select id="trend-period"></select></label>
     </form>
     <p id="trend-scope" class="note"></p>
     <div class="trend-results" aria-live="polite">
-      <div class="trend-metric"><h3>Change in annual total</h3><strong id="trend-slope"></strong></div>
-      <div class="trend-metric"><h3>95% confidence interval</h3><strong id="trend-interval"></strong></div>
-      <div class="trend-metric"><h3>Statistical significance</h3><strong id="trend-significance"></strong><span id="trend-p"></span></div>
+      <div class="trend-metric" id="trend-shift-card" hidden><h3>Estimated shift around 2013</h3><strong id="trend-shift"></strong><span id="trend-shift-ci"></span></div>
+      <div class="trend-metric"><h3 id="trend-slope-label">Change in annual total</h3><strong id="trend-slope"></strong><span id="trend-post-ci" hidden></span></div>
+      <div class="trend-metric" id="trend-interval-card"><h3>95% confidence interval</h3><strong id="trend-interval"></strong></div>
+      <div class="trend-metric"><h3 id="trend-significance-label">Statistical significance</h3><strong id="trend-significance"></strong><span id="trend-p"></span></div>
     </div>
     <p id="trend-interpretation"></p>
-    <div class="segments trend-scale" aria-label="Precipitation chart">
+    <div id="trend-scale" class="segments trend-scale" aria-label="Precipitation chart">
       <button type="button" data-trend-scale="annual" aria-pressed="true">Annual totals</button>
       <button type="button" data-trend-scale="monthly" aria-pressed="false">Monthly estimates</button>
     </div>
@@ -178,8 +183,11 @@
       <summary>Data and method</summary>
       <p id="trend-method"></p>
       <p id="trend-diagnostics"></p>
-      <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Evaluating why the shoreline moved in 2026 would also require observations of upstream inflow and reservoir operations from that period.</p>
-      <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
+      <div id="rainfall-sources">
+        <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Evaluating why the shoreline moved in 2026 would also require observations of upstream inflow and reservoir operations from that period.</p>
+        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
+      </div>
+      <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://modis.gsfc.nasa.gov/data/dataprod/mod28.php">NASA MODIS reservoir product</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
     </details>
     <p class="return-link"><a href="#shoreline" data-investigation>Return to the 2026 shoreline</a></p>
   </section>
@@ -199,7 +207,7 @@
       </div>
     </div>
   </details>
-  <footer class="footer"><p>InfraSAR applies the <a href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps Earth System Trend Detective challenge</a> to Roseires. Explore observations, estimate a rate of change, and examine its uncertainty.</p><p>NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER</p></footer>
+  <footer class="footer"><p>InfraSAR applies the <a href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps Earth System Trend Detective challenge</a> to Roseires. Explore observations, estimate a rate of change, and examine its uncertainty.</p><p>NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER · NASA Terra MODIS</p></footer>
 </main>
 <script type="application/json" id="data">__INFRASAR_DATA__</script>
 <script>/* INFRASAR_SCRIPT */</script>

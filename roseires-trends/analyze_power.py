@@ -64,13 +64,7 @@ def linear_fit(years, totals, lags):
     x = np.column_stack((np.ones(n), years - years[0]))
     coefficients = np.linalg.lstsq(x, totals, rcond=None)[0]
     residuals = totals - x @ coefficients
-    scores = x * residuals[:, None]
-    covariance_sum = scores.T @ scores
-    for lag in range(1, lags + 1):
-        cross_product = scores[lag:].T @ scores[:-lag]
-        covariance_sum += (1 - lag / (lags + 1)) * (cross_product + cross_product.T)
-    bread = np.linalg.inv(x.T @ x)
-    covariance = bread @ covariance_sum @ bread * n / (n - x.shape[1])
+    covariance = hac_covariance(x, residuals, lags)
     se = float(np.sqrt(max(0, covariance[1, 1])))
     intercept, slope = map(float, coefficients)
     if se <= np.finfo(float).eps:
@@ -88,6 +82,24 @@ def linear_fit(years, totals, lags):
         "p_two_sided": erfc(abs(slope / se) / sqrt(2)),
         "hac_lags_years": lags,
     }, residuals
+
+
+def hac_covariance(design, residuals, lags, positions=None):
+    """Bartlett Newey–West covariance on the supplied time grid."""
+    n, parameters = design.shape
+    scores = design * residuals[:, None]
+    if positions is not None:
+        # Missing observations contribute no score. The lag still counts calendar periods.
+        offsets = positions - positions[0]
+        calendar_scores = np.zeros((offsets[-1] + 1, parameters))
+        calendar_scores[offsets] = scores
+        scores = calendar_scores
+    covariance_sum = scores.T @ scores
+    for lag in range(1, lags + 1):
+        cross_product = scores[lag:].T @ scores[:-lag]
+        covariance_sum += (1 - lag / (lags + 1)) * (cross_product + cross_product.T)
+    bread = np.linalg.inv(design.T @ design)
+    return bread @ covariance_sum @ bread * n / (n - parameters)
 
 
 def screen_level_shifts(years, totals, line_residuals):

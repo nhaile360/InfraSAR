@@ -2,6 +2,7 @@
 """Exercise the standalone site in fresh desktop and touch Chromium contexts."""
 
 import argparse
+from hashlib import sha256
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlsplit
 
@@ -238,7 +239,7 @@ def check_other_views(page):
     assert scrubber.input_value() == "0"
     page.get_by_role("button", name="Play", exact=True).click()
     expect(page.get_by_role("button", name="Pause", exact=True)).to_be_enabled()
-    stage = page.locator("#investigations").get_by_role("link", name="Long-term rainfall")
+    stage = page.locator("#investigations").get_by_role("link", name="Long-term observations")
     stage.press("Enter")
     expect(stage).to_have_attribute("aria-current", "location")
     expect(page.locator("#shoreline")).to_be_hidden()
@@ -250,7 +251,7 @@ def check_other_views(page):
 
     expect(page.locator("#pilot-score")).to_contain_text("7.68%")
     expect(page.locator("#pilot-score")).to_contain_text("0.82%")
-    page.get_by_role("link", name="Explore long-term rainfall").click()
+    page.get_by_role("link", name="Explore long-term observations").click()
     expect(page.locator("#trend-chart")).to_be_visible()
     expect(page.locator("#trend-slope")).to_have_text("+1.52 mm/year")
     expect(page.locator("#trend-significance")).to_have_text("Inconclusive")
@@ -260,6 +261,32 @@ def check_other_views(page):
     page.locator("#trend-period").select_option("2")
     expect(page.locator("#trend-table-body tr")).to_have_count(264)
     expect(page.locator("#trend-slope")).to_have_text("+48.17 mm/year")
+    variable = page.get_by_label("Variable", exact=True)
+    variable.select_option("modis")
+    expect(page.locator("#trend-shift")).to_have_text("+164.07 km²")
+    expect(page.locator("#trend-shift-ci")).to_have_text("95% CI 107.55 to 220.59 km²")
+    expect(page.locator("#trend-slope")).to_have_text("-1.26 km²/year")
+    expect(page.locator("#trend-post-ci")).to_have_text("95% CI -3.34 to 0.82 km²/year")
+    expect(page.locator("#trend-significance")).to_have_text("Inconclusive")
+    expect(page.locator("#trend-chart-unit")).to_have_text("Monthly reservoir surface area (km²)")
+    expect(page.locator("#trend-table-body tr")).to_have_count(317)
+    for month, status in [("2000-06", "NASA fill value"), ("2022-01", "No granule")]:
+        row = page.locator("#trend-table-body tr").filter(has_text=month)
+        expect(row.get_by_role("cell", name="—", exact=True)).to_be_visible()
+        expect(row.get_by_role("cell", name=status, exact=True)).to_be_visible()
+    assert page.evaluate("""() => {
+        const events = [];
+        const tracer = {beginPath(){}, stroke(){},
+            moveTo(x, y){events.push(["move", x, y])}, lineTo(x, y){events.push(["line", x, y])}};
+        const rows = seed.modis.monthly.slice(0, 10).map((row, time) => ({time, value: row.area_km2}));
+        drawTrendLine(tracer, rows, x => x, y => y);
+        return events.some(([action, time]) => action === "line" && time === 2)
+            && events.some(([action, time]) => action === "move" && time === 7)
+            && !events.some(([, time]) => rows[time].value === null);
+    }"""), "The plotted line must restart after a gap"
+    variable.select_option("rainfall")
+    expect(page.locator("#trend-slope")).to_have_text("+48.17 mm/year")
+    expect(page.locator("#trend-table-body tr")).to_have_count(264)
     page.get_by_role("link", name="Return to the 2026 shoreline").click()
     expect(page.locator("#shoreline")).to_be_visible()
     expect(page.get_by_role("button", name="Swipe dates")).to_have_attribute("aria-pressed", "true")
@@ -352,8 +379,10 @@ def check_touch(chromium, url, offline):
         canvas.tap(position={"x": 80, "y": 170})
         expect(page.locator("#point-status")).to_contain_text("Point B moved")
         expect(page.locator('[data-point-card="B"]')).to_have_attribute("data-active","true")
-        page.locator("#investigations").get_by_role("link",name="Long-term rainfall").tap()
+        page.locator("#investigations").get_by_role("link", name="Long-term observations").tap()
         expect(page.locator("#trend-chart")).to_be_visible()
+        page.get_by_label("Variable", exact=True).select_option("modis")
+        expect(page.locator("#trend-shift")).to_have_text("+164.07 km²")
         assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Horizontal overflow on mobile trends"
         assert not errors, errors
 
@@ -373,6 +402,8 @@ def main():
         if args.revision:
             version = page.request.get(urljoin(page.url, "version.json"))
             assert version.ok and version.json()["commit"] == args.revision, "Unexpected deployed commit"
+            data = page.request.get(urljoin(page.url, "roseires_modis_monthly_surface_area.csv"))
+            assert data.ok and sha256(data.body()).hexdigest() == page.evaluate("seed.modis.source.sha256"), "Unexpected deployed MODIS CSV"
 
         check_swipe(page, offline)
         check_other_views(page)
