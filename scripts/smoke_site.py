@@ -261,7 +261,7 @@ def check_other_views(page):
     page.locator("#trend-period").select_option("2")
     expect(page.locator("#trend-table-body tr")).to_have_count(264)
     expect(page.locator("#trend-slope")).to_have_text("+48.17 mm/year")
-    variable = page.get_by_label("Variable", exact=True)
+    variable = page.get_by_role("combobox", name="Variable", exact=True)
     variable.select_option("modis")
     expect(page.locator("#trend-shift")).to_have_text("+164.07 km²")
     expect(page.locator("#trend-shift-ci")).to_have_text("95% CI 107.55 to 220.59 km²")
@@ -381,7 +381,7 @@ def check_touch(chromium, url, offline):
         expect(page.locator('[data-point-card="B"]')).to_have_attribute("data-active","true")
         page.locator("#investigations").get_by_role("link", name="Long-term observations").tap()
         expect(page.locator("#trend-chart")).to_be_visible()
-        page.get_by_label("Variable", exact=True).select_option("modis")
+        page.get_by_role("combobox", name="Variable", exact=True).select_option("modis")
         expect(page.locator("#trend-shift")).to_have_text("+164.07 km²")
         assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Horizontal overflow on mobile trends"
         assert not errors, errors

@@ -146,11 +146,11 @@
       <p id="trend-context">Use NASA rainfall estimates from 1981 to 2024 to test a trend for the grid cell around Roseires. This record ends before the 2026 shoreline observation.</p>
     </header>
     <form id="trend-controls" class="trend-controls">
-      <label>Variable <select id="trend-variable">
+      <label><span id="trend-variable-label">Variable</span><select id="trend-variable" aria-labelledby="trend-variable-label">
         <option value="rainfall">Rainfall (NASA POWER)</option>
         <option value="modis">Reservoir surface area (MODIS)</option>
       </select></label>
-      <label id="trend-period-field">Analysis period <select id="trend-period"></select></label>
+      <label id="trend-period-field"><span id="trend-period-label">Analysis period</span><select id="trend-period" aria-labelledby="trend-period-label"></select></label>
     </form>
     <p id="trend-scope" class="note"></p>
     <div class="trend-results" aria-live="polite">
