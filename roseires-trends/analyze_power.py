@@ -56,7 +56,7 @@ def monthly_totals(source):
     return days_and_values
 
 
-def linear_fit(years, totals, lags):
+def linear_fit(years, totals, lags, *, details=False):
     """OLS with Bartlett Newey–West covariance and a two-sided normal approximation."""
     n = len(years)
     if not 0 <= lags < n - 2 or not np.all(np.diff(years) == 1):
@@ -70,7 +70,7 @@ def linear_fit(years, totals, lags):
     if se <= np.finfo(float).eps:
         raise ValueError("The record has insufficient residual variation to estimate uncertainty.")
     half_width = NORMAL.inv_cdf(0.975) * se
-    return {
+    fit = {
         "start": int(years[0]),
         "end": int(years[-1]),
         "n_years": n,
@@ -81,7 +81,17 @@ def linear_fit(years, totals, lags):
         "ci95_mm_per_year": [slope - half_width, slope + half_width],
         "p_two_sided": erfc(abs(slope / se) / sqrt(2)),
         "hac_lags_years": lags,
-    }, residuals
+    }
+    if details:
+        rss = residuals @ residuals
+        i, j = np.triu_indices(n, k=1)
+        fit.update({
+            "fit_covariance": [float(covariance[0, 0]), float(covariance[0, 1]), float(covariance[1, 1])],
+            "residual_sd_mm": float(np.sqrt(rss / (n - 2))),
+            "residual_acf1": float(residuals[1:] @ residuals[:-1] / rss),
+            "theil_sen_mm_per_year": float(np.median((totals[j] - totals[i]) / (years[j] - years[i]))),
+        })
+    return fit, residuals
 
 
 def hac_covariance(design, residuals, lags, positions=None):
@@ -180,6 +190,23 @@ def analyze(source_path):
         "annual": [{"year": int(year), "total_mm": float(total)} for year, total in zip(years, totals)],
         "windows": windows,
     }
+
+
+
+def explorer_windows(investigation):
+    """Precompute the same fit for every supported interval and round for portable HTML."""
+    years = np.array([row["year"] for row in investigation["annual"]])
+    totals = np.array([row["total_mm"] for row in investigation["annual"]])
+    min_years = 10
+    fits = {}
+    for start in range(len(years) - min_years + 1):
+        for stop in range(start + min_years, len(years) + 1):
+            fit, _ = linear_fit(years[start:stop], totals[start:stop], lags=3, details=True)
+            key = f"{fit['start']}-{fit['end']}"
+            fits[key] = {k: (round(v, 7) if isinstance(v, float) else
+                             [round(item, 7) for item in v] if isinstance(v, list) else v)
+                         for k, v in fit.items()}
+    return {"min_years": min_years, "windows": fits}
 
 
 def main():

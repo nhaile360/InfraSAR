@@ -689,7 +689,7 @@ function rebuildEvents(){
   const estimates=ordered("radar").map(r=>({datetime:r.time,meters:estimateHeight(r.time),estimated:true})).filter(h=>h.meters!==null);
   const observed=seed.heights.filter(h=>utc(h.datetime)>=first-pad&&utc(h.datetime)<=last+pad);
   const byTime=new Map();
-  for(const h of [...observed,...estimates])byTime.set(utc(h.datetime),{date:h.datetime,height:h});
+  for(const h of [...estimates,...observed])byTime.set(utc(h.datetime),{date:h.datetime,height:h});
   for(const r of sensors)byTime.set(utc(r.time),{...(byTime.get(utc(r.time))||{}),date:r.time,record:r});
   const prior=toolState.events[toolState.time]?.date;
   toolState.events=[...byTime.values()].sort((a,b)=>utc(a.date)-utc(b.date));
@@ -734,52 +734,93 @@ function compareTimelineDates(){
   setView("swipe");
   $("drag").focus({preventScroll:true});
 }
+function timelineChartReading(id, event) {
+  if (!event) return;
+  const r = event.record;
+  let values;
+  if (id === "radar-chart") {
+    values = r?.type === "radar" ? [
+      "NISAR GCOV " + r.maturity + " · " + [r.version,r.release,r.mode].filter(Boolean).join(" / "),
+      ...Object.entries(toolState.points).map(([point,i]) => "Point " + point + " HH " + dbText(r.raw[i],2))
+    ] : ["No NISAR acquisition at this time"];
+  } else if (id === "water-chart") {
+    values = r?.type === "water" ? ["Sentinel‑2 L2A · derived scene classes",
+      ...Object.entries(toolState.points).map(([point,i]) => "Point " + point + " " + (stateNames[r.states[i]] || "No reading"))
+    ] : ["No Sentinel‑2 class observation at this time"];
+  } else {
+    const h = event.height;
+    values = h ? [h.meters.toFixed(2) + " m", h.estimated
+      ? "Estimated at the radar acquisition time from bracketing DAHITI measurements"
+      : "DAHITI measured height · ±" + h.uncertainty.toFixed(2) + " m reported uncertainty"]
+      : ["No measured or estimated DAHITI height at this time"];
+  }
+  const readout = $(id + "-reading"), text = [showTime(event.date), ...values].join(" · ");
+  if (readout.textContent !== text) readout.textContent = text;
+}
 function createCharts(){
   const definitions=[
-    ["radar-chart","Radar returns · dB","Each dot is one radar reading. The space between dots is a gap in observations."],
-    ["water-chart","Sentinel‑2 water classes","Square = land, circle = water, × = unclear or missing. The rows are Point A and Point B."],
-    ["height-chart","Reservoir height · m","Dots are DAHITI observations. Hollow diamonds are estimated heights on radar dates."]
+    ["radar-chart","Radar backscatter (dB)","HH points · provisional NISAR GCOV. Blank dates have no radar acquisition."],
+    ["water-chart","Optical scene class","Sentinel‑2 L2A derived classes. Square = land, circle = water, × = unclear or missing."],
+    ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates."]
   ];
   for(const [id,title,note] of definitions){
     const wrapper=node("section",null,id==="water-chart"?"chart waterchart":"chart");
-    const h=node("h3",title), c=node("canvas");
-    c.id=id;c.setAttribute("role","img");c.setAttribute("aria-label",title+" "+note);
-    c.addEventListener("click",event=>{
+    const h=node("h3",title), c=node("canvas"), key=node("p",note), reading=node("output",null,"chart-tooltip");
+    c.id=id;
+    c.tabIndex=0;
+    c.setAttribute("role","img");
+    c.setAttribute("aria-label",title+" by acquisition date. Use arrow keys to inspect dates.");
+    key.id=id+"-key";
+    c.setAttribute("aria-describedby",key.id);
+    reading.id=id+"-reading";
+    reading.setAttribute("aria-live","polite");
+    function nearest(event) {
       const box=c.getBoundingClientRect();
       const {first,last}=timeDomain();
       const target=first+clamp((event.clientX-box.left-49)/(box.width-64),0,1)*(last-first);
-      const i=toolState.events.reduce((idx,row,j)=>Math.abs(utc(row.date)-target)<Math.abs(utc(toolState.events[idx].date)-target)?j:idx,0);
-      pause();goToTime(i);
+      return toolState.events.reduce((idx,row,j)=>Math.abs(utc(row.date)-target)<Math.abs(utc(toolState.events[idx].date)-target)?j:idx,0);
+    }
+    const selected=()=>timelineChartReading(id,toolState.events[toolState.time]);
+    c.addEventListener("focus",selected);
+    c.addEventListener("pointerleave",selected);
+    c.addEventListener("pointermove",event=>{
+      if(event.pointerType==="mouse") timelineChartReading(id,toolState.events[nearest(event)]);
     });
-    wrapper.append(h,c,node("p",note));$("charts").append(wrapper);
+    c.addEventListener("click",event=>{pause();goToTime(nearest(event));});
+    c.addEventListener("keydown",event=>{
+      const targets={ArrowLeft:toolState.time-1,ArrowRight:toolState.time+1,Home:0,End:toolState.events.length-1};
+      if(!Object.hasOwn(targets,event.key))return;
+      event.preventDefault();pause();goToTime(targets[event.key]);
+    });
+    wrapper.append(h,c,key,reading);$("charts").append(wrapper);
   }
 }
 function timeDomain(){
   return {first:utc(toolState.events[0].date),last:utc(toolState.events.at(-1).date)};
 }
-function chartFrame(id,labels,unitRange,ticksTime=true){
+function chartFrame(id,labels,unitRange){
   const frame=redrawTo($(id));
   if(!frame)return null;
   const {ctx:c,width:w,height:h}=frame;
   c.clearRect(0,0,w,h);
   const {first,last}=timeDomain();
-  const x0=49,x1=w-15,y0=13,y1=h-25;
+  const x0=49,x1=w-15,y0=16,y1=h-36;
   const X=time=>x0+(utc(time)-first)/(last-first)*(x1-x0);
   const Y=v=>y1-(v-unitRange[0])/(unitRange[1]-unitRange[0])*(y1-y0);
-  c.lineWidth=1;c.strokeStyle="#d5dfd2";c.fillStyle="#45645c";c.font="11px system-ui";
+  c.lineWidth=1;c.strokeStyle="#d5dfd2";c.fillStyle="#45645c";c.font="12px system-ui";
   c.textBaseline="middle";
   for(const [value,label] of labels){
     const y=Y(value);c.beginPath();c.moveTo(x0,y);c.lineTo(x1,y);c.stroke();
     c.textAlign="right";c.fillText(label,x0-5,y);
   }
-  if(ticksTime){
-    const count=w<400?3:5;
-    for(let i=0;i<count;i++){
-      const t=first+(last-first)*i/(count-1),x=x0+(x1-x0)*i/(count-1);
-      c.textAlign=i===0?"left":i===count-1?"right":"center";
-      c.fillText(shortFormat.format(t),x,h-10);
-    }
+  const count=w<450?3:6;
+  for(let i=0;i<count;i++){
+    const t=first+(last-first)*i/(count-1), x=x0+(x1-x0)*i/(count-1);
+    c.textAlign=i===0?"left":i===count-1?"right":"center";
+    c.fillText(shortFormat.format(t),x,h-19);
   }
+  c.textAlign="center";
+  c.fillText("Observation date (UTC)",(x0+x1)/2,h-6);
   const marker=X(toolState.events[toolState.time].date);
   c.setLineDash([4,3]);c.strokeStyle="#4f7067";c.beginPath();c.moveTo(marker,7);c.lineTo(marker,y1+4);c.stroke();c.setLineDash([]);
   return {c,X,Y,x0,x1,y0,y1};
@@ -798,16 +839,12 @@ function drawCharts(){
   const top=Math.max(-5,Math.ceil(Math.max(...radarValues)/5)*5);
   let table=chartFrame("radar-chart",[[bottom,bottom.toString()],[(bottom+top)/2,((bottom+top)/2).toFixed(1)],[top,top.toString()]],[bottom,top]);
   if(!table)return;
-  const radarTexts=[];
   for(const r of ordered("radar"))for(const [key,i] of Object.entries(toolState.points)){
     if(i===null||!Number.isFinite(r.raw[i]))continue;
     dot(table.c,table.X(r.time),table.Y(r.raw[i]),key==="A"?5:4,palette[key],r.time===selected);
-    radarTexts.push(formatDate(r.time)+" point "+key+" "+dbText(r.raw[i],2));
   }
-  $("radar-chart").setAttribute("aria-label","Radar returns. "+radarTexts.join(". "));
-  table=chartFrame("water-chart",[[0,"B"],[1,"A"]],[-.35,1.35]);
+  table=chartFrame("water-chart",[[0,"Point B"],[1,"Point A"]],[-.35,1.35]);
   if(!table)return;
-  const waterTexts=[];
   for(const r of ordered("water"))for(const [key,i] of Object.entries(toolState.points)){
     if(i===null)continue;
     const code=r.states[i], x=table.X(r.time), y=table.Y(key==="A"?1:0), c=table.c;
@@ -818,12 +855,10 @@ function drawCharts(){
       c.strokeStyle=palette[key];c.lineWidth=2;
       c.beginPath();c.moveTo(x-k,y-k);c.lineTo(x+k,y+k);c.moveTo(x+k,y-k);c.lineTo(x-k,y+k);c.stroke();
     }
-    waterTexts.push(formatDate(r.time)+" point "+key+" "+stateNames[code]);
   }
-  $("water-chart").setAttribute("aria-label","Water class observations. "+(waterTexts.join(". ")||"No Sentinel-2 water maps loaded."));
   const hdata=toolState.events.filter(e=>e.height).map(e=>e.height);
-  const heights=hdata.map(h=>h.meters);
-  const a=Math.floor(Math.min(...heights)*2)/2,b=Math.max(a+.5,Math.ceil(Math.max(...heights)*2)/2);
+  const a=Math.floor(Math.min(...hdata.map(h=>h.meters-(h.uncertainty||0)))*2)/2;
+  const b=Math.max(a+.5,Math.ceil(Math.max(...hdata.map(h=>h.meters+(h.uncertainty||0)))*2)/2);
   table=chartFrame("height-chart",[[a,a.toFixed(1)],[(a+b)/2,((a+b)/2).toFixed(1)],[b,b.toFixed(1)]],[a,b]);
   if(!table)return;
   for(const obs of hdata){
@@ -838,7 +873,7 @@ function drawCharts(){
       dot(c,x,y,3.8,"#39766c",obs.datetime===selected);
     }
   }
-  $("height-chart").setAttribute("aria-label","DAHITI reservoir height. "+hdata.map(o=>formatDate(o.datetime)+" "+o.meters.toFixed(2)+" meters"+(o.estimated?" estimated":"")).join(". "));
+
 }
 function updateTimeline(){
   const e=toolState.events[toolState.time];
@@ -867,6 +902,7 @@ function updateTimeline(){
   if(e.height)messages.push("DAHITI "+e.height.meters.toFixed(2)+" m"+(e.height.estimated?" estimated":""));
   $("time-status").textContent=messages.join(" · ");
   updateDateComparison();
+  for(const id of ["radar-chart","water-chart","height-chart"]) timelineChartReading(id,e);
   drawCharts();
 }
 function goToTime(index){

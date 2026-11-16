@@ -118,12 +118,6 @@
           <p id="example-explanation">In the examples, the radar return weakened at both locations. Sentinel‑2 mapped a water gain at A and land on both dates at B.</p>
           <div id="points"></div>
         </section>
-        <section class="timeline" id="timeline-readings" hidden aria-labelledby="timeline-heading">
-          <h2 id="timeline-heading">Observation readings</h2>
-          <p id="time-count"></p>
-          <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
-          <div id="charts"></div>
-        </section>
         <section class="selection" id="selection" hidden aria-live="polite"></section>
         <section class="locator-card" aria-labelledby="locator-title">
           <div class="locator-top"><h2 id="locator-title">Roseires Reservoir</h2><span aria-hidden="true">N ↑</span></div>
@@ -135,6 +129,13 @@
         </section>
       </aside>
     </div>
+    <section class="timeline" id="timeline-readings" hidden aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">Observation readings</h2>
+      <p id="time-count"></p>
+      <p>Choose a date on any chart to update all three charts and the map. Use arrow keys when a chart has focus.</p>
+      <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
+      <div id="charts"></div>
+    </section>
     <div class="trend-bridge">
       <p>Two dates show a local shoreline change. Decades of observations let you look for shifts in reservoir area and trends in rainfall.</p>
       <a class="primary" href="#trend-investigation" data-investigation>Explore long-term observations <span aria-hidden="true">→</span></a>
@@ -143,7 +144,7 @@
   <section id="trend-investigation" class="trend" aria-labelledby="trend-title" hidden>
     <header>
       <h2 id="trend-title" tabindex="-1">Has rainfall changed near Roseires?</h2>
-      <p id="trend-context">Use NASA rainfall estimates from 1981 to 2024 to test a trend for the grid cell around Roseires. This record ends before the 2026 shoreline observation.</p>
+      <p id="trend-context">The NASA Space Apps Trend Detective investigation tests how estimated precipitation has changed in one grid cell near Roseires, Sudan. Choose a time window to see the rate of change and its uncertainty.</p>
     </header>
     <form id="trend-controls" class="trend-controls">
       <label><span id="trend-variable-label">Variable</span><select id="trend-variable" aria-labelledby="trend-variable-label">
@@ -151,6 +152,11 @@
         <option value="modis">Reservoir surface area (MODIS)</option>
       </select></label>
       <label id="trend-period-field"><span id="trend-period-label">Analysis period</span><select id="trend-period" aria-labelledby="trend-period-label"></select></label>
+      <div id="trend-custom" hidden class="trend-year-range">
+        <label>Start year<select id="trend-start" aria-describedby="trend-range-note"></select></label>
+        <label>End year<select id="trend-end" aria-describedby="trend-range-note"></select></label>
+        <p id="trend-range-note">Use at least 10 complete years. Custom ranges are exploratory.</p>
+      </div>
     </form>
     <p id="trend-scope" class="note"></p>
     <div class="trend-results" aria-live="polite">
@@ -163,11 +169,14 @@
     <div id="trend-scale" class="segments trend-scale" aria-label="Precipitation chart">
       <button type="button" data-trend-scale="annual" aria-pressed="true">Annual totals</button>
       <button type="button" data-trend-scale="monthly" aria-pressed="false">Monthly estimates</button>
+      <button type="button" data-trend-scale="monthly-total" aria-pressed="false">Monthly totals</button>
     </div>
     <div class="trend-figure">
       <div id="trend-chart-unit"></div>
       <canvas id="trend-chart" role="img" aria-describedby="trend-chart-key"></canvas>
-      <p id="trend-chart-key" class="note"></p>
+      <p id="trend-chart-key"></p>
+      <label class="chart-scrub">Inspect a plotted value<input id="trend-inspect" type="range" min="0" value="0" aria-describedby="trend-chart-key"></label>
+      <output id="trend-tooltip" class="chart-tooltip" for="trend-inspect" aria-live="polite"></output>
     </div>
     <details class="trend-details">
       <summary>Read the plotted values</summary>
@@ -179,12 +188,25 @@
         </table>
       </div>
     </details>
+    <details id="rainfall-evidence" class="trend-details">
+      <summary>Why does the answer change with the period?</summary>
+      <p id="rainfall-variability"></p>
+      <div class="trend-table">
+        <table>
+          <caption>Full record · effect of Newey–West lag length</caption>
+          <thead><tr><th scope="col">Lag (years)</th><th scope="col">95% slope interval (mm/year)</th><th scope="col">Two-sided p</th></tr></thead>
+          <tbody id="rainfall-lags"></tbody>
+        </table>
+      </div>
+      <p id="rainfall-robust"></p>
+      <p id="rainfall-breaks"></p>
+    </details>
     <details class="trend-details">
       <summary>Data and method</summary>
       <p id="trend-method"></p>
       <p id="trend-diagnostics"></p>
       <div id="rainfall-sources">
-        <p>NASA POWER provides a corrected MERRA-2 reanalysis estimate on a 0.5° × 0.625° grid. Evaluating why the shoreline moved in 2026 would also require observations of upstream inflow and reservoir operations from that period.</p>
+        <p>NASA POWER PRECTOTCORR is an observation-corrected MERRA-2 reanalysis estimate. The 0.5° × 0.625° cell is centered near 11.729° N, 34.467° E. The record ends in 2024. Explaining the 2026 shoreline change would require evidence about inflow, reservoir operations, and water levels at that time.</p>
         <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
       </div>
       <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://modis.gsfc.nasa.gov/data/dataprod/mod28.php">NASA MODIS reservoir product</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>

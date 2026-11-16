@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from analyze_power import analyze, linear_fit, monthly_totals
+from analyze_power import analyze, explorer_windows, linear_fit, monthly_totals
 
 
 HERE = Path(__file__).resolve().parent
@@ -43,6 +43,23 @@ class PowerTrendTest(unittest.TestCase):
         self.assertAlmostEqual(fit["p_two_sided"], 0.79524202, places=7)
         self.assertLess(fit["ci95_mm_per_year"][0], 0)
         self.assertGreater(fit["ci95_mm_per_year"][1], 0)
+
+    def test_explorer_reuses_full_fit_and_exposes_every_supported_range(self):
+        result = analyze(SOURCE)
+        explorer = explorer_windows(result)
+        windows = explorer["windows"]
+        self.assertEqual(explorer["min_years"], 10)
+        self.assertEqual(len(windows), 630)
+        self.assertNotIn("2016-2024", windows)
+        for fit in result["windows"]:
+            view = windows[f"{fit['start']}-{fit['end']}"]
+            for field in ("slope_mm_per_year", "se_mm_per_year", "p_two_sided"):
+                self.assertAlmostEqual(view[field], fit[field], places=6)
+        full = windows["1981-2024"]
+        self.assertAlmostEqual(full["residual_acf1"], 0.7465793, places=6)
+        self.assertAlmostEqual(full["theil_sen_mm_per_year"], 0.5246667, places=6)
+        self.assertAlmostEqual(full["fit_covariance"][2], full["se_mm_per_year"] ** 2, places=5)
+        self.assertAlmostEqual(windows["2014-2024"]["slope_mm_per_year"], 4.2146364, places=6)
 
 
 if __name__ == "__main__":

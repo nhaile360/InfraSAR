@@ -56,3 +56,19 @@ From the repository root, use the existing `roseires-pipeline` environment with 
 conda run -n roseires-pipeline python roseires-trends/analyze_power.py
 conda run -n roseires-pipeline python -m unittest discover -s roseires-trends -p 'test_*.py'
 ```
+
+### Reading the Phase 4 charts
+
+The annual plot shows one dot per complete calendar year, the fitted OLS line, and its pointwise 95% interval for the fitted mean. The band uses the same Newey–West coefficient covariance as the slope test. It measures uncertainty in the mean fit at each year. The displayed slope interval concerns change per year, and neither interval includes systematic reanalysis error. Monthly views show either the original mean rate or the accumulation calculated from that rate. The annual inference stays fixed when switching between those displays.
+
+Annual totals range from **295.77 mm (2011)** to **1,370.67 mm (1987)**, with a standard deviation of **338.12 mm**. The estimated full-record slope of +1.52 mm/year is small relative to its standard error of 5.88 mm/year. Lag-one residual autocorrelation is 0.747. Including one, three, or five years of lagged residual dependence changes the interval but all three include zero.
+
+| Newey–West lag | Full-record 95% slope interval (mm/year) | Two-sided p |
+| ---: | ---: | ---: |
+| 1 year | −7.77 to +10.82 | 0.748 |
+| 3 years | −9.99 to +13.04 | 0.795 |
+| 5 years | −11.00 to +14.05 | 0.811 |
+
+The Theil–Sen estimate is **+0.52 mm/year** for the full record. It is the median of all pairwise annual slopes and serves as a descriptive check against unusually wet or dry years. A conventional Mann–Kendall significance test assumes independence. Serial dependence in this record makes that unadjusted test unsuitable for independent corroboration.
+
+Custom windows require ten complete consecutive years and use the same three-lag calculation. All custom-window intervals and tests are exploratory, including the 2014–2024 fit (+4.21 mm/year, 95% CI −9.09 to +17.52; p = 0.535). The 2003–2024 increase includes the possible 2014 level shift. Its nominal p-value cannot confirm a break selected by inspecting the same record. June–September seasonality is retained in the monthly view and each calendar-year total contains one complete seasonal cycle.
