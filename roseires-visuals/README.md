@@ -1,6 +1,6 @@
 # InfraSAR at Roseires
 
-Open `InfraSAR-Roseires.html` at the repository root or use the [deployed explorer](https://nhaile360.github.io/InfraSAR/). **2026 shoreline** opens the August and October Sentinel‑2 water maps. Switch to **Radar image** to compare the NISAR passes. Drag the divider or use its arrow keys, Home and End. Drag the map to pan, use the zoom buttons or pinch on touch screens. **Show reservoir** fits the full shoreline reference, and **Hide study layers** shows the context alone. **Long-term observations** opens the NASA POWER rainfall and MODIS reservoir surface-area analyses.
+Open `InfraSAR-Roseires.html` at the repository root or use the [deployed explorer](https://nhaile360.github.io/InfraSAR/). **2026 shoreline** opens the August and October Sentinel‑2 water maps. Switch to **Radar image** to compare the NISAR passes. Drag the divider or use its arrow keys, Home and End. Drag the map to pan, use the zoom buttons or pinch on touch screens. **Study inlet** fits the verified study area, **Full reservoir** fits the historical shoreline, and **Hide study layers** shows the context alone. **Long-term observations** opens the NASA POWER rainfall and MODIS reservoir surface-area analyses.
 
 **Compare locations** starts with the inlet and a nearby spot classified as land on both dates. Choose which point to move, then tap the map or drag a marker. The active card shows that location's HH backscatter, optical classes and change between dates. Use **Show both** to fit the two points or **Reset examples** to restore the original comparison. The **Timeline** controls the map and reading charts. When more than two observations from one sensor are loaded, select two dates from that sensor on the timeline to open them in **Swipe dates**.
 
@@ -42,3 +42,11 @@ The two original single-tile SCL exports can be embedded using `--august-scl` an
 ## Typography
 
 The viewer embeds the Latin Inter variable webfont (weights 400–800) in its standalone HTML. It can load without network access. System UI fonts cover unsupported glyphs and remain available if the embedded face cannot load. The asset comes from the [Google Fonts Inter stylesheet](https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap), and the [SIL Open Font Licence](fonts/Inter-OFL.txt) travels with the font and HTML builds.
+
+## Interface layout
+
+The previous layout gave navigation, findings and statistics similar visual weight. Its stacked toolbars and result cards delayed the map and historical plots on narrow screens. The swipe defaults, map presets, point colors, classification swatches, keyboard controls and embedded Inter were effective and carry through to the current layout.
+
+The shared CSS in [atlas.css](src/atlas.css) defines text, surface, border, spacing and control tokens. Investigation links and shoreline modes use underlines, extent actions use outlined buttons, and secondary actions use text links. Chart renderers read the shared color tokens. Observation marks, the rainfall fit and interval, and the MODIS breakpoint each have separate visual encodings. Geographic and sensor reference colors retain their existing meanings.
+
+The map fills the shoreline workspace. At widths of 960 px and below, the evidence and historical estimates move beneath their visualizations. At 640 px and below, controls reflow and touch targets increase to 44 px. The source disclosures retain acquisition IDs, input downloads and scientific credits. Live basemap attribution appears beside each map when connected.

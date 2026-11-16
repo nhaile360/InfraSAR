@@ -6,10 +6,10 @@ const toolState={view:"swipe",layer:"water",change:"water",rule:"local",split:56
   pairByLayer:{},timelinePair:[],time:0,events:[],timer:null,ready:false};
 const mapNames={radar:"Radar image",water:"Optical water map",delta:"Radar signal change",agreement:"Agreement"};
 const guidance={
-  swipe:"Drag the divider to compare the two dates. Switch layers to check how the same area looks in radar and optical imagery.",
-  change:"Find where the optical map shows a water gain or loss. Compare it with the radar change to see where the evidence agrees.",
-  points:"Choose a point to move, then click or tap the map. You can also drag either marker directly.",
-  timeline:"Move through the available observations. The map and charts follow the selected date."
+  swipe:"Drag the divider to compare August and October.",
+  change:"Compare shoreline classifications with changes in the radar signal.",
+  points:"Choose a point, then tap the map or drag its marker.",
+  timeline:"Choose an observation date to update the map and plots."
 };
 const radarRange={min:-24,max:0};
 const historicalWater={fill:"#bedce5b0",stroke:"#467b8b"};
@@ -38,7 +38,20 @@ for (const id of ["basemap-credit", "locator-basemap-credit"]) {
 }
 const overviewBasemap={bounds:contextBounds,density:1536/(contextBounds.east-contextBounds.west)};
 let viewportBasemap=null, basemapTimer, basemapTarget;
-const uiFont = getComputedStyle(document.documentElement).getPropertyValue("--font-ui").trim();
+const theme = getComputedStyle(document.documentElement);
+const themeColor = name => theme.getPropertyValue("--" + name).trim();
+const uiFont = theme.getPropertyValue("--font-ui").trim();
+const chartColors = {
+  ink: themeColor("muted"),
+  grid: themeColor("chart-grid"),
+  cursor: themeColor("chart-cursor"),
+  observed: themeColor("teal"),
+  selected: themeColor("deep"),
+  fit: themeColor("chart-fit"),
+  band: themeColor("chart-band"),
+  paper: themeColor("paper"),
+  points: {A: themeColor("a"), B: themeColor("b")},
+};
 const canvasFont = (weight, size) => weight + " " + size + "px " + uiFont;
 const drawFont = canvasFont(650,13);
 
@@ -439,7 +452,7 @@ function updateLegend(){
     button.addEventListener("click",openData);
     groups.push(button);
   }
-  legend.replaceChildren(node("h3","Map interpretation"),...groups);
+  legend.replaceChildren(node("h3","Map legend"),...groups);
 }
 function visibleLayer(){
   if(!toolState.showRasters)return null;
@@ -489,6 +502,7 @@ function updateFilterNotes(){
     (toolState.showRasters?"This date has no radar or optical map. Use the timeline to select an image.":"The historic outline and study footprint provide geographic context.");
   $("display-description").hidden=$("radar-display").hidden=kind!=="radar";
   $("display-description").textContent=kind==="radar"?filterNotes[toolState.radarDisplay]:"";
+  $("rule-description").hidden=$("rule-tools").hidden;
   $("rule-description").textContent=filterNotes[toolState.rule];
 }
 function makeLayerButtons(){
@@ -507,7 +521,7 @@ function makeLayerButtons(){
     }
   }
   layers.hidden=!options.length;
-  $("layer-title").textContent=view==="timeline"?"Selected observation":"Map layer";
+  $("layer-title").textContent=view==="timeline"?"Study layers":"Map layer";
   layers.replaceChildren(...options.map(([key,label,description,enabled])=>filterButton(
     key,label,description,toolState.showRasters&&key===(isChange?toolState.change:toolState.layer),enabled,()=>{
       if(isChange)toolState.change=key;
@@ -569,7 +583,7 @@ function pointCompare(){
     active.setAttribute("aria-hidden","true");
     control.append(node("span","Point "+key),active);
     heading.append(control);
-    const description=i===null?"Unplaced":same&&key==="A"&&toolState.patch?"Study inlet":same&&key==="B"?"Land on both dates":"Custom location";
+    const description=i===null?"Unplaced":same&&key==="A"&&toolState.patch?"Study inlet":same&&key==="B"?"Nearby dry-land example":"Custom location";
     section.append(heading,node("p",description,"point-description"));
     if(i===null){
       section.append(node("p","Select this point, then choose a cell on the map."));
@@ -585,7 +599,7 @@ function pointCompare(){
     const change=node("p","Radar change ","point-delta");
     change.append(node("strong",radarChange));
     change.append(node("span",Number.isFinite(delta)?(delta<0?" · weaker":delta>0?" · stronger":" · unchanged"):""));
-    outcome.append(change,node("p",optical,"point-optical"));
+    outcome.append(node("p",optical,"point-optical"),change);
     section.append(outcome);
     const readings=node("div",null,"point-values");
     for(const [k,month] of ["August","October"].entries()){
@@ -660,7 +674,7 @@ function updateEvidence(){
   $("patch-count").textContent=patch?"· "+patch.cells.length+" cells":"· 108 cells in the study";
   const agrees=patch&&available&&patch.cells.every(i=>rows[0].states[i]===1&&rows[1].states[i]===2);
   $("evidence-water").textContent=agrees
-    ?"Sentinel‑2 mapped this patch as land in August and water in October."
+    ?"The outlined cells were classified as land in August and water in October."
     : patch&&available
       ?"The published Sentinel‑2 comparison mapped the outlined patch as land in August and water in October. The current overlap or imported classes differ within the outline."
       :"The pilot’s Sentinel‑2 classification mapped the outlined study patch as land in August and water in October.";
@@ -686,7 +700,7 @@ function refreshControls(){
   $("divider").hidden=$("drag").hidden=(view!=="swipe"&&!showsChangePair())||!toolState.showRasters;
   $("context-only").textContent=toolState.showRasters?"Hide study layers":"Show study layers";
   $("context-only").setAttribute("aria-pressed",String(!toolState.showRasters));
-  $("timeline").hidden=view!=="timeline";
+  $("timeline").hidden=$("timeline-notes").hidden=view!=="timeline";
   $("timeline-readings").hidden=view!=="timeline";
   $("point-controls").hidden=view!=="points";
   $("point-section").hidden=view!=="points";
@@ -853,7 +867,7 @@ function createCharts(){
     ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates.","DAHITI station 216","https://dahiti.dgfi.tum.de/en/216/"]
   ];
   for(const [id,title,note,label,url] of definitions){
-    const wrapper=node("section",null,id==="water-chart"?"chart waterchart":"chart");
+    const wrapper=node("section",null,"chart");
     const h=node("h3",title), c=node("canvas"), key=node("p",note), reading=node("output",null,"chart-tooltip");
     c.id=id;
     c.tabIndex=0;
@@ -899,7 +913,7 @@ function chartFrame(id,labels,unitRange){
   const x0=49,x1=w-15,y0=16,y1=h-36;
   const X=time=>x0+(utc(time)-first)/(last-first)*(x1-x0);
   const Y=v=>y1-(v-unitRange[0])/(unitRange[1]-unitRange[0])*(y1-y0);
-  c.lineWidth=1;c.strokeStyle="#d5dfd2";c.fillStyle="#45645c";c.font=canvasFont(500,13);
+  c.lineWidth=1;c.strokeStyle=chartColors.grid;c.fillStyle=chartColors.ink;c.font=canvasFont(500,13);
   c.textBaseline="middle";
   for(const [value,label] of labels){
     const y=Y(value);c.beginPath();c.moveTo(x0,y);c.lineTo(x1,y);c.stroke();
@@ -914,16 +928,16 @@ function chartFrame(id,labels,unitRange){
   c.textAlign="center";
   c.fillText("Observation date (UTC)",(x0+x1)/2,h-6);
   const marker=X(toolState.events[toolState.time].date);
-  c.setLineDash([4,3]);c.strokeStyle="#4f7067";c.beginPath();c.moveTo(marker,7);c.lineTo(marker,y1+4);c.stroke();c.setLineDash([]);
+  c.setLineDash([4,3]);c.strokeStyle=chartColors.cursor;c.beginPath();c.moveTo(marker,7);c.lineTo(marker,y1+4);c.stroke();c.setLineDash([]);
   return {c,X,Y,x0,x1,y0,y1};
 }
 function dot(c,x,y,r,color,selected=false){
   c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fillStyle=color;c.fill();
-  c.strokeStyle=selected?"#22392f":"white";c.lineWidth=selected?2:1;c.stroke();
+  c.strokeStyle=selected?chartColors.selected:chartColors.paper;c.lineWidth=selected?2:1;c.stroke();
 }
 function drawCharts(){
   if(toolState.view!=="timeline"||!toolState.events.length)return;
-  const palette={A:"#a65b21",B:"#286bc1"}, selected=toolState.events[toolState.time].date;
+  const palette=chartColors.points, selected=toolState.events[toolState.time].date;
   let radarValues=[];
   for(const r of ordered("radar"))for(const i of Object.values(toolState.points))
     if(i!==null&&Number.isFinite(r.raw[i]))radarValues.push(r.raw[i]);
@@ -957,12 +971,12 @@ function drawCharts(){
     const x=table.X(obs.datetime),y=table.Y(obs.meters),c=table.c;
     if(obs.estimated){
       c.beginPath();c.moveTo(x,y-5);c.lineTo(x+5,y);c.lineTo(x,y+5);c.lineTo(x-5,y);c.closePath();
-      c.fillStyle="#f9fcf4";c.strokeStyle="#35685f";c.lineWidth=2;c.fill();c.stroke();
+      c.fillStyle=chartColors.paper;c.strokeStyle=chartColors.selected;c.lineWidth=2;c.fill();c.stroke();
     }else{
       const bar=table.Y(obs.meters-obs.uncertainty)-y;
-      c.strokeStyle="#689f9170";c.lineWidth=1;
+      c.strokeStyle=chartColors.cursor;c.lineWidth=1;
       c.beginPath();c.moveTo(x,y-bar);c.lineTo(x,y+bar);c.stroke();
-      dot(c,x,y,3.8,"#39766c",obs.datetime===selected);
+      dot(c,x,y,3.8,chartColors.observed,obs.datetime===selected);
     }
   }
 

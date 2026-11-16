@@ -632,6 +632,46 @@ def check_touch(chromium, url, offline):
         assert not errors, errors
 
 
+
+def check_responsive_layouts(page):
+    stage = page.locator("#investigations")
+    map_frame = page.locator("#map-frame")
+    chart = page.locator("#trend-chart")
+    source_details = page.locator("#data-details > summary")
+
+    def no_horizontal_overflow():
+        assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Page overflows its viewport"
+
+    for width, height in [(1440, 900), (820, 1024), (390, 844), (844, 390), (320, 640)]:
+        page.set_viewport_size({"width": width, "height": height})
+        stage.get_by_role("link", name="2026 shoreline").click()
+        for mode in ("Swipe dates", "Map changes", "Compare locations", "Timeline"):
+            page.get_by_role("button", name=mode, exact=True).click()
+            if mode == "Map changes":
+                page.get_by_role("button", name="Compare change maps").click()
+            expect(map_frame).to_be_visible()
+            no_horizontal_overflow()
+        page.get_by_role("button", name="Swipe dates").click()
+        if height >= 840 and width >= 390:
+            page.evaluate("window.scrollTo(0, 0)")
+            assert map_frame.bounding_box()["y"] < height * .72, "Shoreline controls push the map too far down"
+        stage.get_by_role("link", name="Long-term observations").click()
+        for variable in ("rainfall", "modis"):
+            page.locator("#trend-variable").select_option(variable)
+            expect(chart).to_be_visible()
+            inference = page.locator(".trend-inference").bounding_box()
+            plot = chart.bounding_box()
+            assert plot["width"] > 0 and plot["height"] >= 240
+            if width <= 960:
+                assert inference["y"] > plot["y"] + plot["height"], "The plot should precede the estimates on narrow screens"
+            else:
+                assert inference["x"] >= plot["x"] + plot["width"], "The estimates should sit beside the plot on wide screens"
+            no_horizontal_overflow()
+        source_details.press("Enter")
+        expect(page.get_by_role("link", name="Scientific report and source inventory")).to_be_visible()
+        no_horizontal_overflow()
+        source_details.press("Enter")
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("site", help="Path to the generated index.html or the public HTTPS URL")
@@ -674,6 +714,11 @@ def main():
             check_typography(actual, fallback=True)
         assert not actual_errors, actual_errors
         actual.close()
+        responsive = browser.new_page()
+        responsive_errors = open_site(responsive, url, offline)
+        check_responsive_layouts(responsive)
+        assert not responsive_errors, responsive_errors
+        responsive.close()
         if offline:
             page.bring_to_front()
             check_imported_dates(page)
@@ -685,7 +730,7 @@ def main():
             single.close()
             check_basemap(browser, url)
         browser.close()
-    print("Desktop, keyboard, mouse and mobile touch smoke tests passed for " + url)
+    print("Desktop, keyboard, mouse, responsive and mobile touch smoke tests passed for " + url)
 
 
 if __name__ == "__main__":

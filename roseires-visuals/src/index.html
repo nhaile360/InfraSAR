@@ -3,25 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>InfraSAR · Where did the water move at Roseires?</title>
-<meta name="description" content="Compare real radar and water maps to follow the changing shoreline of Roseires Reservoir in Sudan.">
+<title>InfraSAR · Roseires Reservoir</title>
+<meta name="description" content="Investigate shoreline change and long-term rainfall and reservoir area at Roseires Reservoir, Sudan.">
 <style>/* INFRASAR_STYLE */</style>
 </head>
 <body>
 <header class="sitebar">
   <div class="wrap sitebar-inner">
     <a href="#top" class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>InfraSAR</a>
-    <span class="place">Blue Nile, Sudan</span>
+    <a class="challenge" href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps<span> · Earth System Trend Detective</span></a>
   </div>
 </header>
 <main id="top" class="wrap">
   <header class="intro">
-    <h1>Where did the water<br class="hero-break"> move at Roseires?</h1>
-    <p>Compare two views of the Roseires shoreline in 2026, then explore decades of NASA observations for changes in rainfall and reservoir area.</p>
+    <h1>Roseires Reservoir</h1>
+    <p class="place">Blue Nile, Sudan</p>
+    <p class="intro-summary">Where did the water move in 2026? Compare radar and optical maps, then explore decades of rainfall and reservoir area.</p>
   </header>
   <nav id="investigations" class="investigations" aria-label="Investigations">
-    <a href="#shoreline" data-investigation aria-current="location"><strong>2026 shoreline</strong><span>What changed at Roseires?</span></a>
-    <a href="#trend-investigation" data-investigation><strong>Long-term observations</strong><span>What does the historical record show?</span></a>
+    <a href="#shoreline" data-investigation aria-current="location">2026 shoreline</a>
+    <a href="#trend-investigation" data-investigation>Long-term observations</a>
   </nav>
   <section id="shoreline" class="workspace" aria-labelledby="shoreline-title">
     <h2 id="shoreline-title" class="sr-only" tabindex="-1">What changed at Roseires in 2026?</h2>
@@ -31,7 +32,7 @@
       <button type="button" data-view="points" aria-pressed="false">Compare locations</button>
       <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
     </div>
-    <p id="view-help" class="view-help">Drag the divider to compare August and October. Switch layers to see how radar and optical observations differ.</p>
+    <p id="view-help" class="view-help">Drag the divider to compare August and October.</p>
     <div class="workspace-grid">
       <div class="map-column">
         <div class="map-tools">
@@ -45,20 +46,19 @@
           <section id="layer-tools" class="map-tool-row" aria-labelledby="layer-title">
             <h3 id="layer-title">Map layer</h3>
             <div class="layer-actions">
-              <div id="layers" class="segments" role="group" aria-labelledby="layer-title"></div>
-              <button id="context-only" class="outline" type="button" aria-pressed="false">Hide study layers</button>
+              <div id="layers" class="layer-options" role="group" aria-labelledby="layer-title"></div>
+              <button id="context-only" class="text-button" type="button" aria-pressed="false">Hide study layers</button>
             </div>
-            <p id="layer-description" class="filter-description" aria-live="polite"></p>
             <div id="rule-tools" hidden>
-              <div id="rules" class="segments" role="group" aria-label="Radar classification rule"></div>
-              <p id="rule-description" class="filter-description" aria-live="polite"></p>
+              <span>Radar rule</span>
+              <div id="rules" class="rule-options" role="group" aria-label="Radar classification rule"></div>
             </div>
             <div id="filter-descriptions" hidden></div>
           </section>
         </div>
         <div id="point-controls" class="point-controls" hidden>
           <div class="point-actions">
-            <div class="segments pin-select" role="group" aria-label="Location to move">
+            <div class="pin-select" role="group" aria-label="Location to move">
               <button type="button" data-point="A" aria-pressed="true">Move Point A</button>
               <button type="button" data-point="B" aria-pressed="false">Move Point B</button>
             </div>
@@ -72,11 +72,6 @@
           <div class="timeline-top">
             <label class="scrub" for="scrubber"><span id="scrub-date"></span><input type="range" id="scrubber" min="0" max="0" value="0" aria-label="Timeline date"></label>
             <div class="playback"><button class="outline" type="button" id="play">Play</button><button class="outline" type="button" id="pause" disabled>Pause</button></div>
-          </div>
-          <p id="time-status" role="status"></p>
-          <div id="timeline-pair" class="timeline-pair" hidden>
-            <div><button class="outline" type="button" id="select-date">Select this date</button> <button class="primary" type="button" id="open-swipe" disabled>Compare these dates</button> <button class="text-button" type="button" id="clear-dates" hidden>Clear dates</button></div>
-            <p id="pair-message" role="status"></p>
           </div>
         </div>
         <div class="date-corners" id="dates" aria-live="polite"><span id="before"></span><span id="after"></span></div>
@@ -96,6 +91,13 @@
           </div>
           <div class="scale" id="scale"></div>
         </div>
+        <div id="timeline-notes" class="timeline-notes" hidden>
+          <p id="time-status" role="status"></p>
+          <div id="timeline-pair" class="timeline-pair" hidden>
+            <div><button class="outline" type="button" id="select-date">Select this date</button> <button class="primary" type="button" id="open-swipe" disabled>Compare these dates</button> <button class="text-button" type="button" id="clear-dates" hidden>Clear dates</button></div>
+            <p id="pair-message" role="status"></p>
+          </div>
+        </div>
         <div class="map-meta">
           <label id="radar-display">Radar display <select id="radar-rendering" aria-describedby="display-description"><option value="smooth">Interpolated</option><option value="raw">Original cells</option></select></label>
           <div class="map-credit" id="credit"><a href="https://www.hydrosheds.org/products/hydrolakes">Historical HydroLAKES outline</a></div>
@@ -103,23 +105,26 @@
         <p id="display-description" class="filter-description display-description" aria-live="polite" hidden></p>
         <p id="basemap-credit" class="service-credit" hidden></p>
         <p class="science-links">Contains modified Copernicus Sentinel data 2026. <a id="map-source-details" href="#data-details">Map data and sources</a></p>
-        <div id="legend" class="legend" role="region" aria-label="Map legend"></div>
+        <div class="map-reading">
+          <p id="layer-description" class="filter-description" aria-live="polite"></p>
+          <p id="rule-description" class="filter-description" aria-live="polite" hidden></p>
+          <div id="legend" class="legend" role="region" aria-label="Map legend"></div>
+        </div>
       </div>
       <aside class="side">
         <section class="evidence" id="evidence" aria-label="Evidence at the inlet">
-          <h2 id="evidence-title">Sentinel‑2 mapped water farther into this inlet.</h2>
+          <h2 id="evidence-title">Evidence at the inlet</h2>
           <div class="finding">
-            <h3><span class="evidence-icon water-icon" aria-hidden="true"></span> Water map</h3>
+            <h3>Optical · Sentinel‑2</h3>
             <p id="evidence-water">Sentinel‑2 mapped this patch as land in August and water in October.</p>
           </div>
           <div class="finding">
-            <h3><span class="evidence-icon radar-icon" aria-hidden="true"></span> Radar</h3>
-            <p>The radar return over the outlined patch was weaker in October.</p>
+            <h3>Radar · NISAR HH</h3>
             <p class="metric"><strong id="patch-db">−4.3 dB</strong> median change <span id="patch-count">· 108 cells</span></p>
           </div>
           <div class="finding">
-            <h3><span class="evidence-icon height-icon" aria-hidden="true"></span> Reservoir level</h3>
-            <p>Estimated reservoir height rose about <strong>1.15 m</strong> between the radar passes.</p>
+            <h3>Reservoir height · DAHITI</h3>
+            <p class="metric"><strong>+1.15 m</strong> estimated rise between radar passes</p>
             <p class="note"><a href="https://dahiti.dgfi.tum.de/en/216/">DAHITI station 216</a> · interpolated to radar times</p>
           </div>
           <p id="pilot-score" class="pilot-score" hidden></p>
@@ -134,33 +139,32 @@
         </section>
         <section class="point-section" id="point-section" hidden aria-labelledby="points-title">
           <h2 id="points-title">Location readings</h2>
-          <p id="example-explanation">In the examples, the radar return weakened at both locations. Sentinel‑2 mapped a water gain at A and land on both dates at B.</p>
+          <p id="example-explanation">Radar returns weakened at both example locations. Sentinel‑2 mapped water gain at A and stable land at B.</p>
           <div id="points"></div>
         </section>
         <section class="selection" id="selection" hidden aria-live="polite"></section>
         <section class="locator-card" aria-labelledby="locator-title">
-          <div class="locator-top"><h2 id="locator-title">Roseires Reservoir</h2><span aria-hidden="true">N ↑</span></div>
+          <div class="locator-top"><h2 id="locator-title">Study inlet and reservoir</h2><span aria-hidden="true">N ↑</span></div>
           <canvas id="locator" aria-label="Locator map showing the Blue Nile, Roseires Dam, and the study inlet southeast of the dam."></canvas>
           <p id="locator-basemap-credit" class="service-credit" hidden></p>
         </section>
       </aside>
     </div>
     <section class="timeline" id="timeline-readings" hidden aria-labelledby="timeline-heading">
-      <h2 id="timeline-heading">Observation readings</h2>
-      <p id="time-count"></p>
-      <p>Choose a date on any chart to update all three charts and the map. Use arrow keys when a chart has focus.</p>
+      <div class="timeline-heading"><h2 id="timeline-heading">Observation readings</h2><p id="time-count"></p></div>
+      <p>Select a date on any chart to update the map and other plots. Use arrow keys on a focused plot.</p>
       <div class="chart-key"><span class="chart-a"><i></i> Point A</span><span class="chart-b"><i></i> Point B</span></div>
       <div id="charts"></div>
     </section>
     <div class="trend-bridge">
-      <p>Two dates show a local shoreline change. Decades of observations let you look for shifts in reservoir area and trends in rainfall.</p>
-      <a class="primary" href="#trend-investigation" data-investigation>Explore long-term observations <span aria-hidden="true">→</span></a>
+      <p>The shoreline comparison covers two dates. The historical records test for change over decades.</p>
+      <a class="action-link" href="#trend-investigation" data-investigation>Explore long-term observations <span aria-hidden="true">→</span></a>
     </div>
   </section>
   <section id="trend-investigation" class="trend" aria-labelledby="trend-title" hidden>
     <header>
       <h2 id="trend-title" tabindex="-1">Has rainfall changed near Roseires?</h2>
-      <p id="trend-context">The NASA Space Apps Trend Detective investigation tests how estimated precipitation has changed in one grid cell near Roseires, Sudan. Choose a time window to see the rate of change and its uncertainty.</p>
+      <p id="trend-context">Estimated precipitation in one NASA POWER grid cell near Roseires, Sudan.</p>
     </header>
     <form id="trend-controls" class="trend-controls">
       <label><span id="trend-variable-label">Variable</span><select id="trend-variable" aria-labelledby="trend-variable-label">
@@ -175,24 +179,34 @@
       </div>
     </form>
     <p id="trend-scope" class="note"></p>
-    <div class="trend-results" aria-live="polite">
-      <div class="trend-metric" id="trend-shift-card" hidden><h3>Estimated shift around 2013</h3><strong id="trend-shift"></strong><span id="trend-shift-ci"></span></div>
-      <div class="trend-metric"><h3 id="trend-slope-label">Change in annual total</h3><strong id="trend-slope"></strong><span id="trend-post-ci" hidden></span></div>
-      <div class="trend-metric" id="trend-interval-card"><h3>95% confidence interval</h3><strong id="trend-interval"></strong></div>
-      <div class="trend-metric"><h3 id="trend-significance-label">Statistical significance</h3><strong id="trend-significance"></strong><span id="trend-p"></span></div>
-    </div>
-    <p id="trend-interpretation"></p>
-    <div id="trend-scale" class="segments trend-scale" aria-label="Precipitation chart">
-      <button type="button" data-trend-scale="annual" aria-pressed="true">Annual totals</button>
-      <button type="button" data-trend-scale="monthly" aria-pressed="false">Monthly estimates</button>
-      <button type="button" data-trend-scale="monthly-total" aria-pressed="false">Monthly totals</button>
-    </div>
-    <div class="trend-figure">
-      <div id="trend-chart-unit"></div>
-      <canvas id="trend-chart" role="img" aria-describedby="trend-chart-key"></canvas>
-      <p id="trend-chart-key"></p>
-      <label class="chart-scrub">Inspect a plotted value<input id="trend-inspect" type="range" min="0" value="0" aria-describedby="trend-chart-key"></label>
-      <output id="trend-tooltip" class="chart-tooltip" for="trend-inspect" aria-live="polite"></output>
+    <div class="trend-analysis">
+      <div class="trend-plot">
+        <div id="trend-scale" class="trend-scale layer-options" role="group" aria-label="Precipitation chart">
+          <button type="button" data-trend-scale="annual" aria-pressed="true">Annual totals</button>
+          <button type="button" data-trend-scale="monthly" aria-pressed="false">Monthly estimates</button>
+          <button type="button" data-trend-scale="monthly-total" aria-pressed="false">Monthly totals</button>
+        </div>
+        <figure class="trend-figure">
+          <p id="trend-chart-unit"></p>
+          <canvas id="trend-chart" role="img" aria-describedby="trend-chart-key"></canvas>
+          <figcaption id="trend-chart-key">
+            <ul id="trend-symbols" class="plot-key"></ul>
+            <p id="trend-chart-note"></p>
+          </figcaption>
+          <label class="chart-scrub">Inspect a plotted value<input id="trend-inspect" type="range" min="0" value="0" aria-describedby="trend-chart-key"></label>
+          <output id="trend-tooltip" class="chart-tooltip" for="trend-inspect" aria-live="polite"></output>
+        </figure>
+      </div>
+      <section class="trend-inference" aria-labelledby="trend-inference-title">
+        <h3 id="trend-inference-title">Trend estimate</h3>
+        <div class="trend-results" aria-live="polite">
+          <div class="trend-metric" id="trend-shift-card" hidden><h4>Estimated shift around 2013</h4><strong id="trend-shift"></strong><span id="trend-shift-ci"></span></div>
+          <div class="trend-metric"><h4 id="trend-slope-label">Change in annual total</h4><strong id="trend-slope"></strong><span id="trend-post-ci" hidden></span></div>
+          <div class="trend-metric" id="trend-interval-card"><h4>95% confidence interval</h4><strong id="trend-interval"></strong></div>
+          <div class="trend-metric"><h4 id="trend-significance-label">Statistical significance</h4><strong id="trend-significance"></strong><span id="trend-p"></span></div>
+        </div>
+        <p id="trend-interpretation"></p>
+      </section>
     </div>
     <details class="trend-details">
       <summary>Read the plotted values</summary>
@@ -222,32 +236,37 @@
       <p id="trend-method"></p>
       <p id="trend-diagnostics"></p>
       <div id="rainfall-sources">
+        <p>The two-sided p-value is the probability of a test statistic at least this extreme under a zero slope and the model assumptions. The confidence interval describes uncertainty in the estimated slope under the model.</p>
         <p>NASA POWER PRECTOTCORR is an observation-corrected MERRA-2 reanalysis estimate. The 0.5° × 0.625° cell is centered near 11.729° N, 34.467° E. The record ends in 2024. Explaining the 2026 shoreline change would require evidence about inflow, reservoir operations, and water levels at that time.</p>
-        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a> · <a href="https://ntrs.nasa.gov/citations/20160005045">MERRA‑2 paper</a> · <a href="https://doi.org/10.2307/1913610">Newey–West covariance</a></p></p>
+        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a> · <a href="https://ntrs.nasa.gov/citations/20160005045">MERRA‑2 paper</a> · <a href="https://doi.org/10.2307/1913610">Newey–West covariance</a></p>
       </div>
       <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://doi.org/10.5067/MODIS/MOD28C3.061">NASA Terra MOD28C3.061</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
     </details>
     <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/roseires-trends/README.md">Trend methods and reproducibility</a></p>
     <p class="return-link"><a href="#shoreline" data-investigation>Return to the 2026 shoreline</a></p>
   </section>
-  <details id="data-details">
+  <details id="data-details" class="source-details">
     <summary>Data details</summary>
     <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md">Scientific report and source inventory</a> · <a href="https://nhaile360.github.io/InfraSAR/scientific-inputs.sha256">Scientific input checksums</a></p>
     <div class="details-grid">
-      <div><h3>Acquisitions and methods</h3><div id="methods"></div></div>
-      <div><h3>Map context</h3>
-        <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
-        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
-        <h3>Load more observations</h3>
-        <p>Choose a processed radar observation JSON, a comparator HTML, or the SCL GeoTIFFs and inlet mask. Files are read on this device.</p>
-        <label for="add-data" class="file-label">Processed observation files</label>
-        <input id="add-data" type="file" accept=".json,.html,.tif,.tiff" multiple>
-        <p id="import-status" role="status"></p>
-        <button class="outline" type="button" id="load-sentinel">Load Sentinel‑2 scenes</button>
+      <section aria-labelledby="methods-title"><h3 id="methods-title">Acquisitions and methods</h3><div id="methods"></div></section>
+      <div class="source-sidebar">
+        <section aria-labelledby="map-context-title"><h3 id="map-context-title">Map context</h3>
+          <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
+          <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
+        </section>
+        <section aria-labelledby="data-import-title">
+          <h3 id="data-import-title">Load more observations</h3>
+          <p>Choose a processed radar observation JSON, a comparator HTML, or the SCL GeoTIFFs and inlet mask. Files are read on this device.</p>
+          <label for="add-data" class="file-label">Processed observation files</label>
+          <input id="add-data" type="file" accept=".json,.html,.tif,.tiff" multiple>
+          <p id="import-status" role="status"></p>
+          <button class="outline" type="button" id="load-sentinel">Load Sentinel‑2 scenes</button>
+        </section>
       </div>
     </div>
   </details>
-  <footer class="footer"><p>InfraSAR applies the <a href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps Earth System Trend Detective challenge</a> to Roseires. Explore observations, estimate a rate of change, and examine its uncertainty.</p><p>NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER · NASA Terra MODIS</p></footer>
+  <footer class="footer"><p>InfraSAR applies the <a href="https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/">NASA Space Apps Earth System Trend Detective challenge</a> to Roseires Reservoir.</p><p>NASA–ISRO NISAR · Copernicus Sentinel‑2 · DAHITI · NASA POWER · NASA Terra MODIS</p></footer>
 </main>
 <script type="application/json" id="data">__INFRASAR_DATA__</script>
 <script>/* INFRASAR_SCRIPT */</script>

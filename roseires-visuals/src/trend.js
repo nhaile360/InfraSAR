@@ -112,8 +112,8 @@ function setupTrend(investigation, reservoir, explorer) {
     const Y = value => plotBottom - (value - floor) * (plotBottom - plotTop) / (ceiling - floor);
     ctx.clearRect(0, 0, width, height);
     ctx.font = canvasFont(500,13);
-    ctx.fillStyle = "#49635f";
-    ctx.strokeStyle = "#d5ddd2";
+    ctx.fillStyle = chartColors.ink;
+    ctx.strokeStyle = chartColors.grid;
     ctx.lineWidth = 1;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
@@ -125,29 +125,34 @@ function setupTrend(investigation, reservoir, explorer) {
       ctx.stroke();
       ctx.fillText(String(value), plotLeft - 6, y);
     }
-    const tickCount = width < 480 ? 3 : 6;
     const first = series[0].time, last = series.at(-1).time;
-    for (let i = 0; i < tickCount; i++) {
-      const year = first + (last - first) * i / (tickCount - 1);
-      ctx.textAlign = i === 0 ? "left" : i === tickCount - 1 ? "right" : "center";
-      ctx.fillText(String(Math.floor(year)), X(year), height - 12);
+    const yearStep = [1, 2, 5, 10, 20].find(step => step * (plotRight - plotLeft) / (last - first) >= 64) ?? 20;
+    const ends = [[first, "left"], [last, "right"]];
+    for (const [time, align] of ends) {
+      ctx.textAlign = align;
+      ctx.fillText(String(Math.floor(time)), X(time), height - 12);
+    }
+    ctx.textAlign = "center";
+    for (let year = Math.ceil(first / yearStep) * yearStep; year < last; year += yearStep) {
+      const x = X(year);
+      if (x - plotLeft >= 52 && plotRight - x >= 52) ctx.fillText(String(year), x, height - 12);
     }
     if (band.length) {
-      ctx.fillStyle = "#c089583d";
+      ctx.fillStyle = chartColors.band;
       ctx.beginPath();
       band.forEach((row, index) => index ? ctx.lineTo(X(row.time), Y(row.high)) : ctx.moveTo(X(row.time), Y(row.high)));
       for (const row of [...band].reverse()) ctx.lineTo(X(row.time), Y(row.low));
       ctx.closePath();
       ctx.fill();
     }
-    ctx.strokeStyle = "#277a70";
+    ctx.strokeStyle = chartColors.observed;
     ctx.lineWidth = annual ? 1.5 : 1.1;
     if (!annual) drawTrendLine(ctx, series, X, Y);
     if (annual || area) for (const row of series) {
-      if (row.value !== null) dot(ctx, X(row.time), Y(row.value), annual ? 3.4 : 1.6, "#277a70");
+      if (row.value !== null) dot(ctx, X(row.time), Y(row.value), annual ? 3.8 : 1.9, chartColors.observed);
     }
     if (annual || area) {
-      ctx.strokeStyle = "#9d4e27";
+      ctx.strokeStyle = chartColors.fit;
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
@@ -163,10 +168,19 @@ function setupTrend(investigation, reservoir, explorer) {
       ctx.setLineDash([]);
     }
     const active = series[inspected], x = X(active.time);
-    ctx.strokeStyle = "#49635f";
+    ctx.strokeStyle = chartColors.cursor;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, plotTop); ctx.lineTo(x, plotBottom); ctx.stroke();
-    if (active.value !== null) dot(ctx, x, Y(active.value), 5, "#194e44", true);
+    if (active.value !== null) dot(ctx, x, Y(active.value), 5, chartColors.selected, true);
+  }
+
+  function chartKey(symbols, note) {
+    $("trend-symbols").replaceChildren(...symbols.map(([kind, label]) => {
+      const item = node("li", label);
+      item.dataset.symbol = kind;
+      return item;
+    }));
+    $("trend-chart-note").textContent = note;
   }
 
   function renderTable(headings, cells) {
@@ -216,16 +230,19 @@ function setupTrend(investigation, reservoir, explorer) {
     $("trend-interval").textContent = number.format(low) + " to " + number.format(high) + " mm/year";
     $("trend-significance").textContent = significant ? "Exploratory · interval excludes zero" : "Inconclusive";
     $("trend-p").textContent = pValue(fit.p_two_sided);
-    const direction = signed.format(fit.slope_mm_per_year) + " mm per year in the fitted annual total. ";
-    $("trend-interpretation").textContent = direction + (significant
-      ? "This selected window excludes zero under the fitted model. Its nominal p-value cannot independently confirm a change point."
-      : "The 95% interval gives a range of slopes compatible with the model, including zero. The p-value is the chance of a test statistic at least this extreme assuming zero trend and the model assumptions. The result leaves increases and decreases plausible.");
+    $("trend-interpretation").textContent = significant
+      ? "The selected window’s interval excludes zero under this model. Its nominal p-value cannot independently confirm a change point."
+      : "The slope interval includes zero. An increase or decrease remains compatible with the data and model.";
     $("trend-chart-unit").textContent = totals ? "Monthly precipitation accumulation (mm)"
       : monthly ? "Monthly mean precipitation (mm/day)" : "Calendar-year precipitation total (mm)";
-    $("trend-chart-key").textContent = monthly
-      ? (totals ? "Line · NASA POWER monthly rate multiplied by calendar days." : "Line · NASA POWER monthly means.")
-        + " The slope and test still use the annual totals."
-      : "Dots · complete annual totals. Dashed line · fitted trend. Shading · pointwise 95% interval for the fitted mean, distinct from the slope interval above.";
+    if (monthly) {
+      chartKey([["line", totals ? "Monthly accumulation" : "Monthly mean"]], totals
+        ? "Monthly rate multiplied by calendar days. The trend test uses annual totals."
+        : "NASA POWER monthly means. The trend test uses annual totals.");
+    } else {
+      chartKey([["dot", "Complete annual totals"], ["fit", "Fitted trend"], ["band", "95% interval for the fitted mean"]],
+        "The shaded band gives pointwise uncertainty in the fitted mean. See the trend estimate for the interval around the slope.");
+    }
     chart.setAttribute("aria-label", $("trend-chart-unit").textContent + " for " + fit.start + " to " + fit.end);
 
     const withinPeriod = year => year >= fit.start && year <= fit.end;
@@ -269,13 +286,11 @@ function setupTrend(investigation, reservoir, explorer) {
     $("trend-post-ci").textContent = interval(slope, "km²/year");
     $("trend-significance").textContent = significant ? "Significant in this fit" : "Inconclusive";
     $("trend-p").textContent = pValue(slope.p_two_sided);
-    $("trend-interpretation").textContent = "The estimated shift coincides with the 2013 dam heightening. "
-      + (significant ? "The interval for the later trend excludes zero under this model."
-        : "The interval for the later trend includes zero.");
+    $("trend-interpretation").textContent = "The estimated shift coincides with the 2013 dam heightening. Timing alone cannot establish its cause. "
+      + (significant ? "The later trend interval excludes zero under this model." : "The later trend interval includes zero.");
     $("trend-chart-unit").textContent = "Monthly reservoir surface area (km²)";
-    $("trend-chart-key").textContent = "Dots and connected lines show published monthly measurements. "
-      + "Gaps show " + counts.fill_value + " fill-value months and " + counts.no_granule
-      + " months without a granule. Dashed marker at January 2013.";
+    chartKey([["line", "Published monthly measurements"], ["fit", "January 2013 breakpoint"]],
+      "Gaps show " + counts.fill_value + " fill-value months and " + counts.no_granule + " months without a granule.");
     chart.setAttribute("aria-label", "Monthly reservoir surface area in square kilometers from "
       + monthly[0].month + " to " + monthly.at(-1).month + ", with gaps for unavailable months.");
     series = monthly.map(row => ({
@@ -296,8 +311,9 @@ function setupTrend(investigation, reservoir, explorer) {
     const area = areaMode();
     $("trend-title").textContent = area ? "How has the reservoir’s surface area changed?" : rainfallTitle;
     $("trend-context").textContent = area
-      ? "Explore NASA Terra MODIS monthly surface area and compare the period around the 2013 dam heightening with the years that followed."
+      ? "Monthly NASA Terra MODIS observations for Roseires Reservoir."
       : rainfallContext;
+    $("trend-inference-title").textContent = area ? "Estimated shift and later trend" : "Trend in annual totals";
     $("trend-period-field").hidden = area;
     $("trend-scale").hidden = area;
     $("trend-custom").hidden = area || period.value !== "custom";
@@ -358,10 +374,10 @@ const frozenPilotScores = seed.bundles.find(bundle => bundle.pair === "pilot")?.
 if (frozenPilotScores?.fixed?.gain && frozenPilotScores?.local?.gain) {
   const score = $("pilot-score");
   const percent = value => (100 * value).toFixed(2) + "%";
-  score.textContent = "Across the study area, only "
-    + percent(frozenPilotScores.fixed.gain.precision) + " of radar water-gain flags (fixed rule) and "
+  score.textContent = "Of radar water-gain flags with usable Sentinel‑2 evidence across the study crop, "
+    + percent(frozenPilotScores.fixed.gain.precision) + " (fixed rule) and "
     + percent(frozenPilotScores.local.gain.precision)
-    + " (local rule) matched a water gain in the usable Sentinel‑2 data. Radar darkening alone was an unreliable guide to new water in this pilot.";
+    + " (local rule) matched an optical water gain. Radar darkening alone was unreliable in this pilot.";
   score.hidden = false;
 }
 
