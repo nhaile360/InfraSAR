@@ -321,12 +321,14 @@ def check_imported_dates(page):
             scrubber.press("ArrowRight")
 
     seek("2026-10-02")
+    expect(select).to_be_enabled()
     select.press("Enter")
     expect(select).to_be_disabled()
     expect(compare).to_be_disabled()
     seek("2026-08-26")
     expect(select).to_be_disabled()
     seek("2026-08-18")
+    expect(select).to_be_enabled()
     select.press("Enter")
     expect(compare).to_be_focused()
     compare.press("Enter")
@@ -445,12 +447,14 @@ def main():
         assert not errors, errors
         check_touch(browser, url, offline)
         if offline:
+            page.bring_to_front()
+            check_imported_dates(page)
+            assert not errors, errors
             single = browser.new_page(viewport={"width": 1280, "height": 900})
             single_errors = open_site(single, url, offline)
             check_single_observation(single)
             assert not single_errors, single_errors
-            check_imported_dates(page)
-            assert not errors, errors
+            single.close()
             check_basemap(browser, url)
         browser.close()
     print("Desktop, keyboard, mouse and mobile touch smoke tests passed for " + url)
