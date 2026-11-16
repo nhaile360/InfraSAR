@@ -2,6 +2,7 @@
 """Build the portable InfraSAR explorer from the frozen radar and processed optical layers."""
 
 import argparse
+import base64
 import json
 from pathlib import Path
 import re
@@ -99,7 +100,11 @@ def main():
                "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
                "reservoir": reservoir, "trend": trend, "rainfall_explorer": explorer_windows(trend),
                "modis": analyze_modis(args.modis_csv)}
-    replacements = {"/* INFRASAR_STYLE */": (src / "atlas.css").read_text(),
+    fonts = HERE / "fonts"
+    inter = base64.b64encode((fonts / "inter-latin.woff2").read_bytes()).decode("ascii")
+    styles = (src / "atlas.css").read_text().replace("__INTER_WOFF2__", inter)
+    styles += "\n/*\n" + (fonts / "Inter-OFL.txt").read_text() + "*/\n"
+    replacements = {"/* INFRASAR_STYLE */": styles,
                     "/* INFRASAR_SCRIPT */": "\n".join(
                         (src / name).read_text() for name in ("data.js", "tiff.js", "atlas.js", "trend.js")
                     ),

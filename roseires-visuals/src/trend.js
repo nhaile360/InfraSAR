@@ -111,7 +111,7 @@ function setupTrend(investigation, reservoir, explorer) {
     const X = time => plotLeft + (time - series[0].time) * (plotRight - plotLeft) / (series.at(-1).time - series[0].time);
     const Y = value => plotBottom - (value - floor) * (plotBottom - plotTop) / (ceiling - floor);
     ctx.clearRect(0, 0, width, height);
-    ctx.font = "12px system-ui";
+    ctx.font = canvasFont(500,13);
     ctx.fillStyle = "#49635f";
     ctx.strokeStyle = "#d5ddd2";
     ctx.lineWidth = 1;
@@ -350,6 +350,7 @@ function setupTrend(investigation, reservoir, explorer) {
     });
   }
   new ResizeObserver(draw).observe(chart);
+  document.fonts.ready.then(draw);
   refresh();
 }
 

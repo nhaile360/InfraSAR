@@ -38,3 +38,7 @@ open InfraSAR-Roseires.html
 Leave off `--patch` if that file is elsewhere. The explorer can recover the outline from the original study window if the water map reproduces both the 108-cell extent and the reported median. If the revised mosaic changed the outline, supply the original mask. To add a scored holdout, pass `--observations roseires-pipeline/outputs/holdout/comparator.html` when building. Timeline markers come from the files loaded and use the actual acquisition dates. The date scrubber also includes DAHITI observations.
 
 The two original single-tile SCL exports can be embedded using `--august-scl` and `--october-scl` when a scored comparator is unavailable. The explorer computes usable coverage from the classes available on both dates.
+
+## Typography
+
+The viewer embeds the Latin Inter variable webfont (weights 400–800) in its standalone HTML. It can load without network access. System UI fonts cover unsupported glyphs and remain available if the embedded face cannot load. The asset comes from the [Google Fonts Inter stylesheet](https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap), and the [SIL Open Font Licence](fonts/Inter-OFL.txt) travels with the font and HTML builds.

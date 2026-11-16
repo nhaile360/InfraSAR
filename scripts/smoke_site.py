@@ -64,7 +64,7 @@ def check_basemap(chromium, url):
         west, east = bounds(zoomed.value)
         assert east - west < inlet_width * .8, "Zooming must request a closer view"
 
-        page.get_by_role("button", name="Show reservoir").click()
+        page.get_by_role("button", name="Full reservoir").click()
         with page.expect_request(export) as overview:
             page.get_by_role("button", name="Zoom in").click()
         west, east = bounds(overview.value)
@@ -139,18 +139,19 @@ def check_swipe(page, offline):
     expect(page.locator("#before")).to_contain_text("NISAR candidates")
     expect(page.locator("#after")).to_contain_text("Sentinel‑2 change")
     expect(page.locator("#legend")).to_contain_text("threshold-based")
-    expect(page.get_by_role("button", name="Rule: local")).to_be_visible()
-    page.get_by_role("button", name="Rule: local").click()
-    expect(page.get_by_role("button", name="Rule: fixed")).to_be_visible()
+    expect(page.get_by_role("button", name="Local rule")).to_have_attribute("aria-pressed", "true")
+    page.get_by_role("button", name="Fixed rule").click()
+    expect(page.get_by_role("button", name="Fixed rule")).to_have_attribute("aria-pressed", "true")
+    expect(page.locator("#rule-description")).to_contain_text("−17 dB")
 
-    page.get_by_role("button", name="Show reservoir").click()
+    page.get_by_role("button", name="Full reservoir").click()
     check_reservoir_extent(page)
     page.get_by_role("button", name="Hide study layers").click()
     expect(divider).to_be_hidden()
-    expect(page.locator("#legend")).to_contain_text("Historical shoreline · HydroLAKES")
+    expect(page.locator("#legend")).to_contain_text("Historical shoreline (HydroLAKES)")
     page.get_by_role("button", name="Show study layers").click()
     expect(divider).to_be_visible()
-    page.get_by_role("button", name="Show inlet").click()
+    page.get_by_role("button", name="Study inlet").click()
     if offline:
         assert page.evaluate("""() => {
             const data = new Float32Array(size);
@@ -169,8 +170,8 @@ def check_points(page):
     page.get_by_role("button", name="Compare the inlet with nearby dry land").click()
     expect(page.get_by_role("heading", name="Location readings")).to_be_visible()
     a, b = (page.locator(f'[data-point-card="{key}"]') for key in ("A", "B"))
-    expect(a).to_contain_text("Land → Water")
-    expect(b).to_contain_text("Land → Land")
+    expect(a).to_contain_text("Water gain")
+    expect(b).to_contain_text("Stable land")
     expect(a).to_contain_text("NISAR HH")
     expect(b).to_contain_text("Radar change")
     a_index = page.evaluate("toolState.points.A")
@@ -179,6 +180,12 @@ def check_points(page):
     move.press("Enter")
     expect(move).to_have_attribute("aria-pressed", "true")
     expect(b).to_have_attribute("data-active", "true")
+    expect(b.get_by_text("Active")).to_be_visible()
+    expect(a.get_by_text("Active")).to_be_hidden()
+    a.get_by_role("button", name="Point A", exact=True).press("Enter")
+    expect(a.get_by_text("Active")).to_be_visible()
+    expect(page.get_by_role("button", name="Move Point A")).to_have_attribute("aria-pressed", "true")
+    b.get_by_role("button", name="Point B", exact=True).press("Enter")
     pin = page.get_by_role("button", name="Point B marker")
     expect(pin).to_have_attribute("aria-pressed", "true")
     expect(page.get_by_role("button", name="Point A marker")).to_be_visible()
@@ -208,7 +215,7 @@ def check_points(page):
     page.mouse.up()
     assert abs(page.evaluate("toolState.points.B") - (changed + 1) - expected) <= 1
 
-    page.get_by_role("button", name="Show reservoir").click()
+    page.get_by_role("button", name="Full reservoir").click()
     canvas.click(position={"x": 13, "y": canvas.bounding_box()["height"] * .75})
     expect(page.locator("#point-status")).to_contain_text("inside the dashed study boundary")
     page.get_by_role("button", name="Show both").click()
@@ -224,7 +231,7 @@ def check_other_views(page):
     page.get_by_role("button", name="Map changes").click()
     page.get_by_role("button", name="Agreement", exact=True).click()
     expect(page.locator("#legend")).to_contain_text("Radar change")
-    page.get_by_role("button", name="Radar change", exact=True).click()
+    page.get_by_role("button", name="Radar signal change", exact=True).click()
     expect(page.locator("#legend")).to_contain_text("October minus August")
     page.get_by_role("button", name="Optical change", exact=True).click()
     expect(page.locator("#legend")).to_contain_text("Land in August, water in October")
@@ -448,6 +455,108 @@ def check_published_radar_timeline(page):
     expect(page.locator("#after")).to_contain_text("Right · NISAR HH · 4 Oct 2026")
 
 
+def check_map_presets(page, touch=False):
+    act = lambda locator: locator.tap() if touch else locator.click()
+    home = page.get_by_role("button", name="Study inlet", exact=True)
+    full = page.get_by_role("button", name="Full reservoir", exact=True)
+    for mode in ("Swipe dates", "Map changes", "Compare locations", "Timeline"):
+        act(page.get_by_role("button", name=mode, exact=True))
+        before = page.evaluate("""() => JSON.stringify([
+            toolState.view, toolState.layer, toolState.change, toolState.rule,
+            toolState.time, toolState.pairByLayer, toolState.split, toolState.points,
+            toolState.focus, toolState.chosen, toolState.showRasters
+        ])""")
+        act(full)
+        expect(full).to_have_attribute("aria-pressed", "true")
+        expect(home).to_have_attribute("aria-pressed", "false")
+        check_reservoir_extent(page)
+        if mode == "Swipe dates" and not touch:
+            viewport = page.viewport_size
+            page.set_viewport_size({"width": 830, "height": 760})
+            after_draw(page)
+            check_reservoir_extent(page)
+            page.set_viewport_size(viewport)
+            after_draw(page)
+        act(page.get_by_role("button", name="Zoom in", exact=True))
+        expect(full).to_have_attribute("aria-pressed", "false")
+        page.locator("#map").press("ArrowRight")
+        expect(home).to_have_attribute("aria-pressed", "false")
+        act(home)
+        expect(home).to_have_attribute("aria-pressed", "true")
+        assert page.evaluate("""() => {
+            const t = transform(toolState.cam,map.clientWidth,map.clientHeight);
+            return toolState.patch.cells.every(index => {
+                const [x,y] = t.xy(pointFrom(index));
+                return x > 0 && y > 0 && x < t.width && y < t.height;
+            });
+        }""")
+        assert before == page.evaluate("""() => JSON.stringify([
+            toolState.view, toolState.layer, toolState.change, toolState.rule,
+            toolState.time, toolState.pairByLayer, toolState.split, toolState.points,
+            toolState.focus, toolState.chosen, toolState.showRasters
+        ])"""), "Map presets must only change the camera"
+    act(page.get_by_role("button", name="Swipe dates", exact=True))
+
+
+def check_filter_guidance(page):
+    helper = page.locator("#layer-description")
+    legend = page.locator("#legend")
+    for name, phrase in [("Optical water map", "classifies visible land"), ("Radar image", "microwave backscatter")]:
+        choice = page.get_by_role("button", name=name, exact=True)
+        choice.press("Enter")
+        expect(helper).to_contain_text(phrase)
+        assert choice.get_attribute("aria-describedby")
+        if name == "Optical water map":
+            for label in ("Cloud", "Cloud shadow", "Missing coverage", "Ambiguous observation", "Historical shoreline"):
+                expect(legend).to_contain_text(label)
+    expect(legend).to_contain_text("−24 dB")
+    for value, phrase in [("raw", "cell boundaries"), ("smooth", "Blends display colors")]:
+        page.locator("#radar-rendering").select_option(value)
+        expect(page.locator("#display-description")).to_contain_text(phrase)
+    page.get_by_role("button", name="Map changes", exact=True).click()
+    for name, phrase in [
+        ("Optical change", "apparent water gains"), ("Radar signal change", "cannot identify a water transition"),
+        ("Compare change maps", "independent Sentinel"), ("Agreement", "lack sufficient evidence")
+    ]:
+        choice = page.get_by_role("button", name=name, exact=True)
+        choice.press("Enter")
+        expect(helper).to_contain_text(phrase)
+        assert choice.get_attribute("aria-describedby")
+    for name, phrase in [("Fixed rule", "−17 dB"), ("Local rule", "nearby reference land and water")]:
+        choice = page.get_by_role("button", name=name, exact=True)
+        choice.press("Enter")
+        expect(page.locator("#rule-description")).to_contain_text(phrase)
+        assert choice.get_attribute("aria-describedby")
+    page.get_by_role("button", name="Swipe dates", exact=True).click()
+
+
+def check_typography(page, fallback=False):
+    assert page.evaluate("document.fonts.load('650 16px Inter', 'Study inlet').then(faces => faces.some(f => f.status === 'loaded'))")
+    cdp = page.context.new_cdp_session(page)
+    cdp.send("DOM.enable")
+    cdp.send("CSS.enable")
+    root = cdp.send("DOM.getDocument")["root"]["nodeId"]
+    title = cdp.send("DOM.querySelector", {"nodeId": root, "selector": "#loc-inlet"})["nodeId"]
+
+    def rendered_inter():
+        fonts = cdp.send("CSS.getPlatformFontsForNode", {"nodeId": title})["fonts"]
+        assert fonts
+        return any(font["isCustomFont"] and font["familyName"].startswith("Inter") for font in fonts)
+
+    assert rendered_inter(), "The map controls must render the embedded font"
+    if fallback:
+        page.evaluate("""() => {
+            const sheet = document.styleSheets[0];
+            const index = Array.from(sheet.cssRules).findIndex(rule => rule.type === CSSRule.FONT_FACE_RULE);
+            sheet.deleteRule(index);
+            document.querySelector('#loc-inlet').getBoundingClientRect();
+        }""")
+        assert not rendered_inter(), "System fonts must take over when Inter is unavailable"
+        expect(page.get_by_role("button", name="Full reservoir")).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth === innerWidth")
+    cdp.detach()
+
+
 def check_scientific_citations(page):
     expect(page.get_by_text("Contains modified Copernicus Sentinel data 2026.")).to_be_visible()
     expect(page.get_by_role("link", name="Evidence, methods and validation scores")).to_have_attribute(
@@ -473,6 +582,7 @@ def check_touch(chromium, url, offline):
         page = mobile.new_page()
         errors = open_site(page, url, offline)
         assert page.evaluate("document.documentElement.scrollWidth === innerWidth"), "Horizontal overflow on mobile"
+        check_map_presets(page, touch=True)
         canvas = page.locator("#map")
         canvas.scroll_into_view_if_needed()
         divider = page.get_by_role("slider", name="Drag to compare")
@@ -501,11 +611,11 @@ def check_touch(chromium, url, offline):
         touch("touchEnd")
         assert page.evaluate("toolState.cam.span") < original["span"] * .8, "Pinch did not zoom"
 
-        page.get_by_role("button", name="Show reservoir").tap()
+        page.get_by_role("button", name="Full reservoir").tap()
         check_reservoir_extent(page)
         page.get_by_role("button", name="Optical water map", exact=True).tap()
         expect(page.locator("#after")).to_contain_text("Sentinel‑2")
-        page.get_by_role("button", name="Show inlet").tap()
+        page.get_by_role("button", name="Study inlet").tap()
         page.get_by_role("button", name="Compare locations").tap()
         page.get_by_role("button", name="Move Point B",exact=True).tap()
         canvas.tap(position={"x": 80, "y": 170})
@@ -550,6 +660,9 @@ def main():
         check_touch(browser, url, offline)
         actual = browser.new_page(viewport={"width": 1280, "height": 900})
         actual_errors = open_site(actual, url, offline)
+        check_map_presets(actual)
+        check_filter_guidance(actual)
+        check_typography(actual)
         check_published_radar_timeline(actual)
         check_scientific_citations(actual)
         if offline:
@@ -558,6 +671,7 @@ def main():
             actual.locator("#add-data").set_input_files(mask)
             expect(actual.locator("#import-status")).to_contain_text("84.9% of the study crop")
             assert actual.evaluate("toolState.patch.cells.length === 108")
+            check_typography(actual, fallback=True)
         assert not actual_errors, actual_errors
         actual.close()
         if offline:
