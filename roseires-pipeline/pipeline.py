@@ -31,6 +31,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 from crop_roseires import ARCHIVE, SCENES, load_token
+from catalog_nisar import CATALOG
 
 HOLDOUT = {
     "2026-08-17": "NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001",
@@ -448,6 +449,44 @@ def verified_predictions(pair, out, grid):
         require_grid(actual, grid, path)
         changes.append(values)
     return raw, *changes, lock
+
+
+def timeline_planes(manifest, grid, patch):
+    """Load aligned, checksum-verified timeline crops as dB planes."""
+    if not manifest.is_file():
+        return
+    catalog = {row["id"]: row for row in load(CATALOG)["granules"]
+               if row["status"] == "awaiting native HH verification"}
+    seen = set()
+    for record in load(manifest):
+        source = catalog[record["id"]]
+        for field in ("datetime", "maturity", "version", "release", "mode", "source_url"):
+            if record[field] != source[field]:
+                raise ValueError(f"Observation metadata differs from CMR: {record['id']}")
+        if (record["cmr_concept_id"] != source["concept_id"]
+                or record["source_checksum_catalog"] != source["source_checksum"]):
+            raise ValueError(f"Observation source differs from CMR: {record['id']}")
+        if record["datetime"] in seen:
+            raise ValueError(f"Duplicate radar acquisition: {record['datetime']}")
+        seen.add(record["datetime"])
+        filename = f"roseires_{record['datetime'][:10]}_HHHH.tif"
+        path = manifest.parent / filename
+        if record["raster"] != filename or digest(path) != record["sha256"]:
+            raise ValueError(f"Radar crop does not match its manifest: {path}")
+        require_grid(record["grid"], grid, manifest)
+        raw, actual, _ = raster(path)
+        require_grid(actual, grid, path)
+        if raw.dtype != np.dtype("float32") or record["inlet_valid_cells"] < 1:
+            raise ValueError(f"Radar crop has an unsupported numeric type or no inlet observations: {path}")
+        # Compute dB before rounding to Float32 for the browser.
+        raw_db = db(raw.astype(np.float64))
+        if record["source_nodata"] is not None:
+            raw_db[raw == float(record["source_nodata"])] = np.nan
+        valid = np.isfinite(raw_db)
+        if int(valid.sum()) != record["valid_cells"] or (patch is not None
+                and int(valid[patch].sum()) != record["inlet_valid_cells"]):
+            raise ValueError(f"Radar crop coverage differs from manifest: {path}")
+        yield record, raw_db
 
 
 def encode(array):

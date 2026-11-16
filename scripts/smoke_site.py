@@ -229,7 +229,11 @@ def check_other_views(page):
     check_points(page)
     page.get_by_role("button", name="Timeline").click()
     expect(page.get_by_role("heading", name="Observation readings")).to_be_visible()
-    expect(page.get_by_role("button", name="Compare these dates")).to_be_hidden()
+    comparison = page.get_by_role("button", name="Compare these dates")
+    if page.evaluate("loaded.radar.size > 2"):
+        expect(comparison).to_be_disabled()
+    else:
+        expect(comparison).to_be_hidden()
     scrubber = page.get_by_role("slider", name="Timeline date")
     scrubber.press("ArrowRight")
     expect(page.locator("#time-status")).not_to_be_empty()
@@ -294,6 +298,7 @@ def check_other_views(page):
 
 def check_imported_dates(page):
     # Exercise the import UI with a test-only bundle on the original grid.
+    radar_count = page.evaluate("loaded.radar.size")
     payload = page.evaluate("""() => {
         const bundle = structuredClone(seed.bundles.find(item => item.pair === "pilot"));
         bundle.pair = "holdout";
@@ -307,7 +312,7 @@ def check_imported_dates(page):
         "name": "test-holdout.html", "mimeType": "text/html", "buffer": payload.encode()
     })
     expect(page.locator("#import-status")).to_contain_text("usable water or land class")
-    assert page.evaluate("loaded.radar.size === 4")
+    assert page.evaluate("loaded.radar.size") == radar_count + 2
     page.get_by_role("button", name="Timeline").click()
     scrubber = page.get_by_role("slider", name="Timeline date")
     select = page.get_by_role("button", name="Select this date")
@@ -339,11 +344,12 @@ def check_imported_dates(page):
 
 def check_single_observation(page):
     # An isolated browser fixture reuses a frozen plane. No fixture goes into the site data.
+    radar_count = page.evaluate("loaded.radar.size")
     payload = page.evaluate("""() => {
         const bundle = seed.bundles.find(item => item.pair === "pilot");
         return JSON.stringify({
-            id:"NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001",
-            datetime:"2026-09-10T03:19:00Z", maturity:"PROVISIONAL", version:"1.0.11", release:"P05023",
+            id:"NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260909T031900_20260909T031935_P05023_N_F_J_001",
+            datetime:"2026-09-09T03:19:00Z", maturity:"PROVISIONAL", version:"1.0.11", release:"P05023",
             mode:"DHDH", grid:seed.grid, hh_db:bundle.arrays.hh_before
         });
     }""")
@@ -351,15 +357,16 @@ def check_single_observation(page):
     page.locator("#add-data").set_input_files({
         "name": "test-observation.json", "mimeType": "application/json", "buffer": payload.encode()
     })
-    page.wait_for_function("loaded.radar.size === 3 && toolState.events.some(e => e.date.startsWith('2026-09-10'))")
+    page.wait_for_function("count => loaded.radar.size === count && toolState.events.some(e => e.date.startsWith('2026-09-09'))",
+                           arg=radar_count + 1)
     assert page.evaluate("loaded.water.size === 2 && toolState.patch.cells.length === 108")
     page.get_by_role("button", name="Timeline").click()
     slider = page.get_by_role("slider", name="Timeline date")
-    index = page.evaluate("toolState.events.findIndex(event => event.date.startsWith('2026-09-10'))")
+    index = page.evaluate("toolState.events.findIndex(event => event.date.startsWith('2026-09-09'))")
     slider.press("Home")
     for _ in range(index):
         slider.press("ArrowRight")
-    expect(page.locator("#before")).to_contain_text("10 Sep")
+    expect(page.locator("#before")).to_contain_text("9 Sep")
     status = page.locator("#time-status")
     for label in ("PROVISIONAL", "Radar only", "Point A HH", "Point B HH"):
         expect(status).to_contain_text(label)
@@ -371,6 +378,45 @@ def check_single_observation(page):
             && !comparable(row, {...row, maturity:"VALIDATED"})
             && !comparable(row, {...row, mode:"SHSH"});
     }""")
+
+
+def check_published_radar_timeline(page):
+    if not page.evaluate("seed.radar_observations.length"):
+        return
+    dates = ["2026-06-18", "2026-06-30", "2026-07-12", "2026-07-24", "2026-08-17",
+             "2026-08-29", "2026-09-10", "2026-09-22", "2026-10-04", "2026-10-16"]
+    assert page.evaluate("ordered('radar').map(r => day(r.time))") == dates
+    assert page.evaluate("loaded.water.size === 2 && toolState.patch.cells.length === 108")
+    page.get_by_role("button", name="Timeline").click()
+    slider = page.get_by_role("slider", name="Timeline date")
+    status = page.locator("#time-status")
+
+    def seek(date):
+        slider.press("Home")
+        index = page.evaluate("(date) => toolState.events.findIndex(e => e.record?.time.startsWith(date))", date)
+        assert index >= 0
+        for _ in range(index):
+            slider.press("ArrowRight")
+
+    seek("2026-08-17")
+    expect(status).to_contain_text("P05023 / DHDH")
+    expect(status).to_contain_text("Radar only")
+    for point in ("A", "B"):
+        db = page.evaluate("""point => dbText(
+            toolState.events[toolState.time].record.raw[toolState.points[point]], 2
+        )""", point)
+        assert db.endswith(" dB")
+        expect(status).to_contain_text(f"Point {point} HH {db}")
+    select = page.get_by_role("button", name="Select this date")
+    select.press("Enter")
+    seek("2026-09-22")
+    expect(status).to_contain_text("P05023 / SHSH")
+    expect(select).to_be_disabled()
+    seek("2026-10-04")
+    select.press("Enter")
+    page.get_by_role("button", name="Compare these dates").press("Enter")
+    expect(page.locator("#before")).to_contain_text("Left · NISAR HH · 17 Aug 2026")
+    expect(page.locator("#after")).to_contain_text("Right · NISAR HH · 4 Oct 2026")
 
 
 def check_touch(chromium, url, offline):
@@ -447,6 +493,11 @@ def main():
         check_other_views(page)
         assert not errors, errors
         check_touch(browser, url, offline)
+        actual = browser.new_page(viewport={"width": 1280, "height": 900})
+        actual_errors = open_site(actual, url, offline)
+        check_published_radar_timeline(actual)
+        assert not actual_errors, actual_errors
+        actual.close()
         if offline:
             page.bring_to_front()
             check_imported_dates(page)

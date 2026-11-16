@@ -1,0 +1,314 @@
+[
+  {
+    "id": "NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001",
+    "datetime": "2026-06-18T03:19:04.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "SHSH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4248910954-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "82ac38d8f232fa43758a038524c37414",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-06-18_HHHH.tif",
+    "sha256": "e3bafeb29b918b9397f48831d751a7a28c09f5427e3f41a9cb98ec3d7f88009f"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001",
+    "datetime": "2026-06-30T03:19:03.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4242802037-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001/NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "72f7699ac8c40d229772f71c5422c0c5",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-06-30_HHHH.tif",
+    "sha256": "a7983bdd5cf998d00bbb1330365e3e00e1ed2a5105489c7733856899aa4188e3"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001",
+    "datetime": "2026-07-12T03:19:03.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4257667130-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001/NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "0d071795675b69b6a64f3689121dc119",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-07-12_HHHH.tif",
+    "sha256": "ae3249146ba101325d9b07fd13f0a0353552a728987e7046e33f30c50e188ad8"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001",
+    "datetime": "2026-07-24T03:19:02.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4260716822-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001/NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "8ec31c8cdc7343e9fcf3066e07b3404a",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-07-24_HHHH.tif",
+    "sha256": "cb844fec92eb2cca205344830e75541c99cb16f584fc0f107fa34a4247642ad0"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001",
+    "datetime": "2026-08-17T03:19:01.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4285211632-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "350f58583980812d6622544efa53c2fa",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-08-17_HHHH.tif",
+    "sha256": "f2f8915d9fb98170f9fec9a274c9f43b6263062336f8c40edb98cd60c16a0808"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001",
+    "datetime": "2026-09-10T03:19:00.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4308125414-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "a8811611371505f49f8c835361a6251b",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-09-10_HHHH.tif",
+    "sha256": "d1fc7a5c20fa6b8803678b6c1fef58449507e0129753de72dc12a5762a2df36f"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001",
+    "datetime": "2026-09-22T03:19:00.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "SHSH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4321351928-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "b69745c291a289e5b1ed958d6e6fae7d",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-09-22_HHHH.tif",
+    "sha256": "9f22da4f05b68c8f7f5859e187f9c9a245c5a5996bca55d3eab825853a70af96"
+  },
+  {
+    "id": "NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001",
+    "datetime": "2026-10-04T03:19:00.000000Z",
+    "maturity": "PROVISIONAL",
+    "version": "1.0.11",
+    "release": "P05023",
+    "mode": "DHDH",
+    "grid": {
+      "width": 711,
+      "height": 446,
+      "west": 647085.1044029767,
+      "north": 1303758.0249756854,
+      "epsg": 32636,
+      "pixel_m": 20
+    },
+    "cmr_concept_id": "G4343127383-ASF",
+    "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001.h5",
+    "band": "//science/LSAR/GCOV/grids/frequencyA/HHHH",
+    "source_checksum_catalog": {
+      "Value": "249ab01422200206f59217a597712572",
+      "Algorithm": "MD5"
+    },
+    "source_checksum_verified": false,
+    "source_nodata": "NaN",
+    "source_window": [
+      12050,
+      3104,
+      711,
+      446
+    ],
+    "native_center_offset_m": [
+      -5.104402976692654,
+      1.975024314597249
+    ],
+    "valid_cells": 317106,
+    "inlet_valid_cells": 108,
+    "raster": "roseires_2026-10-04_HHHH.tif",
+    "sha256": "38f5d78857450764448cc3e81e82eee8c34e4aee247e464b8dbf912841a0d2a4"
+  }
+]

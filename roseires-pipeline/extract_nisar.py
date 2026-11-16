@@ -9,9 +9,13 @@ import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
+from urllib.request import Request, urlopen
 
 import pipeline as roseires
 from catalog_nisar import CATALOG
@@ -21,7 +25,7 @@ from crop_roseires import ARCHIVE, load_token
 OUTPUT = roseires.HERE / "outputs" / "timeline"
 BAND = "//science/LSAR/GCOV/grids/frequencyA/HHHH"
 SCENE_ID = re.compile(r"NISAR_L2_PR_GCOV_[A-Z0-9_]+")
-TARGET = {"epsg": 32636, "pixel_m": 20}
+HDF5_SIGNATURE = b"\x89HDF\r\n\x1a\n"
 
 
 def gdal(tool, binary, env, *args):
@@ -33,6 +37,46 @@ def gdal(tool, binary, env, *args):
         message = result.stderr.strip().splitlines()[-1:] or ["no diagnostic"]
         raise ValueError(f"{tool} returned {result.returncode}: {message[0]}")
     return result.stdout
+
+
+def remote_access(url, token):
+    """Probe only the HDF5 signature and keep the bearer on the original request."""
+    request = Request(url, headers={"Range": "bytes=0-7"})
+    request.add_unredirected_header("Authorization", "Bearer " + token)
+    try:
+        with urlopen(request, timeout=12) as response:
+            if urlsplit(response.url).hostname == "urs.earthdata.nasa.gov":
+                return False, "ASF access redirected to Earthdata Login."
+            readable = response.status == 206 and response.read(8) == HDF5_SIGNATURE
+            if readable:
+                return True, "ASF returned the HDF5 signature over HTTP 206."
+            return False, f"ASF returned HTTP {response.status} without the expected HDF5 byte range."
+    except HTTPError as error:
+        if urlsplit(error.url).hostname == "urs.earthdata.nasa.gov":
+            return False, f"ASF access redirected to Earthdata Login (HTTP {error.code})."
+        return False, f"ASF data request returned HTTP {error.code}."
+    except (URLError, OSError) as error:
+        reason = getattr(error, "reason", error)
+        if isinstance(reason, socket.gaierror):
+            return False, "DNS lookup failed while connecting to NASA/ASF."
+        return False, f"NASA/ASF connection failed ({type(reason).__name__})."
+
+
+def dataset_info(dataset, row, args, env):
+    try:
+        return json.loads(gdal("gdalinfo", args.gdal_bin, env, "-json", dataset))
+    except ValueError as error:
+        if args.source_dir is not None:
+            raise
+        readable, report = remote_access(row["source_url"], env["GDAL_HTTP_BEARER"])
+        if readable:
+            # Some hosts serve ranges but reject the initial HEAD request.
+            env["CPL_VSIL_CURL_USE_HEAD"] = "NO"
+            try:
+                return json.loads(gdal("gdalinfo", args.gdal_bin, env, "-json", dataset))
+            except ValueError as retry:
+                raise ValueError(f"{report} GDAL could not open the HH subdataset even with HEAD disabled. {retry}") from retry
+        raise ValueError(f"{report} {error}") from error
 
 
 def native_window(info, grid):
@@ -79,7 +123,7 @@ def extract(row, grid, inlet_mask, args, env):
     if '"' in source:
         raise ValueError("Use a source directory without quotes.")
     dataset = f'HDF5:"{source}":{BAND}'
-    info = json.loads(gdal("gdalinfo", args.gdal_bin, env, "-json", dataset))
+    info = dataset_info(dataset, row, args, env)
     window, offset = native_window(info, grid)
     west, south, east, north = roseires.bounds(grid)
     name = f"roseires_{row['datetime'][:10]}_HHHH.tif"

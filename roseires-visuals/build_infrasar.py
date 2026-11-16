@@ -12,7 +12,6 @@ sys.path.insert(0, str(HERE.parent / "roseires-pipeline"))
 sys.path.insert(0, str(HERE.parent / "roseires-trends"))
 import pipeline as roseires
 from analyze_modis import CSV_PATH as MODIS_CSV, analyze as analyze_modis
-from catalog_nisar import CATALOG
 
 
 def processed_bundle(path, grid):
@@ -36,41 +35,6 @@ def aligned_byte_raster(path, grid):
     aligned = np.full((grid["height"], grid["width"]), roseires.OUTSIDE_TILE, dtype=np.uint8)
     aligned[row:row + data.shape[0], col:col + data.shape[1]] = data
     return aligned
-
-
-def radar_observations(manifest, grid, patch):
-    if not manifest.is_file():
-        return []
-    catalog = {row["id"]: row for row in roseires.load(CATALOG)["granules"]
-               if row["status"] == "awaiting native HH verification"}
-    records = []
-    seen = set()
-    for record in roseires.load(manifest):
-        source = catalog[record["id"]]
-        for field in ("datetime", "maturity", "version", "release", "mode"):
-            if record[field] != source[field]:
-                raise ValueError(f"Observation metadata differs from CMR: {record['id']}")
-        if record["datetime"] in seen:
-            raise ValueError(f"Duplicate radar acquisition: {record['datetime']}")
-        seen.add(record["datetime"])
-        filename = f"roseires_{record['datetime'][:10]}_HHHH.tif"
-        path = manifest.parent / filename
-        if record["raster"] != filename or roseires.digest(path) != record["sha256"]:
-            raise ValueError(f"Radar crop does not match its manifest: {path}")
-        roseires.require_grid(record["grid"], grid, manifest)
-        raw, actual, _ = roseires.raster(path)
-        roseires.require_grid(actual, grid, path)
-        if raw.dtype != roseires.np.dtype("float32") or record["inlet_valid_cells"] < 1:
-            raise ValueError(f"Radar crop has an unsupported numeric type or no inlet observations: {path}")
-        raw_db = roseires.db(raw)
-        if record["source_nodata"] is not None:
-            raw_db[raw == float(record["source_nodata"])] = roseires.np.nan
-        valid = roseires.np.isfinite(raw_db)
-        if int(valid.sum()) != record["valid_cells"] or (patch is not None
-                and int(valid[patch].sum()) != record["inlet_valid_cells"]):
-            raise ValueError(f"Radar crop coverage differs from manifest: {path}")
-        records.append({**record, "hh_db": roseires.encode(raw_db)})
-    return records
 
 
 def main():
@@ -122,7 +86,8 @@ def main():
     reservoir = json.loads((src / "roseires-reservoir.json").read_text())
     if reservoir["epsg"] != grid["epsg"]:
         raise ValueError("Reservoir geometry must use the study grid projection")
-    observations = radar_observations(args.radar_manifest, grid, mask)
+    observations = [{**record, "hh_db": roseires.encode(plane)}
+                    for record, plane in roseires.timeline_planes(args.radar_manifest, grid, mask)]
     if args.radar_json_dir:
         args.radar_json_dir.mkdir(parents=True, exist_ok=True)
         for record in observations:
