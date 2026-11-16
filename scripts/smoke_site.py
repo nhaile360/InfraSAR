@@ -55,6 +55,8 @@ def check_basemap(chromium, url):
             content_type="image/gif", body=pixel, headers={"access-control-allow-origin": "*"}))
         errors = open_site(page, url, offline=False)
         page.wait_for_function("viewportBasemap?.image.naturalWidth > 0")
+        expect(page.locator("#basemap-credit")).to_contain_text("OpenStreetMap contributors")
+        expect(page.locator("#basemap-credit")).to_contain_text("GIS User Community")
         inlet_width = page.evaluate("viewportBasemap.bounds.east - viewportBasemap.bounds.west")
 
         with page.expect_request(export) as zoomed:
@@ -446,6 +448,25 @@ def check_published_radar_timeline(page):
     expect(page.locator("#after")).to_contain_text("Right · NISAR HH · 4 Oct 2026")
 
 
+def check_scientific_citations(page):
+    expect(page.get_by_text("Contains modified Copernicus Sentinel data 2026.")).to_be_visible()
+    expect(page.get_by_role("link", name="Evidence, methods and validation scores")).to_have_attribute(
+        "href", "https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md#claim-audit"
+    )
+    page.get_by_role("link", name="Map data and sources").click()
+    expect(page.get_by_role("link", name="Scientific report and source inventory")).to_be_visible()
+    expect(page.get_by_role("link", name="S2C_36PXT_20260826_0_L2A")).to_have_attribute(
+        "href", "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_36PXT_20260826_0_L2A"
+    )
+    expect(page.get_by_role("link", name="Schwatke et al. (2015)")).to_be_visible()
+    page.get_by_role("button", name="Load Sentinel‑2 scenes").click()
+    expect(page.locator("#import-status")).to_contain_text("84.9% of the study crop")
+    page.get_by_text("Data details", exact=True).click()
+    page.get_by_role("button", name="Timeline").click()
+    expect(page.get_by_role("link", name="Acquisitions and processing")).to_be_visible()
+    expect(page.get_by_role("link", name="Scene identifiers and dates")).to_be_visible()
+
+
 def check_touch(chromium, url, offline):
     with chromium.new_context(viewport={"width": 390, "height": 844},
                               device_scale_factor=2, has_touch=True, is_mobile=True) as mobile:
@@ -516,8 +537,12 @@ def main():
         if args.revision:
             version = page.request.get(urljoin(page.url, "version.json"))
             assert version.ok and version.json()["commit"] == args.revision, "Unexpected deployed commit"
-            data = page.request.get(urljoin(page.url, "roseires_modis_monthly_surface_area.csv"))
-            assert data.ok and sha256(data.body()).hexdigest() == page.evaluate("seed.modis.source.sha256"), "Unexpected deployed MODIS CSV"
+            for asset, digest in version.json()["sha256"].items():
+                data = page.request.get(urljoin(page.url, asset))
+                assert data.ok and sha256(data.body()).hexdigest() == digest, f"Unexpected deployed asset: {asset}"
+            assert version.json()["sha256"]["roseires_modis_monthly_surface_area.csv"] == page.evaluate(
+                "seed.modis.source.sha256"
+            ), "Deployed MODIS CSV differs from the analyzed input"
 
         check_swipe(page, offline)
         check_other_views(page)
@@ -526,6 +551,13 @@ def main():
         actual = browser.new_page(viewport={"width": 1280, "height": 900})
         actual_errors = open_site(actual, url, offline)
         check_published_radar_timeline(actual)
+        check_scientific_citations(actual)
+        if offline:
+            actual.get_by_text("Data details", exact=True).click()
+            mask = Path(__file__).resolve().parents[1] / "roseires-pipeline/outputs/pilot/inlet_patch_mask.tif"
+            actual.locator("#add-data").set_input_files(mask)
+            expect(actual.locator("#import-status")).to_contain_text("84.9% of the study crop")
+            assert actual.evaluate("toolState.patch.cells.length === 108")
         assert not actual_errors, actual_errors
         actual.close()
         if offline:

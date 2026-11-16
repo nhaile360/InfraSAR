@@ -198,3 +198,7 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
 .chart-scrub{display:grid;gap:2px;font-weight:700;margin-top:9px}
 .chart-scrub input{width:100%;min-height:32px;accent-color:var(--teal);margin:0}
 @media(max-width:720px){#charts{grid-template-columns:minmax(0,1fr)}}
+.service-credit,.science-links{font-size:.76rem;line-height:1.45;color:var(--muted)}
+.service-credit{padding:5px 9px;background:#f3f5ee;overflow-wrap:anywhere}
+.science-links{margin:6px 0}
+.map-column>.science-links{padding-inline:9px}

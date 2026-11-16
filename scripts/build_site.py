@@ -2,6 +2,7 @@
 """Build the publishable files using the tracked scientific inputs."""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 PILOT = ROOT / "roseires-pipeline" / "outputs" / "pilot"
 MODIS_CSV = ROOT / "roseires-trends" / "roseires_modis_monthly_surface_area.csv"
+LOCK = ROOT / "docs/scientific-inputs.sha256"
 
 
 def main():
@@ -26,7 +28,7 @@ def main():
         cli.error("--revision must be a full Git commit SHA")
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    if any(path.name not in {"index.html", "version.json", MODIS_CSV.name} or not path.is_file() or path.is_symlink()
+    if any(path.name not in {"index.html", "version.json", MODIS_CSV.name, LOCK.name} or not path.is_file() or path.is_symlink()
            for path in output.iterdir()):
         cli.error("Choose an output directory containing only generated site files.")
 
@@ -39,7 +41,10 @@ def main():
         check=True,
     )
     shutil.copyfile(MODIS_CSV, output / MODIS_CSV.name)
-    (output / "version.json").write_text(json.dumps({"commit": args.revision}) + "\n", encoding="utf-8")
+    shutil.copyfile(LOCK, output / LOCK.name)
+    assets = {name: hashlib.sha256((output / name).read_bytes()).hexdigest()
+              for name in ("index.html", MODIS_CSV.name, LOCK.name)}
+    (output / "version.json").write_text(json.dumps({"commit": args.revision, "sha256": assets}) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

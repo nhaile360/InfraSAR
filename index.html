@@ -205,6 +205,10 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
 .chart-scrub{display:grid;gap:2px;font-weight:700;margin-top:9px}
 .chart-scrub input{width:100%;min-height:32px;accent-color:var(--teal);margin:0}
 @media(max-width:720px){#charts{grid-template-columns:minmax(0,1fr)}}
+.service-credit,.science-links{font-size:.76rem;line-height:1.45;color:var(--muted)}
+.service-credit{padding:5px 9px;background:#f3f5ee;overflow-wrap:anywhere}
+.science-links{margin:6px 0}
+.map-column>.science-links{padding-inline:9px}
 </style>
 </head>
 <body>
@@ -283,13 +287,15 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
         </div>
         <div class="map-meta">
           <label id="radar-display">Radar display <select id="radar-rendering"><option value="smooth">Interpolated</option><option value="raw">Original cells</option></select></label>
-          <div class="map-credit" id="credit">HydroLAKES · geographic reference</div>
+          <div class="map-credit" id="credit"><a href="https://www.hydrosheds.org/products/hydrolakes">Historical HydroLAKES outline</a></div>
         </div>
+        <p id="basemap-credit" class="service-credit" hidden></p>
+        <p class="science-links">Contains modified Copernicus Sentinel data 2026. <a id="map-source-details" href="#data-details">Map data and sources</a></p>
         <div id="legend" class="legend" aria-label="Map legend"></div>
       </div>
       <aside class="side">
         <section class="evidence" id="evidence" aria-label="Evidence at the inlet">
-          <h2 id="evidence-title">Water reached farther into this inlet.</h2>
+          <h2 id="evidence-title">Sentinel‑2 mapped water farther into this inlet.</h2>
           <div class="finding">
             <h3><span class="evidence-icon water-icon" aria-hidden="true"></span> Water map</h3>
             <p id="evidence-water">Sentinel‑2 mapped this patch as land in August and water in October.</p>
@@ -301,10 +307,11 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
           </div>
           <div class="finding">
             <h3><span class="evidence-icon height-icon" aria-hidden="true"></span> Reservoir level</h3>
-            <p>The reservoir rose about <strong>1.15 m</strong> between the radar passes.</p>
-            <p class="note">DAHITI estimate</p>
+            <p>Estimated reservoir height rose about <strong>1.15 m</strong> between the radar passes.</p>
+            <p class="note"><a href="https://dahiti.dgfi.tum.de/en/216/">DAHITI station 216</a> · interpolated to radar times</p>
           </div>
           <p id="pilot-score" class="pilot-score" hidden></p>
+          <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md#claim-audit">Evidence, methods and validation scores</a></p>
           <button type="button" id="follow-up" class="follow-up">Compare the inlet with nearby dry land <span aria-hidden="true">→</span></button>
           <details class="sensor-method">
             <summary>Why use radar and optical imagery?</summary>
@@ -326,6 +333,7 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
             <button type="button" id="loc-dam"><i aria-hidden="true"></i> Full reservoir</button>
             <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
           </div>
+          <p id="locator-basemap-credit" class="service-credit" hidden></p>
         </section>
       </aside>
     </div>
@@ -407,19 +415,21 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
       <p id="trend-diagnostics"></p>
       <div id="rainfall-sources">
         <p>NASA POWER PRECTOTCORR is an observation-corrected MERRA-2 reanalysis estimate. The 0.5° × 0.625° cell is centered near 11.729° N, 34.467° E. The record ends in 2024. Explaining the 2026 shoreline change would require evidence about inflow, reservoir operations, and water levels at that time.</p>
-        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
+        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a> · <a href="https://ntrs.nasa.gov/citations/20160005045">MERRA‑2 paper</a> · <a href="https://doi.org/10.2307/1913610">Newey–West covariance</a></p></p>
       </div>
-      <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://modis.gsfc.nasa.gov/data/dataprod/mod28.php">NASA MODIS reservoir product</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
+      <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://doi.org/10.5067/MODIS/MOD28C3.061">NASA Terra MOD28C3.061</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
     </details>
+    <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/roseires-trends/README.md">Trend methods and reproducibility</a></p>
     <p class="return-link"><a href="#shoreline" data-investigation>Return to the 2026 shoreline</a></p>
   </section>
   <details id="data-details">
     <summary>Data details</summary>
+    <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md">Scientific report and source inventory</a> · <a href="https://nhaile360.github.io/InfraSAR/scientific-inputs.sha256">Scientific input checksums</a></p>
     <div class="details-grid">
       <div><h3>Acquisitions and methods</h3><div id="methods"></div></div>
       <div><h3>Map context</h3>
         <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
-        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
+        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
         <h3>Load more observations</h3>
         <p>Choose a processed radar observation JSON, a comparator HTML, or the SCL GeoTIFFs and inlet mask. Files are read on this device.</p>
         <label for="add-data" class="file-label">Processed observation files</label>
@@ -855,6 +865,10 @@ const agreementNames={1:"Both stable",2:"Both show water gain",3:"Both show wate
 let rasterCache=new WeakMap(), changeCache=null, baseMask=null, stagedTiffs={}, drawing=0;
 let remoteBusy=false;
 const basemapService="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export";
+const esriCredit = "Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), (c) OpenStreetMap contributors, and the GIS User Community";
+for (const id of ["basemap-credit", "locator-basemap-credit"]) {
+  $(id).append(link("Esri World Topographic Map", basemapService.replace(/\/export$/, "")), " · " + esriCredit);
+}
 const overviewBasemap={bounds:contextBounds,density:1536/(contextBounds.east-contextBounds.west)};
 let viewportBasemap=null, basemapTimer, basemapTarget;
 const drawFont = '700 12px "DM Sans","Avenir Next",system-ui,sans-serif';
@@ -1148,7 +1162,7 @@ function draw(){
   const meters=[50,100,200,500,1000,2000,5000,10000,20000,40000].filter(x=>x*t.factor<width*.24).at(-1)||50;
   $("scale").textContent=meters>=1000?meters/1000+" km":meters+" m";
   $("scale").style.width=meters*t.factor+"px";
-  $("credit").textContent=basemapVisible?"Esri World Topographic Map and contributors · HydroLAKES":"HydroLAKES · geographic reference";
+  $("basemap-credit").hidden = !basemapVisible;
   drawLocator();
 }
 function drawLocator(){
@@ -1156,7 +1170,7 @@ function drawLocator(){
   if(!dim)return;
   const cam=reservoirCamera(dim.width,dim.height);
   const t=transform(cam,dim.width,dim.height);
-  drawContext(miniContext,t);
+  $("locator-basemap-credit").hidden = !drawContext(miniContext,t);
   drawFootprint(miniContext,t);
   drawContextLabels(miniContext,t,true);
   if(map.clientWidth){
@@ -1350,7 +1364,11 @@ function details(){
     node("p","20 m cells on WGS 84 / UTM zone 36N. Sentinel‑2 scene classes were aligned with nearest-neighbor resampling. Only mapped vegetation or bare land count as land. Water is class 6."));
   const list=node("ul");
   for(const r of ordered("radar"))list.append(node("li","NISAR · "+showTime(r.time)+" · "+r.id));
-  for(const w of ordered("water"))for(const r of w.sources)list.append(node("li","Sentinel‑2 · "+showTime(r.datetime||r.date)+" · "+r.id));
+  for(const w of ordered("water"))for(const r of w.sources) {
+    const item = node("li","Sentinel‑2 · "+showTime(r.datetime||r.date)+" · ");
+    item.append(link(r.id, "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/" + encodeURIComponent(r.id)));
+    list.append(item);
+  }
   const sources=node("p");
   sources.append(link("NISAR GCOV guide","https://nisar-docs.asf.alaska.edu/gcov/"),
     " · ",link("Sentinel‑2 processing and scene classes","https://sentiwiki.copernicus.eu/web/s2-processing"),
@@ -1363,6 +1381,8 @@ function details(){
   const downloads=node("p","Original HH power crops (GeoTIFF) · ");
   const repository="https://raw.githubusercontent.com/nhaile360/InfraSAR/main/roseires-crops/roseires_";
   downloads.append(link("29 Aug 2026",repository+"2026-08-29_HHHH.tif")," · ",link("16 Oct 2026",repository+"2026-10-16_HHHH.tif"));
+  downloads.append(" · ",link("Eight timeline crops and metadata",
+    "https://github.com/nhaile360/InfraSAR/tree/main/roseires-pipeline/outputs/timeline"));
   parent.append(downloads);
   if(pair.candidates.local||pair.candidates.fixed){
     parent.append(node("p","Radar candidates were generated from NISAR HH alone. The fixed rule uses −17 dB. The local rule uses a 3×3 median and compares reference water and land, with a 0.75 dB uncertainty band."));
@@ -1371,7 +1391,9 @@ function details(){
   const estimates=pilotRadar().map(r=>estimateHeight(r.time));
   height.append(link("DAHITI station 216","https://dahiti.dgfi.tum.de/en/216/"),
     " · Radar-date estimates "+estimates.map(v=>v===null?"unavailable":v.toFixed(2)+" m").join(" and ")+
-    ". Each is linearly interpolated between neighboring DAHITI observations. Heights describe the reservoir as a whole.");
+    ". Interpolated from neighboring observations. The difference has no propagated uncertainty interval. Heights describe the reservoir as a whole. ",
+    link("Schwatke et al. (2015)", "https://doi.org/10.5194/hess-19-4345-2015"), " · ",
+    link("DAHITI data licence", "https://dahiti.dgfi.tum.de/en/register/"));
   parent.append(height);
   for(const [name,idx] of [["Point A",toolState.points.A],["Point B",toolState.points.B],["Selected cell",toolState.chosen]]){
     if(idx===null)continue;
@@ -1398,7 +1420,7 @@ function updateEvidence(){
   $("evidence-water").textContent=agrees
     ?"Sentinel‑2 mapped this patch as land in August and water in October."
     : patch&&available
-      ?"The original Sentinel‑2 classification mapped this patch as land in August and water in October. The current mosaic adds observations from the neighboring tile."
+      ?"The published Sentinel‑2 comparison mapped the outlined patch as land in August and water in October. The current overlap or imported classes differ within the outline."
       :"The pilot’s Sentinel‑2 classification mapped the outlined study patch as land in August and water in October.";
   $("follow-up").disabled=toolState.examples.B===null;
   $("example-explanation").hidden=toolState.examples.B===null;
@@ -1582,11 +1604,11 @@ function timelineChartReading(id, event) {
 }
 function createCharts(){
   const definitions=[
-    ["radar-chart","Radar backscatter (dB)","HH points · provisional NISAR GCOV. Blank dates have no radar acquisition."],
-    ["water-chart","Optical scene class","Sentinel‑2 L2A derived classes. Square = land, circle = water, × = unclear or missing."],
-    ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates."]
+    ["radar-chart","Radar backscatter (dB)","HH points · provisional NISAR GCOV. Blank dates have no radar acquisition.","Acquisitions and processing","https://github.com/nhaile360/InfraSAR/blob/main/roseires-pipeline/NISAR_TIMELINE.md"],
+    ["water-chart","Optical scene class","Sentinel‑2 L2A derived classes. Square = land, circle = water, × = unclear or missing.","Scene identifiers and dates","https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md#inputs"],
+    ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates.","DAHITI station 216","https://dahiti.dgfi.tum.de/en/216/"]
   ];
-  for(const [id,title,note] of definitions){
+  for(const [id,title,note,label,url] of definitions){
     const wrapper=node("section",null,id==="water-chart"?"chart waterchart":"chart");
     const h=node("h3",title), c=node("canvas"), key=node("p",note), reading=node("output",null,"chart-tooltip");
     c.id=id;
@@ -1615,7 +1637,10 @@ function createCharts(){
       if(!Object.hasOwn(targets,event.key))return;
       event.preventDefault();pause();goToTime(targets[event.key]);
     });
-    wrapper.append(h,c,key,reading);$("charts").append(wrapper);
+    const citation=node("p",null,"science-links");
+    citation.append(link(label,url));
+    wrapper.append(h,c,key,reading,citation);
+    $("charts").append(wrapper);
   }
 }
 function timeDomain(){
@@ -2032,6 +2057,9 @@ async function init(){
   for(const bundle of seed.bundles)await addBundle(bundle);
   for(const record of seed.radar_observations||[])await addRadarObservation(record);
   if(seed.patch)baseMask=await unpack(seed.patch);
+  $("map-source-details").addEventListener("click", () => {
+    $("data-details").open = true;
+  });
   createCharts();
   activateMap();
   for(const button of document.querySelectorAll("[data-view]"))button.addEventListener("click",()=>setView(button.dataset.view));

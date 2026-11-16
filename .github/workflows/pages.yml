@@ -28,6 +28,7 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Verify the science and build the static site
         run: |
+          python scripts/verify_science.py
           python -m unittest discover -s roseires-trends -p 'test_*.py'
           python -m unittest discover -s roseires-pipeline -p 'test_*.py'
           python scripts/build_site.py

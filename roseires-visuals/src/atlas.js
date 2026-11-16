@@ -32,6 +32,10 @@ const agreementNames={1:"Both stable",2:"Both show water gain",3:"Both show wate
 let rasterCache=new WeakMap(), changeCache=null, baseMask=null, stagedTiffs={}, drawing=0;
 let remoteBusy=false;
 const basemapService="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/export";
+const esriCredit = "Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), (c) OpenStreetMap contributors, and the GIS User Community";
+for (const id of ["basemap-credit", "locator-basemap-credit"]) {
+  $(id).append(link("Esri World Topographic Map", basemapService.replace(/\/export$/, "")), " · " + esriCredit);
+}
 const overviewBasemap={bounds:contextBounds,density:1536/(contextBounds.east-contextBounds.west)};
 let viewportBasemap=null, basemapTimer, basemapTarget;
 const drawFont = '700 12px "DM Sans","Avenir Next",system-ui,sans-serif';
@@ -325,7 +329,7 @@ function draw(){
   const meters=[50,100,200,500,1000,2000,5000,10000,20000,40000].filter(x=>x*t.factor<width*.24).at(-1)||50;
   $("scale").textContent=meters>=1000?meters/1000+" km":meters+" m";
   $("scale").style.width=meters*t.factor+"px";
-  $("credit").textContent=basemapVisible?"Esri World Topographic Map and contributors · HydroLAKES":"HydroLAKES · geographic reference";
+  $("basemap-credit").hidden = !basemapVisible;
   drawLocator();
 }
 function drawLocator(){
@@ -333,7 +337,7 @@ function drawLocator(){
   if(!dim)return;
   const cam=reservoirCamera(dim.width,dim.height);
   const t=transform(cam,dim.width,dim.height);
-  drawContext(miniContext,t);
+  $("locator-basemap-credit").hidden = !drawContext(miniContext,t);
   drawFootprint(miniContext,t);
   drawContextLabels(miniContext,t,true);
   if(map.clientWidth){
@@ -527,7 +531,11 @@ function details(){
     node("p","20 m cells on WGS 84 / UTM zone 36N. Sentinel‑2 scene classes were aligned with nearest-neighbor resampling. Only mapped vegetation or bare land count as land. Water is class 6."));
   const list=node("ul");
   for(const r of ordered("radar"))list.append(node("li","NISAR · "+showTime(r.time)+" · "+r.id));
-  for(const w of ordered("water"))for(const r of w.sources)list.append(node("li","Sentinel‑2 · "+showTime(r.datetime||r.date)+" · "+r.id));
+  for(const w of ordered("water"))for(const r of w.sources) {
+    const item = node("li","Sentinel‑2 · "+showTime(r.datetime||r.date)+" · ");
+    item.append(link(r.id, "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/" + encodeURIComponent(r.id)));
+    list.append(item);
+  }
   const sources=node("p");
   sources.append(link("NISAR GCOV guide","https://nisar-docs.asf.alaska.edu/gcov/"),
     " · ",link("Sentinel‑2 processing and scene classes","https://sentiwiki.copernicus.eu/web/s2-processing"),
@@ -540,6 +548,8 @@ function details(){
   const downloads=node("p","Original HH power crops (GeoTIFF) · ");
   const repository="https://raw.githubusercontent.com/nhaile360/InfraSAR/main/roseires-crops/roseires_";
   downloads.append(link("29 Aug 2026",repository+"2026-08-29_HHHH.tif")," · ",link("16 Oct 2026",repository+"2026-10-16_HHHH.tif"));
+  downloads.append(" · ",link("Eight timeline crops and metadata",
+    "https://github.com/nhaile360/InfraSAR/tree/main/roseires-pipeline/outputs/timeline"));
   parent.append(downloads);
   if(pair.candidates.local||pair.candidates.fixed){
     parent.append(node("p","Radar candidates were generated from NISAR HH alone. The fixed rule uses −17 dB. The local rule uses a 3×3 median and compares reference water and land, with a 0.75 dB uncertainty band."));
@@ -548,7 +558,9 @@ function details(){
   const estimates=pilotRadar().map(r=>estimateHeight(r.time));
   height.append(link("DAHITI station 216","https://dahiti.dgfi.tum.de/en/216/"),
     " · Radar-date estimates "+estimates.map(v=>v===null?"unavailable":v.toFixed(2)+" m").join(" and ")+
-    ". Each is linearly interpolated between neighboring DAHITI observations. Heights describe the reservoir as a whole.");
+    ". Interpolated from neighboring observations. The difference has no propagated uncertainty interval. Heights describe the reservoir as a whole. ",
+    link("Schwatke et al. (2015)", "https://doi.org/10.5194/hess-19-4345-2015"), " · ",
+    link("DAHITI data licence", "https://dahiti.dgfi.tum.de/en/register/"));
   parent.append(height);
   for(const [name,idx] of [["Point A",toolState.points.A],["Point B",toolState.points.B],["Selected cell",toolState.chosen]]){
     if(idx===null)continue;
@@ -575,7 +587,7 @@ function updateEvidence(){
   $("evidence-water").textContent=agrees
     ?"Sentinel‑2 mapped this patch as land in August and water in October."
     : patch&&available
-      ?"The original Sentinel‑2 classification mapped this patch as land in August and water in October. The current mosaic adds observations from the neighboring tile."
+      ?"The published Sentinel‑2 comparison mapped the outlined patch as land in August and water in October. The current overlap or imported classes differ within the outline."
       :"The pilot’s Sentinel‑2 classification mapped the outlined study patch as land in August and water in October.";
   $("follow-up").disabled=toolState.examples.B===null;
   $("example-explanation").hidden=toolState.examples.B===null;
@@ -759,11 +771,11 @@ function timelineChartReading(id, event) {
 }
 function createCharts(){
   const definitions=[
-    ["radar-chart","Radar backscatter (dB)","HH points · provisional NISAR GCOV. Blank dates have no radar acquisition."],
-    ["water-chart","Optical scene class","Sentinel‑2 L2A derived classes. Square = land, circle = water, × = unclear or missing."],
-    ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates."]
+    ["radar-chart","Radar backscatter (dB)","HH points · provisional NISAR GCOV. Blank dates have no radar acquisition.","Acquisitions and processing","https://github.com/nhaile360/InfraSAR/blob/main/roseires-pipeline/NISAR_TIMELINE.md"],
+    ["water-chart","Optical scene class","Sentinel‑2 L2A derived classes. Square = land, circle = water, × = unclear or missing.","Scene identifiers and dates","https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md#inputs"],
+    ["height-chart","Reservoir height (m)","DAHITI. Filled circles and bars show measured height and uncertainty. Hollow diamonds show estimates.","DAHITI station 216","https://dahiti.dgfi.tum.de/en/216/"]
   ];
-  for(const [id,title,note] of definitions){
+  for(const [id,title,note,label,url] of definitions){
     const wrapper=node("section",null,id==="water-chart"?"chart waterchart":"chart");
     const h=node("h3",title), c=node("canvas"), key=node("p",note), reading=node("output",null,"chart-tooltip");
     c.id=id;
@@ -792,7 +804,10 @@ function createCharts(){
       if(!Object.hasOwn(targets,event.key))return;
       event.preventDefault();pause();goToTime(targets[event.key]);
     });
-    wrapper.append(h,c,key,reading);$("charts").append(wrapper);
+    const citation=node("p",null,"science-links");
+    citation.append(link(label,url));
+    wrapper.append(h,c,key,reading,citation);
+    $("charts").append(wrapper);
   }
 }
 function timeDomain(){
@@ -1209,6 +1224,9 @@ async function init(){
   for(const bundle of seed.bundles)await addBundle(bundle);
   for(const record of seed.radar_observations||[])await addRadarObservation(record);
   if(seed.patch)baseMask=await unpack(seed.patch);
+  $("map-source-details").addEventListener("click", () => {
+    $("data-details").open = true;
+  });
   createCharts();
   activateMap();
   for(const button of document.querySelectorAll("[data-view]"))button.addEventListener("click",()=>setView(button.dataset.view));

@@ -1,0 +1,99 @@
+# InfraSAR scientific report
+
+InfraSAR studies an inlet of Roseires Reservoir on the Blue Nile, Sudan. The [NASA Space Apps Earth System Trend Detective challenge](https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/) calls for a defined variable and region, a time series, an estimated rate, and an assessment of significance. InfraSAR separates local radar and optical observations, reservoir-wide height and area, and atmospheric grid-cell rainfall.
+
+## Source inventory
+
+Dates are UTC unless noted. Provider records were checked during this audit on **2026-11-16 UTC**. Where original access timestamps were not archived, the date by which the input was present in the repository is given separately. These records use persistent identifiers and hashes for repeatability.
+
+### Inputs
+
+| Publisher and product | Version, acquisition and access | Coverage and resolution | Access, attribution and role |
+| --- | --- | --- | --- |
+| NASA/JPL and ISRO, distributed by ASF DAAC. [NISAR L-band L2 Provisional Geocoded Polarimetric Covariance](https://cmr.earthdata.nasa.gov/search/concepts/C2854338529-ASF.html) | CMR PROVISIONAL V1, product 1.0.11, CRID P05023. Ten acquisitions June 18–Oct 16, 2026. The pilot crops were present by Nov 15, 2026. Eight additional crops were streamed Nov 15 Pacific time. | Ascending track 057, frame 007, Frequency A 20 MHz HH. Eight HH+HV (DHDH), two HH-only (SHSH). The local 20 m posted UTM 36N crop is 711 × 446 cells, or 14.22 × 8.92 km. | Public CMR metadata, Earthdata Login for HDF5. Credit NASA–ISRO and ASF. HH gamma-zero power supplies the radar display, dB readings, and candidate rules. Granule IDs, UTC times, footprints, and provider checksums are in the [catalog](../roseires-pipeline/nisar_catalog.json). [Pilot crop hashes](../roseires-pipeline/outputs/pilot/radar_predictions.json) and [additional crop hashes](../roseires-pipeline/outputs/timeline/manifest.json) verify extracted bytes. Whole streamed HDF5s were not hashed. |
+| European Union Copernicus Sentinel‑2C MSI Level‑2A, ESA processing, distributed as COG assets via [Element 84 Earth Search](https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a) | Aug 26, 2026, processing baseline 05.12, and Oct 15, 2026, baseline 05.13, both relative orbit 035. Exact items below. The locked optical provenance was present Nov 15, 2026. The original COG access time was not recorded. | Tiles 36PXT and 36PXU; 20 m Scene Classification Layer (SCL). Nearest-neighbor cropped onto the UTM 36N radar grid. | Public AWS COG assets. **Contains modified Copernicus Sentinel data 2026.** SCL is the optical comparison reference. Cite the [Sentinel data licence](https://ewds.climate.copernicus.eu/licences/ec-sentinel), [processing guide](https://sentiwiki.copernicus.eu/web/s2-processing), and [original asset URLs](../roseires-pipeline/outputs/pilot/optical_provenance.json). |
+| DGFI‑TUM, [DAHITI multi-mission satellite altimetry, Roseires station 216](https://dahiti.dgfi.tum.de/en/216/) | Local snapshot of 21 readings, Aug 7–Nov 2, 2026, present by Nov 15. Exact retrieval timestamp, product release and per-reading mission IDs were not recorded. | Reservoir-wide point series with irregular sampling, heights and reported uncertainty in meters. Station 11.7652° N, 34.4083° E; no raster pixel size. | Public station metadata; authenticated downloads. The provider lists the datasets as [CC BY 4.0](https://dahiti.dgfi.tum.de/en/register/). Credit DGFI‑TUM and [Schwatke et al. (2015)](https://doi.org/10.5194/hess-19-4345-2015). [Frozen readings](../roseires-visuals/src/dahiti-216.json) support the height chart and radar-date interpolation. |
+| NASA Langley POWER based on NASA GMAO MERRA‑2. [Corrected monthly precipitation PRECTOTCORR](https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR&community=AG&longitude=34.4673&latitude=11.7285&start=1981&end=2024&format=JSON) | Archived API v2.10.0. Jan 1981–Dec 2024, local solar time. Retrieved Nov 15, 2026. | One 0.5° × 0.625° grid cell near 11.729° N, 34.467° E. 528 mean monthly rates in mm/day supply 44 calendar-year totals in mm. | Public API; credit both [NASA POWER](https://power.larc.nasa.gov/docs/acknowledgements/) and MERRA‑2. The [archived response](../roseires-trends/nasa-power-roseires.json) supplies the rainfall analysis. |
+| NASA Terra MODIS, NASA LP DAAC. [Water Reservoir Monthly L3 Global](https://doi.org/10.5067/MODIS/MOD28C3.061) | MOD28C3 Collection 6.1, lake 111, GRanD ID 4483. Mar 2000–Jul 2026. The derived CSV existed by Nov 15; per-granule retrieval dates were not recorded. | Monthly whole-reservoir surface area in km². Product composites eight-day area classifications. The area series has no per-pixel output. | Original HDF4 granules through Earthdata. Cite the product DOI. The [CSV](../roseires-trends/roseires_modis_monthly_surface_area.csv) includes 312 source file names and SHA-256 checksums, including fill-value granules. Used for the 2013 level-shift model and later slope. [Product record](https://data.nasa.gov/dataset/modis-terra-water-reservoir-monthly-l3-global-v061-a2581) · [Collection 6.1 guide](https://modis-land.gsfc.nasa.gov/pdf/MODIS_MOD28_User_Guide_1.1_20210702_zero_storage.pdf) |
+| HydroSHEDS / McGill, [HydroLAKES](https://www.hydrosheds.org/products/hydrolakes), [Messager et al. (2016)](https://doi.org/10.1038/ncomms13603) | v1.0, feature 1543, exported by Nov 15. Historical SRTM Water Body Data source, exact feature vintage unrecorded. | Whole-reservoir historic outline. Exported in EPSG:32636, generalized at 20 m and coordinates rounded to 1 m. These are export settings. | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Credit HydroLAKES and identify projection and generalization. [Frozen geometry and source query](../roseires-visuals/src/roseires-reservoir.json) provide map context. |
+| Esri and contributors, [ArcGIS World Topographic Map](https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer) | Live service, metadata checked Nov 16, 2026. No single pinned vintage or version. | Global contextual cartography; source detail varies with place and display scale. | Esri service terms apply. The map displays the service's full copyright string when imagery is visible. The app requests viewport and overview images at runtime. Basemap pixels do not enter any scientific calculation. [Esri attribution guidance](https://support.esri.com/en-us/knowledge-base/what-is-the-correct-way-to-cite-an-arcgis-online-basema-000012040) |
+| [OpenStreetMap dam way 306787728](https://www.openstreetmap.org/way/306787728) and [GeoNames Sudan gazetteer](https://www.geonames.org/search.html?country=SD) | Live reference sources. Local point labels in the project by Nov 15. Exact feature revision and GeoNames source ID were not archived. | Approximate dam and town points in UTM 36N, with no grid resolution. | Credit [OpenStreetMap contributors (ODbL)](https://www.openstreetmap.org/copyright) and [GeoNames (CC BY)](https://www.geonames.org/export/). Context only. |
+
+| Earth Search item | Tile observation time UTC | Native SAFE identifier |
+| --- | --- | --- |
+| [Aug 36PXT](https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_36PXT_20260826_0_L2A) | Aug 26 08:16:57.978 | S2C_MSIL2A_20260826T075611_N0512_R035_T36PXT_20260826T114616.SAFE |
+| [Aug 36PXU](https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_36PXU_20260826_0_L2A) | Aug 26 08:16:43.517 | S2C_MSIL2A_20260826T075611_N0512_R035_T36PXU_20260826T114616.SAFE |
+| [Oct 36PXT](https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_36PXT_20261015_0_L2A) | Oct 15 08:17:01.563 | S2C_MSIL2A_20261015T075911_N0513_R035_T36PXT_20261015T114459.SAFE |
+| [Oct 36PXU](https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_36PXU_20261015_0_L2A) | Oct 15 08:16:47.091 | S2C_MSIL2A_20261015T075911_N0513_R035_T36PXU_20261015T114459.SAFE |
+
+The tile times above are the STAC observation fields. SAFE identifiers also contain the datatake and product times. The frozen comparator retains four aligned source SCL arrays; complete optical COGs were not hashed when originally extracted.
+
+### Supporting and upstream references
+
+Reviewed Nov 16, 2026 UTC. Publications are cited, not bundled, and retain their publishers’ terms. Statistical references have no spatial resolution or study time series.
+
+| Publisher, title and identifier | Date or version; project role |
+| --- | --- |
+| NASA Science and ISRO, [NISAR mission concept](https://science.nasa.gov/mission/nisar/mission-concept/); ASF, [GCOV guide](https://nisar-docs.asf.alaska.edu/gcov/) | Live pages establish active microwave imaging through clouds and in darkness, gamma-zero radiometry and posting. GCOV processing uses a reference DEM based on Copernicus 30 m and 90 m products. The actual per-granule DEM selection was not archived in InfraSAR. |
+| ESA/Copernicus, [Sentinel‑2 MSI L2A processing](https://sentiwiki.copernicus.eu/web/s2-processing) | Live documentation supports SCL meanings, 20 m classification, and upstream correction. InfraSAR uses delivered classes rather than rerunning atmospheric correction. |
+| DGFI‑TUM / Copernicus Publications, Schwatke, Dettmering, Bosch & Seitz, [DAHITI: multi-mission satellite altimetry](https://doi.org/10.5194/hess-19-4345-2015) | 2015, HESS 19, CC BY 3.0 paper. Supports the provider’s reservoir-level method. The radar-date interpolation is an InfraSAR calculation. |
+| NASA GMAO / American Meteorological Society, Gelaro et al., [MERRA‑2](https://ntrs.nasa.gov/citations/20160005045) (doi:10.1175/JCLI-D-16-0758.1); NASA Langley, [POWER data methodology](https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/) | 2017 paper and live methodology. Global reanalysis provides the model grid and observation-corrected land precipitation. Gauges and modeled forcings are upstream and are not separately used by InfraSAR. |
+| NASA MODIS science team, [Global Water Reservoir algorithm and documentation](https://modis-land.gsfc.nasa.gov/pdf/MODIS_MOD28_User_Guide_1.1_20210702_zero_storage.pdf) | Terra MOD28C2 Collection 6.1 supplies eight-day area classifications to MOD28C3. GRanD identifies the reservoir. Storage and evaporation upstream variables do not enter this analysis. |
+| NASA/NGA, [SRTM Water Body Data](https://doi.org/10.5067/MEaSUREs/SRTM/SRTMSWBD.003) | SRTM flew Feb 2000. Historical vector-water input to HydroLAKES. InfraSAR uses the HydroLAKES feature export. |
+| Econometric Society, Newey & West, [Autocorrelation-consistent covariance estimator](https://doi.org/10.2307/1913610) | 1987, Econometrica 55. Basis of both rainfall and MODIS inference. InfraSAR documents Bartlett weighting, finite-sample scaling, its selected lags, and the normal approximation separately. |
+| American Statistical Association, Sen, [Regression coefficient based on Kendall’s tau](https://doi.org/10.2307/2285891); Elsevier, Hamed & Rao, [Modified Mann–Kendall for autocorrelated data](https://doi.org/10.1016/S0022-1694%2897%2900125-X) | 1968 and 1998. Theil–Sen is used descriptively as the median pairwise slope. Hamed–Rao explains why serial dependence matters to inference; its test was not run here. |
+| Institute of Mathematical Statistics, Schwarz, [Estimating the dimension of a model](https://doi.org/10.1214/aos/1176344136) | 1978. Basis for the exploratory BIC screen. InfraSAR penalizes both fitted level shifts and searched locations. |
+| International Hydropower Association, [Sudan – Roseires](https://www.hydropower.org/sediment-management-case-studies/sudan-roseires) | Publication date unstated. Reports commissioning in 1966 and commissioning of the heightening in 2013. Defines historical context and the 2013 interruption date; it does not establish cause for the fitted shift. |
+| NASA Space Apps, [Be An Earth System Trend Detective!](https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/) | 2026. Defines the challenge requirements for time-series display, trend magnitude and significance. |
+
+### Investigated and optional inputs
+
+- The catalog had 38 provisional granules. Twenty-eight from different tracks or frames were excluded. The separate [VALIDATED collection](https://cmr.earthdata.nasa.gov/search/concepts/C3622241360-ASF.html) returned zero for the study area on Oct 21–23. BETA products, GSLC and 40 MHz acquisitions contributed no values.
+- August 17 and October 4 are verified radar scenes. The optional optical holdout pipeline exists, but no independently paired optical holdout is deployed. User-loaded comparator HTML, HH JSON, SCL TIFFs, and compatible masks are local session inputs.
+- Aqua, other MODIS collections, MODIS storage and evaporation, and DAHITI area and volume were excluded from the published fits.
+
+## Claim audit
+
+| App claim | Evidence and calculation | Limits |
+| --- | --- | --- |
+| Sentinel‑2 mapped water farther into the outlined inlet. | The [fixed mask](../roseires-pipeline/outputs/pilot/inlet_patch_mask.tif) contains 108 cells, or 43,200 m² of grid area. All 108 have August SCL 5 (bare land) and October SCL 6 (water) in the checksummed comparator. | Local case study. Area is the outlined grid footprint. SCL is subject to cloud, shadow, overlap, mixed pixels and date mismatch. |
+| HH weakened by 4.32 dB at the inlet. | Convert both positive HH power rasters with 10 × log10(power). Subtract August from October at each mask cell, then take the median, −4.32091 dB. The middle half of cellwise changes spans −8.07 to +3.85 dB. [Prediction manifest](../roseires-pipeline/outputs/pilot/radar_predictions.json) | Moisture, roughness, vegetation and speckle can change HH. The case study does not validate a general radar flood detector. |
+| Radar-only classification agreed infrequently with the usable optical reference. | [Frozen scores](../roseires-pipeline/outputs/pilot/scores.json) compare both rules in 269,220 of 317,106 cells (84.90%). Precision = hits / (hits + false alarms). Recall = hits / (hits + misses). | SCL was acquired 3 days before August radar and 1 day before October radar. Unusable SCL is excluded. Radar abstentions on usable optical event cells count as misses. Agreement with SCL does not establish absolute accuracy. |
+| Reservoir height rose about 1.15 m between the two pilot radar passes. | Linear interpolation by elapsed UTC time gives 486.78794 m on Aug 29 (brackets Aug 28–Sep 1) and 487.93544 m on Oct 16 (brackets Oct 12–19), a +1.14750 m difference. [Frozen observations](../roseires-visuals/src/dahiti-216.json) | DAHITI reports errors on provider observations. The interpolated difference is a point estimate without a propagated interval. It represents reservoir-wide height. |
+| The expanded radar sequence is variable. | In the compatible DHDH series, median cellwise HH change from Aug 29 to Sep 10 was −8.56 dB, then readings rose through mid-October. [Same-mode analysis](../roseires-pipeline/NISAR_TIMELINE.md) | The eight extra observations are radar-only. Inundation frequency and causes remain unresolved. |
+| Full-record rainfall trend is inconclusive. | Multiply 528 monthly rates by actual days and sum 12 per year. OLS on 44 complete totals, 1981–2024, gives +1.52 mm/year; 95% CI −9.99 to +13.04; p = 0.795 with three-year Newey–West lags. One- and five-lag intervals also span zero. [Statistical analysis](../roseires-trends/README.md) | Lag-one residual autocorrelation ~0.75. The small-sample interval is approximate and excludes systematic reanalysis error. The plotted band is pointwise uncertainty for the fitted mean. The 2003–2024 and other custom windows are exploratory. The rainfall record ends in 2024. |
+| MODIS area shifted around 2013, with uncertainty about the later trend. | 235 published values, 77 fill values and five missing granule months. Seasonal level/slope model estimates +164.07 km² at the 2013 breakpoint (95% CI 107.55 to 220.59). The separate later slope is −1.26 km²/year (95% CI −3.34 to +0.82, p = 0.234). [Seasonal model and data policy](../roseires-trends/README.md#modis-reservoir-surface-area) | Jan–May and Oct–Dec have comparable coverage and are used in both fits. Missing months remain gaps. Timing alone does not identify the cause of the level shift. |
+| The map shows a historic reservoir outline and an inlet study footprint. | The pale outline is HydroLAKES. The dashed box represents the 711 × 446 study raster. The yellow outline is the frozen 108-cell mask. | Display interpolation changes rendered colors between cell centers. The analytical grids and values are unchanged. |
+
+| Radar rule / event | Hits | Misses | False alarms | Precision | Recall |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Fixed / gain | 663 | 5,160 | 7,969 | 7.68% | 11.39% |
+| Local / gain | 85 | 5,738 | 10,230 | 0.82% | 1.46% |
+| Fixed / loss | 211 | 165 | 64,735 | 0.32% | 56.12% |
+| Local / loss | 0 | 376 | 125 | 0.00% | 0.00% |
+
+## Reproduce the application
+
+1. Create the [Conda environment](../roseires-pipeline/environment.yml) for upstream raster processing. Earthdata Login is required for native ASF and LP DAAC files. Keep credentials in the ignored local .env. Follow the [catalog and extraction workflow](../roseires-pipeline/NISAR_TIMELINE.md) to crop Frequency A HHHH. It preserves Float32 power and samples the native raster onto the existing 20 m WGS 84 / UTM 36N grid.
+2. Follow [Sentinel‑2 extraction and radar validation](../roseires-pipeline/README.md). Freeze radar predictions before optical scoring. Fixed water uses HH ≤ −17 dB. The local rule uses a 3×3 median, the midpoint of open-water P90 and land P10 controls, and a ±0.75 dB ambiguity interval. The mosaic prefers usable classes and retains land/water conflicts as unknown. Use the frozen inlet mask to reproduce the exact local case study. The viewer’s optional mask reconstruction searches a 136 × 136 inlet window for a connected land-to-water group with the same cell count and radar signature.
+3. For new DAHITI downloads, use station 216 and preserve UTC times, height and uncertainty. The existing snapshot supports an offline rebuild. Use the POWER archive with analyze_power.py. Use extract_modis.py with the downloaded Collection 6.1 HDF4 files or the frozen CSV with analyze_modis.py. The [statistical notes](../roseires-trends/README.md) document both models, missing-data policy, confidence intervals and sensitivity checks.
+4. Verify the [24 locked input hashes](scientific-inputs.sha256) and run the following commands from the project root. Python 3.12 and the pinned dependency ranges in requirements-site.txt support the public build. No authentication is needed for this rebuild.
+
+```sh
+python -m pip install -r requirements-site.txt
+python scripts/verify_science.py
+python -m unittest discover -s roseires-trends -p 'test_*.py'
+python -m unittest discover -s roseires-pipeline -p 'test_*.py'
+python scripts/build_site.py
+python -m pip install "playwright>=1.52,<2"
+python -m playwright install chromium
+python scripts/smoke_site.py dist/index.html
+```
+
+## Tests and deployment
+
+The [GitHub Pages workflow](../.github/workflows/pages.yml) checks the scientific inputs, recomputes key claims, rebuilds the site, and runs the browser suite before publishing on main. The public browser checks use the exact Git SHA and confirm generated output hashes. Coverage includes map overlays and attribution, keyboard and touch, scientific links, point and date interactions, local comparator/HH imports, trend values, and MODIS gaps.
+
+- [Public website](https://nhaile360.github.io/InfraSAR/)
+- [Deployed commit and output hashes](https://nhaile360.github.io/InfraSAR/version.json)
+- [Test and deployment results](https://github.com/nhaile360/InfraSAR/actions/workflows/pages.yml)

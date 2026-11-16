@@ -83,13 +83,15 @@
         </div>
         <div class="map-meta">
           <label id="radar-display">Radar display <select id="radar-rendering"><option value="smooth">Interpolated</option><option value="raw">Original cells</option></select></label>
-          <div class="map-credit" id="credit">HydroLAKES · geographic reference</div>
+          <div class="map-credit" id="credit"><a href="https://www.hydrosheds.org/products/hydrolakes">Historical HydroLAKES outline</a></div>
         </div>
+        <p id="basemap-credit" class="service-credit" hidden></p>
+        <p class="science-links">Contains modified Copernicus Sentinel data 2026. <a id="map-source-details" href="#data-details">Map data and sources</a></p>
         <div id="legend" class="legend" aria-label="Map legend"></div>
       </div>
       <aside class="side">
         <section class="evidence" id="evidence" aria-label="Evidence at the inlet">
-          <h2 id="evidence-title">Water reached farther into this inlet.</h2>
+          <h2 id="evidence-title">Sentinel‑2 mapped water farther into this inlet.</h2>
           <div class="finding">
             <h3><span class="evidence-icon water-icon" aria-hidden="true"></span> Water map</h3>
             <p id="evidence-water">Sentinel‑2 mapped this patch as land in August and water in October.</p>
@@ -101,10 +103,11 @@
           </div>
           <div class="finding">
             <h3><span class="evidence-icon height-icon" aria-hidden="true"></span> Reservoir level</h3>
-            <p>The reservoir rose about <strong>1.15 m</strong> between the radar passes.</p>
-            <p class="note">DAHITI estimate</p>
+            <p>Estimated reservoir height rose about <strong>1.15 m</strong> between the radar passes.</p>
+            <p class="note"><a href="https://dahiti.dgfi.tum.de/en/216/">DAHITI station 216</a> · interpolated to radar times</p>
           </div>
           <p id="pilot-score" class="pilot-score" hidden></p>
+          <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md#claim-audit">Evidence, methods and validation scores</a></p>
           <button type="button" id="follow-up" class="follow-up">Compare the inlet with nearby dry land <span aria-hidden="true">→</span></button>
           <details class="sensor-method">
             <summary>Why use radar and optical imagery?</summary>
@@ -126,6 +129,7 @@
             <button type="button" id="loc-dam"><i aria-hidden="true"></i> Full reservoir</button>
             <button type="button" id="loc-inlet"><i aria-hidden="true"></i> Study inlet</button>
           </div>
+          <p id="locator-basemap-credit" class="service-credit" hidden></p>
         </section>
       </aside>
     </div>
@@ -207,19 +211,21 @@
       <p id="trend-diagnostics"></p>
       <div id="rainfall-sources">
         <p>NASA POWER PRECTOTCORR is an observation-corrected MERRA-2 reanalysis estimate. The 0.5° × 0.625° cell is centered near 11.729° N, 34.467° E. The record ends in 2024. Explaining the 2026 shoreline change would require evidence about inflow, reservoir operations, and water levels at that time.</p>
-        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a></p>
+        <p><a id="trend-source" href="https://power.larc.nasa.gov/">Original NASA response</a> · <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/">NASA POWER methodology</a> · <a href="https://ntrs.nasa.gov/citations/20160005045">MERRA‑2 paper</a> · <a href="https://doi.org/10.2307/1913610">Newey–West covariance</a></p></p>
       </div>
-      <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://modis.gsfc.nasa.gov/data/dataprod/mod28.php">NASA MODIS reservoir product</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
+      <p id="modis-sources" hidden><a id="modis-csv" href="roseires_modis_monthly_surface_area.csv">Monthly CSV and source checksums</a> · <a href="https://doi.org/10.5067/MODIS/MOD28C3.061">NASA Terra MOD28C3.061</a> · <a href="https://www.hydropower.org/sediment-management-case-studies/sudan-roseires">Roseires dam heightening</a></p>
     </details>
+    <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/roseires-trends/README.md">Trend methods and reproducibility</a></p>
     <p class="return-link"><a href="#shoreline" data-investigation>Return to the 2026 shoreline</a></p>
   </section>
   <details id="data-details">
     <summary>Data details</summary>
+    <p class="science-links"><a href="https://github.com/nhaile360/InfraSAR/blob/main/docs/SCIENTIFIC_REPORT.md">Scientific report and source inventory</a> · <a href="https://nhaile360.github.io/InfraSAR/scientific-inputs.sha256">Scientific input checksums</a></p>
     <div class="details-grid">
       <div><h3>Acquisitions and methods</h3><div id="methods"></div></div>
       <div><h3>Map context</h3>
         <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
-        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
+        <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
         <h3>Load more observations</h3>
         <p>Choose a processed radar observation JSON, a comparator HTML, or the SCL GeoTIFFs and inlet mask. Files are read on this device.</p>
         <label for="add-data" class="file-label">Processed observation files</label>

@@ -1,34 +1,31 @@
 # InfraSAR
-NASA Space Apps project exploring reservoir shoreline change at Roseires with NISAR and Sentinel-2.
 
-The static site opens at [index.html](index.html). Start at the 2026 inlet comparison and open **Long-term observations** to investigate reservoir surface area or rainfall.
+InfraSAR is a NASA Space Apps [Earth System Trend Detective](https://www.spaceappschallenge.org/2026/challenges/earth-system-trend-detective/) project about Roseires Reservoir, Sudan.
 
-The bundled long-term records include NASA POWER precipitation for the MERRA-2 grid cell near Roseires and NASA Terra MODIS monthly reservoir surface area. See the [analysis and provenance](roseires-trends/README.md), [explorer build instructions](roseires-visuals/README.md), and [shoreline processing pipeline](roseires-pipeline/README.md).
+Open the [public GitHub Pages explorer](https://nhaile360.github.io/InfraSAR/). **2026 shoreline** compares the NISAR radar and Sentinel‑2 optical pilot scenes. **Timeline** shows ten verified provisional NISAR passes, including eight radar-only passes, alongside optical classifications and DAHITI reservoir heights. **Long-term observations** presents separate NASA POWER rainfall and NASA Terra MODIS reservoir-area analyses. The same viewer is available in the standalone index.html and InfraSAR-Roseires.html files.
+
+- [Scientific report, source inventory, and claim audit](docs/SCIENTIFIC_REPORT.md)
+- [Locked scientific input hashes](docs/scientific-inputs.sha256)
+- [Shoreline processing](roseires-pipeline/README.md), [NISAR inventory](roseires-pipeline/NISAR_TIMELINE.md), and [trend analysis](roseires-trends/README.md)
+- [Explorer controls and offline build](roseires-visuals/README.md)
 
 ## Build and publish
 
-Run the static build with Python 3.12. The build uses the checked-in scientific artifacts, and visitors only need a browser.
+Use Python 3.12. The website builds from the checked-in scientific inputs without credentials. Original upstream downloads use provider authentication as described in the report.
 
 ```sh
 python -m pip install -r requirements-site.txt
+python scripts/verify_science.py
 python -m unittest discover -s roseires-trends -p 'test_*.py'
+python -m unittest discover -s roseires-pipeline -p 'test_*.py'
 python scripts/build_site.py
-```
-
-The build writes `dist/index.html`, `dist/version.json`, and the derived MODIS CSV. The version file identifies the commit on GitHub Actions and Cloudflare Pages. Publish only `dist/`. When updating the checked-in standalone copies, copy `dist/index.html` to both `index.html` and `InfraSAR-Roseires.html`.
-
-The [GitHub Actions workflow](.github/workflows/pages.yml) builds and browser-tests every push to `main`. Where the repository's plan supports Pages, choose **GitHub Actions** under **Settings → Pages**, then run **Build and deploy InfraSAR** from the Actions tab. Future pushes to `main` deploy automatically. The workflow checks the deployed commit and tests the public site in Chromium.
-
-For a private-repository Cloudflare Pages deployment, connect the GitHub repository in the Cloudflare Pages dashboard, set **Production branch** to `main`, and use `dist` as the output directory. Use Python 3.12 and the build command below. Cloudflare will build future pushes to `main`.
-
-```sh
-python -m pip install -r requirements-site.txt && python scripts/build_site.py
-```
-
-The site build needs no Earthdata credentials. Browser smoke tests can also be run locally with Playwright and Chromium installed.
-
-```sh
 python -m pip install "playwright>=1.52,<2"
 python -m playwright install chromium
 python scripts/smoke_site.py dist/index.html
 ```
+
+The build generates index.html, version.json, the MODIS CSV, and scientific-inputs.sha256 in dist/. When updating the standalone copies, copy dist/index.html to both root HTML files.
+
+The [GitHub Actions workflow](.github/workflows/pages.yml) validates the inputs and browser-tests the site before publishing dist/ to GitHub Pages on main. The live [version record](https://nhaile360.github.io/InfraSAR/version.json) gives the commit and SHA-256 hashes of the deployed assets. [Deployment runs](https://github.com/nhaile360/InfraSAR/actions/workflows/pages.yml) record the public-site test results.
+
+Contains modified Copernicus Sentinel data 2026. The scientific report lists provider and licence credits for all other input sources.
