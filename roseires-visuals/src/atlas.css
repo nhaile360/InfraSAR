@@ -182,3 +182,19 @@ h1{color:var(--ink-dark);font:600 clamp(2.65rem,4.6vw,4.8rem)/.98 "Instrument Se
 .trend-table table{border-collapse:collapse;width:100%;text-align:left;font-size:.78rem;font-variant-numeric:tabular-nums}
 .trend-table caption{text-align:left;font-weight:650}
 .trend-table th,.trend-table td{border-bottom:1px solid var(--line);padding:4px 9px 4px 0}
+.timeline{margin-top:14px;background:var(--white);border:1px solid var(--line);border-radius:12px;padding:clamp(12px,2.2vw,24px)}
+#charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:9px}
+.chart{min-width:0;padding:9px;border:1px solid var(--line);border-radius:9px;margin:0}
+.chart:first-child{grid-column:1/-1}
+.chart canvas{height:clamp(180px,25vw,266px)}
+.chart.waterchart canvas{height:clamp(180px,25vw,266px)}
+.chart canvas:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.chart .chart-tooltip,.chart-tooltip{display:block;background:#e9f1e8;color:var(--deep);border-radius:7px;padding:8px 10px;font-size:.83rem;line-height:1.45;margin-top:6px;min-height:3.8em}
+#timeline-readings .chart-key{margin:8px 0}
+.trend-year-range{display:flex;flex-wrap:wrap;align-items:end;gap:8px 15px}
+.trend-year-range p{font-size:.78rem;color:var(--muted);max-width:28ch}
+#trend-chart{height:clamp(235px,36vw,385px);cursor:crosshair}
+#trend-chart-key,.chart-scrub{font-size:.8rem;color:var(--muted)}
+.chart-scrub{display:grid;gap:2px;font-weight:700;margin-top:9px}
+.chart-scrub input{width:100%;min-height:32px;accent-color:var(--teal);margin:0}
+@media(max-width:720px){#charts{grid-template-columns:minmax(0,1fr)}}

@@ -11,6 +11,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "roseires-pipeline"))
 sys.path.insert(0, str(HERE.parent / "roseires-trends"))
 import pipeline as roseires
+from analyze_power import explorer_windows
 from analyze_modis import CSV_PATH as MODIS_CSV, analyze as analyze_modis
 
 
@@ -92,10 +93,11 @@ def main():
         args.radar_json_dir.mkdir(parents=True, exist_ok=True)
         for record in observations:
             roseires.dump(args.radar_json_dir / (record["id"] + ".json"), record)
+    trend = json.loads(args.trend.read_text())
     payload = {"grid": grid, "bundles": [pilot, *(processed_bundle(path, grid) for path in args.observations)],
                "radar_observations": observations,
                "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
-               "reservoir": reservoir, "trend": json.loads(args.trend.read_text()),
+               "reservoir": reservoir, "trend": trend, "rainfall_explorer": explorer_windows(trend),
                "modis": analyze_modis(args.modis_csv)}
     replacements = {"/* INFRASAR_STYLE */": (src / "atlas.css").read_text(),
                     "/* INFRASAR_SCRIPT */": "\n".join(
