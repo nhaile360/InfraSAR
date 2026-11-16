@@ -79,6 +79,29 @@ function validGrid(value) {
     && Math.abs(value.west-grid.west)<1e-5 && Math.abs(value.north-grid.north)<1e-5;
 }
 const loaded = {radar:new Map(), water:new Map(), pairs:new Map()};
+function radarRecord(record, raw, optical) {
+  const parts = record.id.split("_");
+  const maturity = record.maturity || (parts[2] === "PR" ? "PROVISIONAL" : "Unknown maturity");
+  return {type:"radar",time:record.datetime,id:record.id,raw,maturity,optical,
+    version:record.version || (parts[12] === "P05023" ? "1.0.11" : null),
+    release:record.release || parts[12], mode:record.mode || parts[9],
+    geometry:parts.slice(5,9).join(":"),cells:record.valid_cells};
+}
+function comparable(a, b) {
+  return Boolean(a && b && a.type === b.type && (a.type !== "radar" ||
+    (a.version && ["maturity","version","release","mode","geometry"].every(field => a[field] === b[field]))));
+}
+async function addRadarObservation(record) {
+  if (!validGrid(record.grid) || !/^NISAR_L2_PR_GCOV_[A-Z0-9_]+$/.test(record.id)
+      || !Number.isFinite(utc(record.datetime)) || !record.version || !record.release || !record.mode) {
+    throw new Error("Choose a verified single NISAR observation on the 20 m Roseires grid.");
+  }
+  const raw = await unpack(record.hh_db);
+  if (!(raw instanceof Float32Array) || !raw.some(Number.isFinite)) throw new Error("No usable radar readings.");
+  if ([...loaded.radar.values()].some(row => utc(row.time) === utc(record.datetime) || row.id === record.id))
+    throw new Error("This radar acquisition is already available.");
+  loaded.radar.set(record.datetime, radarRecord(record, raw, []));
+}
 async function addBundle(bundle) {
   if (!validGrid(bundle.grid) || !["pilot","holdout"].includes(bundle.pair)) throw new Error("Choose a scored Roseires pilot or holdout comparator on the same grid.");
   const records=bundle.radar?.radar;
@@ -92,8 +115,8 @@ async function addBundle(bundle) {
     const phase=i?"after":"before";
     const raw=processed["hh_"+phase];
     if (!(raw instanceof Float32Array)) throw new Error("The processed file is missing radar readings.");
-    radarRows.push({type:"radar",time:record.datetime,id:record.id,raw});
     const optical=bundle.optical_sources?.[day(record.datetime)], scl=processed["scl_"+phase];
+    radarRows.push(radarRecord(record,raw,optical&&scl instanceof Uint8Array ? Object.values(optical) : []));
     if (optical && scl instanceof Uint8Array) {
       const sources=Object.values(optical);
       const time=sources[0]?.datetime||sources[0]?.date;
@@ -103,7 +126,10 @@ async function addBundle(bundle) {
     }
   }
   for(const name of ["fixed","local"]) if(processed[name] instanceof Uint8Array) pair.candidates[name]=processed[name];
-  for(const row of radarRows){loaded.radar.set(row.time,row);pair.radar.push(row)}
+  for(const row of radarRows){
+    if (bundle.pair === "pilot" || !loaded.radar.has(row.time)) loaded.radar.set(row.time,row);
+    pair.radar.push(row);
+  }
   for(const row of waterRows){loaded.water.set(row.time,row);pair.water.push(row)}
   loaded.pairs.set(pair.name,pair);
   return pair;
@@ -112,7 +138,10 @@ function addWater(rows) {
   const pilot = loaded.pairs.get("pilot");
   for (const old of pilot.water) loaded.water.delete(old.time);
   pilot.water=rows;
-  for (const row of rows) loaded.water.set(row.time,row);
+  for (const [i,row] of rows.entries()) {
+    loaded.water.set(row.time,row);
+    if (pilot.radar[i]) pilot.radar[i].optical = row.sources;
+  }
 }
 function ordered(kind){return [...loaded[kind].values()].sort((a,b)=>utc(a.time)-utc(b.time))}
 function pilotWater(){return loaded.pairs.get("pilot").water}

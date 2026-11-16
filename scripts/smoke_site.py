@@ -335,6 +335,41 @@ def check_imported_dates(page):
     expect(page.get_by_role("slider",name="Drag to compare")).to_be_visible()
 
 
+def check_single_observation(page):
+    # An isolated browser fixture reuses a frozen plane. No fixture goes into the site data.
+    payload = page.evaluate("""() => {
+        const bundle = seed.bundles.find(item => item.pair === "pilot");
+        return JSON.stringify({
+            id:"NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001",
+            datetime:"2026-09-10T03:19:00Z", maturity:"PROVISIONAL", version:"1.0.11", release:"P05023",
+            mode:"DHDH", grid:seed.grid, hh_db:bundle.arrays.hh_before
+        });
+    }""")
+    page.get_by_text("Data details", exact=True).click()
+    page.locator("#add-data").set_input_files({
+        "name": "test-observation.json", "mimeType": "application/json", "buffer": payload.encode()
+    })
+    page.wait_for_function("loaded.radar.size === 3 && toolState.events.some(e => e.date.startsWith('2026-09-10'))")
+    assert page.evaluate("loaded.water.size === 2 && toolState.patch.cells.length === 108")
+    page.get_by_role("button", name="Timeline").click()
+    slider = page.get_by_role("slider", name="Timeline date")
+    index = page.evaluate("toolState.events.findIndex(event => event.date.startsWith('2026-09-10'))")
+    slider.press("Home")
+    for _ in range(index):
+        slider.press("ArrowRight")
+    expect(page.locator("#before")).to_contain_text("10 Sep")
+    status = page.locator("#time-status")
+    for label in ("PROVISIONAL", "Radar only", "Point A HH", "Point B HH"):
+        expect(status).to_contain_text(label)
+    assert page.evaluate("""() => {
+        const row = toolState.events[toolState.time].record;
+        const index = toolState.points.A;
+        return row.raw[index] === pilotRadar()[0].raw[index]
+            && !comparable(row, {...row, maturity:"VALIDATED"})
+            && !comparable(row, {...row, mode:"SHSH"});
+    }""")
+
+
 def check_touch(chromium, url, offline):
     with chromium.new_context(viewport={"width": 390, "height": 844},
                               device_scale_factor=2, has_touch=True, is_mobile=True) as mobile:
@@ -410,6 +445,10 @@ def main():
         assert not errors, errors
         check_touch(browser, url, offline)
         if offline:
+            single = browser.new_page(viewport={"width": 1280, "height": 900})
+            single_errors = open_site(single, url, offline)
+            check_single_observation(single)
+            assert not single_errors, single_errors
             check_imported_dates(page)
             assert not errors, errors
             check_basemap(browser, url)

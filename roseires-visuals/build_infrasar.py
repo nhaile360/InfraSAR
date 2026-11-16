@@ -12,6 +12,7 @@ sys.path.insert(0, str(HERE.parent / "roseires-pipeline"))
 sys.path.insert(0, str(HERE.parent / "roseires-trends"))
 import pipeline as roseires
 from analyze_modis import CSV_PATH as MODIS_CSV, analyze as analyze_modis
+from catalog_nisar import CATALOG
 
 
 def processed_bundle(path, grid):
@@ -37,12 +38,49 @@ def aligned_byte_raster(path, grid):
     return aligned
 
 
+def radar_observations(manifest, grid, patch):
+    if not manifest.is_file():
+        return []
+    catalog = {row["id"]: row for row in roseires.load(CATALOG)["granules"]
+               if row["status"] == "awaiting native HH verification"}
+    records = []
+    seen = set()
+    for record in roseires.load(manifest):
+        source = catalog[record["id"]]
+        for field in ("datetime", "maturity", "version", "release", "mode"):
+            if record[field] != source[field]:
+                raise ValueError(f"Observation metadata differs from CMR: {record['id']}")
+        if record["datetime"] in seen:
+            raise ValueError(f"Duplicate radar acquisition: {record['datetime']}")
+        seen.add(record["datetime"])
+        filename = f"roseires_{record['datetime'][:10]}_HHHH.tif"
+        path = manifest.parent / filename
+        if record["raster"] != filename or roseires.digest(path) != record["sha256"]:
+            raise ValueError(f"Radar crop does not match its manifest: {path}")
+        roseires.require_grid(record["grid"], grid, manifest)
+        raw, actual, _ = roseires.raster(path)
+        roseires.require_grid(actual, grid, path)
+        if raw.dtype != roseires.np.dtype("float32") or record["inlet_valid_cells"] < 1:
+            raise ValueError(f"Radar crop has an unsupported numeric type or no inlet observations: {path}")
+        raw_db = roseires.db(raw)
+        if record["source_nodata"] is not None:
+            raw_db[raw == float(record["source_nodata"])] = roseires.np.nan
+        valid = roseires.np.isfinite(raw_db)
+        if int(valid.sum()) != record["valid_cells"] or (patch is not None
+                and int(valid[patch].sum()) != record["inlet_valid_cells"]):
+            raise ValueError(f"Radar crop coverage differs from manifest: {path}")
+        records.append({**record, "hh_db": roseires.encode(raw_db)})
+    return records
+
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--pilot", type=Path, help="Scored pilot comparator.html")
     cli.add_argument("--observations", type=Path, action="append", default=[], help="Other scored comparator.html files")
     cli.add_argument("--august-scl", type=Path, help="Original aligned 36PXT classification")
     cli.add_argument("--october-scl", type=Path, help="Original aligned 36PXT classification")
+    cli.add_argument("--radar-manifest", type=Path, default=roseires.HERE / "outputs/timeline/manifest.json")
+    cli.add_argument("--radar-json-dir", type=Path, help="Export individual verified observations for local browser import")
     cli.add_argument("--patch", type=Path, help="Original aligned outlined patch mask")
     cli.add_argument("--trend", type=Path,
                      default=HERE.parent / "roseires-trends" / "power-analysis.json",
@@ -72,7 +110,7 @@ def main():
             scene_id = f"S2C_36PXT_{optical_date.replace('-', '')}_0_L2A"
             pilot["optical_sources"][radar_date] = {"36PXT": {"id": scene_id, "date": optical_date, "tile": "36PXT"}}
 
-    patch = None
+    patch = mask = None
     if args.patch:
         mask = aligned_byte_raster(args.patch, grid) == 1
         deltas = (raw[1] - raw[0])[mask]
@@ -84,7 +122,13 @@ def main():
     reservoir = json.loads((src / "roseires-reservoir.json").read_text())
     if reservoir["epsg"] != grid["epsg"]:
         raise ValueError("Reservoir geometry must use the study grid projection")
+    observations = radar_observations(args.radar_manifest, grid, mask)
+    if args.radar_json_dir:
+        args.radar_json_dir.mkdir(parents=True, exist_ok=True)
+        for record in observations:
+            roseires.dump(args.radar_json_dir / (record["id"] + ".json"), record)
     payload = {"grid": grid, "bundles": [pilot, *(processed_bundle(path, grid) for path in args.observations)],
+               "radar_observations": observations,
                "patch": patch, "heights": json.loads((src / "dahiti-216.json").read_text()),
                "reservoir": reservoir, "trend": json.loads(args.trend.read_text()),
                "modis": analyze_modis(args.modis_csv)}

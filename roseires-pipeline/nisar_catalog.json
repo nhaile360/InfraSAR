@@ -1,0 +1,2220 @@
+{
+  "bounding_box_lon_lat": [
+    34.35,
+    11.71,
+    34.48,
+    11.79
+  ],
+  "queries": {
+    "PROVISIONAL": {
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "concept_id": "C2854338529-ASF",
+      "start": "2026-06-17",
+      "end_inclusive": "2026-10-23",
+      "hits": 38
+    },
+    "VALIDATED": {
+      "collection": "NISAR_L2_GCOV_V1",
+      "concept_id": "C3622241360-ASF",
+      "start": "2026-10-21",
+      "end_inclusive": "2026-10-23",
+      "hits": 0
+    }
+  },
+  "granules": [
+    {
+      "concept_id": "G4248910954-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-06-18T03:19:04.000000Z",
+      "end": "2026-06-18T03:19:38.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.05508,
+                  "Longitude": 35.08492
+                },
+                {
+                  "Latitude": 12.14314,
+                  "Longitude": 34.60094
+                },
+                {
+                  "Latitude": 11.61774,
+                  "Longitude": 32.37956
+                },
+                {
+                  "Latitude": 9.54067,
+                  "Longitude": 32.88798
+                },
+                {
+                  "Latitude": 10.05508,
+                  "Longitude": 35.08492
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_057_A_007_2005_SHSH_A_20260618T031904_20260618T031938_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1434451968,
+      "source_checksum": {
+        "Value": "82ac38d8f232fa43758a038524c37414",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4244573346-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_023_122_D_082_2005_DHDH_M_20260622T161410_20260622T161445_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-06-22T16:14:10.000000Z",
+      "end": "2026-06-22T16:14:45.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.18454,
+                  "Longitude": 33.07939
+                },
+                {
+                  "Latitude": 12.04075,
+                  "Longitude": 32.55928
+                },
+                {
+                  "Latitude": 11.50967,
+                  "Longitude": 34.80583
+                },
+                {
+                  "Latitude": 13.64448,
+                  "Longitude": 35.3422
+                },
+                {
+                  "Latitude": 14.18454,
+                  "Longitude": 33.07939
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_122_D_082_2005_DHDH_M_20260622T161410_20260622T161445_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_122_D_082_2005_DHDH_M_20260622T161410_20260622T161445_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1828716544,
+      "source_checksum": {
+        "Value": "27cc50688b6bffa82a1530657a74bcbc",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4244721773-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_023_122_D_083_2005_DHDH_A_20260622T161444_20260622T161518_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-06-22T16:14:44.000000Z",
+      "end": "2026-06-22T16:15:18.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.1546,
+                  "Longitude": 32.61043
+                },
+                {
+                  "Latitude": 10.06927,
+                  "Longitude": 32.11501
+                },
+                {
+                  "Latitude": 9.54963,
+                  "Longitude": 34.33388
+                },
+                {
+                  "Latitude": 11.62765,
+                  "Longitude": 34.83783
+                },
+                {
+                  "Latitude": 12.1546,
+                  "Longitude": 32.61043
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_122_D_083_2005_DHDH_A_20260622T161444_20260622T161518_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_122_D_083_2005_DHDH_A_20260622T161444_20260622T161518_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1816133632,
+      "source_checksum": {
+        "Value": "7b20ccd0d0956e85e10b560c8095a92a",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4244724799-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_023_129_A_008_2005_DHDH_M_20260623T031118_20260623T031153_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-06-23T03:11:18.000000Z",
+      "end": "2026-06-23T03:11:53.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.06292,
+                  "Longitude": 36.70846
+                },
+                {
+                  "Latitude": 14.21039,
+                  "Longitude": 36.20376
+                },
+                {
+                  "Latitude": 13.66912,
+                  "Longitude": 33.93603
+                },
+                {
+                  "Latitude": 11.53417,
+                  "Longitude": 34.47221
+                },
+                {
+                  "Latitude": 12.06292,
+                  "Longitude": 36.70846
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_129_A_008_2005_DHDH_M_20260623T031118_20260623T031153_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_129_A_008_2005_DHDH_M_20260623T031118_20260623T031153_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1891631104,
+      "source_checksum": {
+        "Value": "4a492d512baad1f9bcfacec123d7812c",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4242802037-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-06-30T03:19:03.000000Z",
+      "end": "2026-06-30T03:19:38.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.03311,
+                  "Longitude": 35.09045
+                },
+                {
+                  "Latitude": 12.18063,
+                  "Longitude": 34.59178
+                },
+                {
+                  "Latitude": 11.65516,
+                  "Longitude": 32.37038
+                },
+                {
+                  "Latitude": 9.51874,
+                  "Longitude": 32.89335
+                },
+                {
+                  "Latitude": 10.03311,
+                  "Longitude": 35.09045
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001/NISAR_L2_PR_GCOV_024_057_A_007_2005_DHDH_A_20260630T031903_20260630T031938_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1866465280,
+      "source_checksum": {
+        "Value": "72f7699ac8c40d229772f71c5422c0c5",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4245860315-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_024_122_D_082_2005_SHSH_M_20260704T161410_20260704T161444_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-04T16:14:10.000000Z",
+      "end": "2026-07-04T16:14:44.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.13955,
+                  "Longitude": 33.06783
+                },
+                {
+                  "Latitude": 12.05535,
+                  "Longitude": 32.5621
+                },
+                {
+                  "Latitude": 11.52419,
+                  "Longitude": 34.80893
+                },
+                {
+                  "Latitude": 13.59968,
+                  "Longitude": 35.33039
+                },
+                {
+                  "Latitude": 14.13955,
+                  "Longitude": 33.06783
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_024_122_D_082_2005_SHSH_M_20260704T161410_20260704T161444_P05023_N_F_J_001/NISAR_L2_PR_GCOV_024_122_D_082_2005_SHSH_M_20260704T161410_20260704T161444_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1400897536,
+      "source_checksum": {
+        "Value": "a1c93b613c7483418ec95477f1d72ffb",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4246114097-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_024_122_D_083_2005_SHSH_A_20260704T161443_20260704T161517_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-04T16:14:43.000000Z",
+      "end": "2026-07-04T16:15:17.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.16921,
+                  "Longitude": 32.61326
+                },
+                {
+                  "Latitude": 10.0839,
+                  "Longitude": 32.11776
+                },
+                {
+                  "Latitude": 9.56392,
+                  "Longitude": 34.33795
+                },
+                {
+                  "Latitude": 11.64182,
+                  "Longitude": 34.84241
+                },
+                {
+                  "Latitude": 12.16921,
+                  "Longitude": 32.61326
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_024_122_D_083_2005_SHSH_A_20260704T161443_20260704T161517_P05023_N_F_J_001/NISAR_L2_PR_GCOV_024_122_D_083_2005_SHSH_A_20260704T161443_20260704T161517_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1430257664,
+      "source_checksum": {
+        "Value": "1e80cb7e3fe9dc160a94371ec41db167",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4246026785-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_024_129_A_008_2005_DHDH_M_20260705T031117_20260705T031152_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-05T03:11:17.000000Z",
+      "end": "2026-07-05T03:11:52.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.04593,
+                  "Longitude": 36.71133
+                },
+                {
+                  "Latitude": 14.19355,
+                  "Longitude": 36.20727
+                },
+                {
+                  "Latitude": 13.65241,
+                  "Longitude": 33.93988
+                },
+                {
+                  "Latitude": 11.51743,
+                  "Longitude": 34.47596
+                },
+                {
+                  "Latitude": 12.04593,
+                  "Longitude": 36.71133
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_024_129_A_008_2005_DHDH_M_20260705T031117_20260705T031152_P05023_N_F_J_001/NISAR_L2_PR_GCOV_024_129_A_008_2005_DHDH_M_20260705T031117_20260705T031152_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1883242496,
+      "source_checksum": {
+        "Value": "039e8793c3c8f307c25e078d6a48ee92",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4257667130-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-12T03:19:03.000000Z",
+      "end": "2026-07-12T03:19:37.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.06652,
+                  "Longitude": 35.08137
+                },
+                {
+                  "Latitude": 12.15478,
+                  "Longitude": 34.59823
+                },
+                {
+                  "Latitude": 11.62935,
+                  "Longitude": 32.37687
+                },
+                {
+                  "Latitude": 9.5523,
+                  "Longitude": 32.88537
+                },
+                {
+                  "Latitude": 10.06652,
+                  "Longitude": 35.08137
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001/NISAR_L2_PR_GCOV_025_057_A_007_2005_DHDH_A_20260712T031903_20260712T031937_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1820327936,
+      "source_checksum": {
+        "Value": "0d071795675b69b6a64f3689121dc119",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4254222810-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_025_122_D_082_2005_DHDH_M_20260716T161409_20260716T161443_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-16T16:14:09.000000Z",
+      "end": "2026-07-16T16:14:43.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.16077,
+                  "Longitude": 33.07297
+                },
+                {
+                  "Latitude": 12.07654,
+                  "Longitude": 32.56723
+                },
+                {
+                  "Latitude": 11.54535,
+                  "Longitude": 34.81415
+                },
+                {
+                  "Latitude": 13.62089,
+                  "Longitude": 35.33551
+                },
+                {
+                  "Latitude": 14.16077,
+                  "Longitude": 33.07297
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_025_122_D_082_2005_DHDH_M_20260716T161409_20260716T161443_P05023_N_F_J_001/NISAR_L2_PR_GCOV_025_122_D_082_2005_DHDH_M_20260716T161409_20260716T161443_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1786773504,
+      "source_checksum": {
+        "Value": "49d8a380458e59e553d09eecb43f4102",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4254219957-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_025_122_D_083_2005_DHDH_A_20260716T161442_20260716T161517_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-16T16:14:42.000000Z",
+      "end": "2026-07-16T16:15:17.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.1904,
+                  "Longitude": 32.61838
+                },
+                {
+                  "Latitude": 10.04548,
+                  "Longitude": 32.10884
+                },
+                {
+                  "Latitude": 9.52579,
+                  "Longitude": 34.32838
+                },
+                {
+                  "Latitude": 11.66337,
+                  "Longitude": 34.84601
+                },
+                {
+                  "Latitude": 12.1904,
+                  "Longitude": 32.61838
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_025_122_D_083_2005_DHDH_A_20260716T161442_20260716T161517_P05023_N_F_J_001/NISAR_L2_PR_GCOV_025_122_D_083_2005_DHDH_A_20260716T161442_20260716T161517_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1862270976,
+      "source_checksum": {
+        "Value": "aad3246aef2afd59eef6fb451ee7add6",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4254500604-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_025_129_A_008_2005_DHDH_M_20260717T031117_20260717T031151_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-17T03:11:17.000000Z",
+      "end": "2026-07-17T03:11:51.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.08807,
+                  "Longitude": 36.7038
+                },
+                {
+                  "Latitude": 14.17562,
+                  "Longitude": 36.21199
+                },
+                {
+                  "Latitude": 13.6346,
+                  "Longitude": 33.94481
+                },
+                {
+                  "Latitude": 11.55894,
+                  "Longitude": 34.46599
+                },
+                {
+                  "Latitude": 12.08807,
+                  "Longitude": 36.7038
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_025_129_A_008_2005_DHDH_M_20260717T031117_20260717T031151_P05023_N_F_J_001/NISAR_L2_PR_GCOV_025_129_A_008_2005_DHDH_M_20260717T031117_20260717T031151_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1845493760,
+      "source_checksum": {
+        "Value": "27a7473905af00f311cf9a91d8b4df24",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4260716822-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-07-24T03:19:02.000000Z",
+      "end": "2026-07-24T03:19:36.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.04483,
+                  "Longitude": 35.08816
+                },
+                {
+                  "Latitude": 12.13272,
+                  "Longitude": 34.60346
+                },
+                {
+                  "Latitude": 11.60734,
+                  "Longitude": 32.38218
+                },
+                {
+                  "Latitude": 9.53027,
+                  "Longitude": 32.89053
+                },
+                {
+                  "Latitude": 10.04483,
+                  "Longitude": 35.08816
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001/NISAR_L2_PR_GCOV_026_057_A_007_2005_DHDH_A_20260724T031902_20260724T031936_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1820327936,
+      "source_checksum": {
+        "Value": "8ec31c8cdc7343e9fcf3066e07b3404a",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4278092786-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_027_129_A_008_2005_DHDH_M_20260810T031115_20260810T031150_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-10T03:11:15.000000Z",
+      "end": "2026-08-10T03:11:50.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.02565,
+                  "Longitude": 36.71668
+                },
+                {
+                  "Latitude": 14.17321,
+                  "Longitude": 36.21251
+                },
+                {
+                  "Latitude": 13.63227,
+                  "Longitude": 33.94564
+                },
+                {
+                  "Latitude": 11.49725,
+                  "Longitude": 34.48139
+                },
+                {
+                  "Latitude": 12.02565,
+                  "Longitude": 36.71668
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_027_129_A_008_2005_DHDH_M_20260810T031115_20260810T031150_P05023_N_F_J_001/NISAR_L2_PR_GCOV_027_129_A_008_2005_DHDH_M_20260810T031115_20260810T031150_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1887436800,
+      "source_checksum": {
+        "Value": "a10555ae3fb280eb44be08264119ad46",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4285211632-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-17T03:19:01.000000Z",
+      "end": "2026-08-17T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.04794,
+                  "Longitude": 35.0856
+                },
+                {
+                  "Latitude": 12.13617,
+                  "Longitude": 34.60239
+                },
+                {
+                  "Latitude": 11.61081,
+                  "Longitude": 32.38122
+                },
+                {
+                  "Latitude": 9.53374,
+                  "Longitude": 32.88961
+                },
+                {
+                  "Latitude": 10.04794,
+                  "Longitude": 35.0856
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_028_057_A_007_2005_DHDH_A_20260817T031901_20260817T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1820327936,
+      "source_checksum": {
+        "Value": "350f58583980812d6622544efa53c2fa",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4287916388-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_028_122_D_082_2005_SHSH_M_20260821T161407_20260821T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-21T16:14:07.000000Z",
+      "end": "2026-08-21T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.1989,
+                  "Longitude": 33.08287
+                },
+                {
+                  "Latitude": 12.11467,
+                  "Longitude": 32.57704
+                },
+                {
+                  "Latitude": 11.58329,
+                  "Longitude": 34.82412
+                },
+                {
+                  "Latitude": 13.65875,
+                  "Longitude": 35.34596
+                },
+                {
+                  "Latitude": 14.1989,
+                  "Longitude": 33.08287
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_028_122_D_082_2005_SHSH_M_20260821T161407_20260821T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_028_122_D_082_2005_SHSH_M_20260821T161407_20260821T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1405091840,
+      "source_checksum": {
+        "Value": "ec44698a411d9a809ed8d48d6021bead",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4287893628-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_028_122_D_083_2005_SHSH_A_20260821T161440_20260821T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-21T16:14:40.000000Z",
+      "end": "2026-08-21T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.22862,
+                  "Longitude": 32.6278
+                },
+                {
+                  "Latitude": 10.08373,
+                  "Longitude": 32.11796
+                },
+                {
+                  "Latitude": 9.56367,
+                  "Longitude": 34.33846
+                },
+                {
+                  "Latitude": 11.70097,
+                  "Longitude": 34.85737
+                },
+                {
+                  "Latitude": 12.22862,
+                  "Longitude": 32.6278
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_028_122_D_083_2005_SHSH_A_20260821T161440_20260821T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_028_122_D_083_2005_SHSH_A_20260821T161440_20260821T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1459617792,
+      "source_checksum": {
+        "Value": "91e282ea8bcd39d35454f099ce3d428f",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4288280295-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_028_129_A_008_2005_DHDH_M_20260822T031115_20260822T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-22T03:11:15.000000Z",
+      "end": "2026-08-22T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.04799,
+                  "Longitude": 36.71117
+                },
+                {
+                  "Latitude": 14.13605,
+                  "Longitude": 36.22167
+                },
+                {
+                  "Latitude": 13.59519,
+                  "Longitude": 33.95493
+                },
+                {
+                  "Latitude": 11.51948,
+                  "Longitude": 34.47582
+                },
+                {
+                  "Latitude": 12.04799,
+                  "Longitude": 36.71117
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_028_129_A_008_2005_DHDH_M_20260822T031115_20260822T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_028_129_A_008_2005_DHDH_M_20260822T031115_20260822T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1845493760,
+      "source_checksum": {
+        "Value": "32a22cf71656c54f5c788022af6e39ae",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4293121640-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-08-29T03:19:01.000000Z",
+      "end": "2026-08-29T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.06641,
+                  "Longitude": 35.08073
+                },
+                {
+                  "Latitude": 12.15475,
+                  "Longitude": 34.59795
+                },
+                {
+                  "Latitude": 11.62935,
+                  "Longitude": 32.37662
+                },
+                {
+                  "Latitude": 9.55229,
+                  "Longitude": 32.88511
+                },
+                {
+                  "Latitude": 10.06641,
+                  "Longitude": 35.08073
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_029_057_A_007_2005_DHDH_A_20260829T031901_20260829T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1824522240,
+      "source_checksum": {
+        "Value": "a384d6891d348ead03719ac37e8684b9",
+        "Algorithm": "MD5"
+      },
+      "optical_date": "2026-08-26",
+      "status": "verified pilot"
+    },
+    {
+      "concept_id": "G4298164482-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_029_122_D_082_2005_DHDH_M_20260902T161407_20260902T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-02T16:14:07.000000Z",
+      "end": "2026-09-02T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.188,
+                  "Longitude": 33.07971
+                },
+                {
+                  "Latitude": 12.10378,
+                  "Longitude": 32.57387
+                },
+                {
+                  "Latitude": 11.57243,
+                  "Longitude": 34.82096
+                },
+                {
+                  "Latitude": 13.64791,
+                  "Longitude": 35.34267
+                },
+                {
+                  "Latitude": 14.188,
+                  "Longitude": 33.07971
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_029_122_D_082_2005_DHDH_M_20260902T161407_20260902T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_029_122_D_082_2005_DHDH_M_20260902T161407_20260902T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1790967808,
+      "source_checksum": {
+        "Value": "7cfdffc71a17d7cc91adc700b1837394",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4298164798-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_029_122_D_083_2005_DHDH_A_20260902T161440_20260902T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-02T16:14:40.000000Z",
+      "end": "2026-09-02T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.21772,
+                  "Longitude": 32.62465
+                },
+                {
+                  "Latitude": 10.07284,
+                  "Longitude": 32.11486
+                },
+                {
+                  "Latitude": 9.55311,
+                  "Longitude": 34.33407
+                },
+                {
+                  "Latitude": 11.69046,
+                  "Longitude": 34.85275
+                },
+                {
+                  "Latitude": 12.21772,
+                  "Longitude": 32.62465
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_029_122_D_083_2005_DHDH_A_20260902T161440_20260902T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_029_122_D_083_2005_DHDH_A_20260902T161440_20260902T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1862270976,
+      "source_checksum": {
+        "Value": "8b6d2722a56407875cbc2f8e0fed0368",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4298697231-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_029_129_A_008_2005_DHDH_M_20260903T031115_20260903T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-03T03:11:15.000000Z",
+      "end": "2026-09-03T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.05851,
+                  "Longitude": 36.70889
+                },
+                {
+                  "Latitude": 14.14642,
+                  "Longitude": 36.2187
+                },
+                {
+                  "Latitude": 13.60552,
+                  "Longitude": 33.95189
+                },
+                {
+                  "Latitude": 11.52981,
+                  "Longitude": 34.47282
+                },
+                {
+                  "Latitude": 12.05851,
+                  "Longitude": 36.70889
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_029_129_A_008_2005_DHDH_M_20260903T031115_20260903T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_029_129_A_008_2005_DHDH_M_20260903T031115_20260903T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1845493760,
+      "source_checksum": {
+        "Value": "09a7a9a4233aaf6c9f3fe771f710d857",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4308125414-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-10T03:19:00.000000Z",
+      "end": "2026-09-10T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.022,
+                  "Longitude": 35.09285
+                },
+                {
+                  "Latitude": 12.1697,
+                  "Longitude": 34.59503
+                },
+                {
+                  "Latitude": 11.64422,
+                  "Longitude": 32.37354
+                },
+                {
+                  "Latitude": 9.50782,
+                  "Longitude": 32.89646
+                },
+                {
+                  "Latitude": 10.022,
+                  "Longitude": 35.09285
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_030_057_A_007_2005_DHDH_A_20260910T031900_20260910T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1866465280,
+      "source_checksum": {
+        "Value": "a8811611371505f49f8c835361a6251b",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4313202739-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_030_122_D_082_2005_SHSH_M_20260914T161407_20260914T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-14T16:14:07.000000Z",
+      "end": "2026-09-14T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.17869,
+                  "Longitude": 33.07695
+                },
+                {
+                  "Latitude": 12.09447,
+                  "Longitude": 32.57115
+                },
+                {
+                  "Latitude": 11.56307,
+                  "Longitude": 34.81863
+                },
+                {
+                  "Latitude": 13.63858,
+                  "Longitude": 35.3402
+                },
+                {
+                  "Latitude": 14.17869,
+                  "Longitude": 33.07695
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_030_122_D_082_2005_SHSH_M_20260914T161407_20260914T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_030_122_D_082_2005_SHSH_M_20260914T161407_20260914T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1405091840,
+      "source_checksum": {
+        "Value": "490cc0a605d5bd3b4acc8a210ce5a957",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4313209558-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_030_122_D_083_2005_SHSH_A_20260914T161440_20260914T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-14T16:14:40.000000Z",
+      "end": "2026-09-14T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.20832,
+                  "Longitude": 32.62236
+                },
+                {
+                  "Latitude": 10.06342,
+                  "Longitude": 32.11266
+                },
+                {
+                  "Latitude": 9.54335,
+                  "Longitude": 34.33352
+                },
+                {
+                  "Latitude": 11.68079,
+                  "Longitude": 34.85172
+                },
+                {
+                  "Latitude": 12.20832,
+                  "Longitude": 32.62236
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_030_122_D_083_2005_SHSH_A_20260914T161440_20260914T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_030_122_D_083_2005_SHSH_A_20260914T161440_20260914T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1459617792,
+      "source_checksum": {
+        "Value": "57ed804b5c894577f8badc32a0f78d7c",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4313711467-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_030_129_A_008_2005_DHDH_M_20260915T031114_20260915T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-15T03:11:14.000000Z",
+      "end": "2026-09-15T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.00724,
+                  "Longitude": 36.72141
+                },
+                {
+                  "Latitude": 14.1547,
+                  "Longitude": 36.21683
+                },
+                {
+                  "Latitude": 13.61377,
+                  "Longitude": 33.94991
+                },
+                {
+                  "Latitude": 11.47872,
+                  "Longitude": 34.48548
+                },
+                {
+                  "Latitude": 12.00724,
+                  "Longitude": 36.72141
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_030_129_A_008_2005_DHDH_M_20260915T031114_20260915T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_030_129_A_008_2005_DHDH_M_20260915T031114_20260915T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1887436800,
+      "source_checksum": {
+        "Value": "412bb5ec0a31881a5e4258e8ea3dede3",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4321351928-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-22T03:19:00.000000Z",
+      "end": "2026-09-22T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.0115,
+                  "Longitude": 35.09321
+                },
+                {
+                  "Latitude": 12.15953,
+                  "Longitude": 34.59678
+                },
+                {
+                  "Latitude": 11.63371,
+                  "Longitude": 32.37394
+                },
+                {
+                  "Latitude": 9.4973,
+                  "Longitude": 32.89685
+                },
+                {
+                  "Latitude": 10.0115,
+                  "Longitude": 35.09321
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_031_057_A_007_2005_SHSH_A_20260922T031900_20260922T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1468006400,
+      "source_checksum": {
+        "Value": "b69745c291a289e5b1ed958d6e6fae7d",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4326781905-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_031_122_D_082_2005_DHDH_M_20260926T161407_20260926T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-26T16:14:07.000000Z",
+      "end": "2026-09-26T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.1764,
+                  "Longitude": 33.07621
+                },
+                {
+                  "Latitude": 12.09217,
+                  "Longitude": 32.5705
+                },
+                {
+                  "Latitude": 11.56082,
+                  "Longitude": 34.81792
+                },
+                {
+                  "Latitude": 13.63633,
+                  "Longitude": 35.33943
+                },
+                {
+                  "Latitude": 14.1764,
+                  "Longitude": 33.07621
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_031_122_D_082_2005_DHDH_M_20260926T161407_20260926T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_031_122_D_082_2005_DHDH_M_20260926T161407_20260926T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1790967808,
+      "source_checksum": {
+        "Value": "e45e1126bf42fb58474034b048432ccf",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4326778663-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_031_122_D_083_2005_DHDH_A_20260926T161440_20260926T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-26T16:14:40.000000Z",
+      "end": "2026-09-26T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.20603,
+                  "Longitude": 32.62166
+                },
+                {
+                  "Latitude": 10.06113,
+                  "Longitude": 32.11201
+                },
+                {
+                  "Latitude": 9.54141,
+                  "Longitude": 34.33154
+                },
+                {
+                  "Latitude": 11.67888,
+                  "Longitude": 34.84961
+                },
+                {
+                  "Latitude": 12.20603,
+                  "Longitude": 32.62166
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_031_122_D_083_2005_DHDH_A_20260926T161440_20260926T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_031_122_D_083_2005_DHDH_A_20260926T161440_20260926T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1862270976,
+      "source_checksum": {
+        "Value": "a67c76ee3702c1ec15e5681a45ec36eb",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4327200945-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_031_129_A_008_2005_DHDH_M_20260927T031114_20260927T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-09-27T03:11:14.000000Z",
+      "end": "2026-09-27T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.01349,
+                  "Longitude": 36.71911
+                },
+                {
+                  "Latitude": 14.16126,
+                  "Longitude": 36.21586
+                },
+                {
+                  "Latitude": 13.62034,
+                  "Longitude": 33.94888
+                },
+                {
+                  "Latitude": 11.48529,
+                  "Longitude": 34.48446
+                },
+                {
+                  "Latitude": 12.01349,
+                  "Longitude": 36.71911
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_031_129_A_008_2005_DHDH_M_20260927T031114_20260927T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_031_129_A_008_2005_DHDH_M_20260927T031114_20260927T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1887436800,
+      "source_checksum": {
+        "Value": "e51193bb873e43257f6fb27ea4e0668b",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4343127383-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-04T03:19:00.000000Z",
+      "end": "2026-10-04T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 9.99849,
+                  "Longitude": 35.09628
+                },
+                {
+                  "Latitude": 12.14659,
+                  "Longitude": 34.60022
+                },
+                {
+                  "Latitude": 11.62116,
+                  "Longitude": 32.37882
+                },
+                {
+                  "Latitude": 9.48474,
+                  "Longitude": 32.90161
+                },
+                {
+                  "Latitude": 9.99849,
+                  "Longitude": 35.09628
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_057_A_007_2005_DHDH_A_20261004T031900_20261004T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1866465280,
+      "source_checksum": {
+        "Value": "249ab01422200206f59217a597712572",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "awaiting native HH verification"
+    },
+    {
+      "concept_id": "G4355272425-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_032_122_D_082_2005_SHSH_M_20261008T161407_20261008T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-08T16:14:07.000000Z",
+      "end": "2026-10-08T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.1901,
+                  "Longitude": 33.07932
+                },
+                {
+                  "Latitude": 12.10588,
+                  "Longitude": 32.57351
+                },
+                {
+                  "Latitude": 11.57446,
+                  "Longitude": 34.821
+                },
+                {
+                  "Latitude": 13.64993,
+                  "Longitude": 35.3427
+                },
+                {
+                  "Latitude": 14.1901,
+                  "Longitude": 33.07932
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_122_D_082_2005_SHSH_M_20261008T161407_20261008T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_122_D_082_2005_SHSH_M_20261008T161407_20261008T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1400897536,
+      "source_checksum": {
+        "Value": "24b89a7be448af88f316cfdf45fae4c7",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4355291464-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_032_122_D_083_2005_SHSH_A_20261008T161440_20261008T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-08T16:14:40.000000Z",
+      "end": "2026-10-08T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH"
+      ],
+      "mode": "SHSH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.21973,
+                  "Longitude": 32.62471
+                },
+                {
+                  "Latitude": 10.07485,
+                  "Longitude": 32.11494
+                },
+                {
+                  "Latitude": 9.55479,
+                  "Longitude": 34.33564
+                },
+                {
+                  "Latitude": 11.69214,
+                  "Longitude": 34.85424
+                },
+                {
+                  "Latitude": 12.21973,
+                  "Longitude": 32.62471
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_122_D_083_2005_SHSH_A_20261008T161440_20261008T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_122_D_083_2005_SHSH_A_20261008T161440_20261008T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1459617792,
+      "source_checksum": {
+        "Value": "73facb2f42c3787789872477be0b8509",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4356608325-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_032_129_A_008_2005_DHDH_M_20261009T031114_20261009T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-09T03:11:14.000000Z",
+      "end": "2026-10-09T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 11.99525,
+                  "Longitude": 36.72169
+                },
+                {
+                  "Latitude": 14.14324,
+                  "Longitude": 36.21938
+                },
+                {
+                  "Latitude": 13.60236,
+                  "Longitude": 33.95253
+                },
+                {
+                  "Latitude": 11.46729,
+                  "Longitude": 34.48799
+                },
+                {
+                  "Latitude": 11.99525,
+                  "Longitude": 36.72169
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_129_A_008_2005_DHDH_M_20261009T031114_20261009T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_129_A_008_2005_DHDH_M_20261009T031114_20261009T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1891631104,
+      "source_checksum": {
+        "Value": "95353e331eed86161589449583cf219c",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4374297537-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-16T03:19:01.000000Z",
+      "end": "2026-10-16T03:19:35.999342Z",
+      "track": 57,
+      "direction": "ASCENDING",
+      "frame": 7,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 10.04252,
+                  "Longitude": 35.08783
+                },
+                {
+                  "Latitude": 12.13058,
+                  "Longitude": 34.60396
+                },
+                {
+                  "Latitude": 11.60522,
+                  "Longitude": 32.38267
+                },
+                {
+                  "Latitude": 9.52815,
+                  "Longitude": 32.89101
+                },
+                {
+                  "Latitude": 10.04252,
+                  "Longitude": 35.08783
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001/NISAR_L2_PR_GCOV_033_057_A_007_2005_DHDH_A_20261016T031901_20261016T031935_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1820327936,
+      "source_checksum": {
+        "Value": "87827aac1fcc4dcad26d283e4a37bcf9",
+        "Algorithm": "MD5"
+      },
+      "optical_date": "2026-10-15",
+      "status": "verified pilot"
+    },
+    {
+      "concept_id": "G4383500663-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_033_122_D_082_2005_DHDH_M_20261020T161407_20261020T161441_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-20T16:14:07.000000Z",
+      "end": "2026-10-20T16:14:41.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 82,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 14.20761,
+                  "Longitude": 33.08449
+                },
+                {
+                  "Latitude": 12.12338,
+                  "Longitude": 32.57861
+                },
+                {
+                  "Latitude": 11.59191,
+                  "Longitude": 34.82609
+                },
+                {
+                  "Latitude": 13.66737,
+                  "Longitude": 35.34798
+                },
+                {
+                  "Latitude": 14.20761,
+                  "Longitude": 33.08449
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_033_122_D_082_2005_DHDH_M_20261020T161407_20261020T161441_P05023_N_F_J_001/NISAR_L2_PR_GCOV_033_122_D_082_2005_DHDH_M_20261020T161407_20261020T161441_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1790967808,
+      "source_checksum": {
+        "Value": "bfb325d977ee72369aed2d63f6238849",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4383453012-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_033_122_D_083_2005_DHDH_A_20261020T161440_20261020T161515_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-20T16:14:40.000000Z",
+      "end": "2026-10-20T16:15:15.999342Z",
+      "track": 122,
+      "direction": "DESCENDING",
+      "frame": 83,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.23723,
+                  "Longitude": 32.6298
+                },
+                {
+                  "Latitude": 10.09234,
+                  "Longitude": 32.11995
+                },
+                {
+                  "Latitude": 9.57269,
+                  "Longitude": 34.33874
+                },
+                {
+                  "Latitude": 11.70996,
+                  "Longitude": 34.85783
+                },
+                {
+                  "Latitude": 12.23723,
+                  "Longitude": 32.6298
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_033_122_D_083_2005_DHDH_A_20261020T161440_20261020T161515_P05023_N_F_J_001/NISAR_L2_PR_GCOV_033_122_D_083_2005_DHDH_A_20261020T161440_20261020T161515_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1862270976,
+      "source_checksum": {
+        "Value": "8ad949caad8dd66972aed387deb9cc92",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    },
+    {
+      "concept_id": "G4384323889-ASF",
+      "cmr_revision": 1,
+      "id": "NISAR_L2_PR_GCOV_033_129_A_008_2005_DHDH_M_20261021T031115_20261021T031149_P05023_N_F_J_001",
+      "collection": "NISAR_L2_GCOV_PROVISIONAL_V1",
+      "maturity": "PROVISIONAL",
+      "datetime": "2026-10-21T03:11:15.000000Z",
+      "end": "2026-10-21T03:11:49.999342Z",
+      "track": 129,
+      "direction": "ASCENDING",
+      "frame": 8,
+      "frequency_a_mhz": 20,
+      "frequency_a_polarizations": [
+        "HH",
+        "HV"
+      ],
+      "mode": "DHDH",
+      "version": "1.0.11",
+      "release": "P05023",
+      "footprint": {
+        "GPolygons": [
+          {
+            "Boundary": {
+              "Points": [
+                {
+                  "Latitude": 12.03975,
+                  "Longitude": 36.71346
+                },
+                {
+                  "Latitude": 14.12781,
+                  "Longitude": 36.22397
+                },
+                {
+                  "Latitude": 13.587,
+                  "Longitude": 33.95726
+                },
+                {
+                  "Latitude": 11.5113,
+                  "Longitude": 34.47811
+                },
+                {
+                  "Latitude": 12.03975,
+                  "Longitude": 36.71346
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "source_url": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_033_129_A_008_2005_DHDH_M_20261021T031115_20261021T031149_P05023_N_F_J_001/NISAR_L2_PR_GCOV_033_129_A_008_2005_DHDH_M_20261021T031115_20261021T031149_P05023_N_F_J_001.h5",
+      "source_size_bytes": 1845493760,
+      "source_checksum": {
+        "Value": "b58182a4052823cb22406b535548d26e",
+        "Algorithm": "MD5"
+      },
+      "optical_date": null,
+      "status": "different track, direction or frame"
+    }
+  ]
+}

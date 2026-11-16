@@ -1,5 +1,7 @@
 # Roseires shoreline change
 
+See the [NISAR timeline inventory and extraction workflow](NISAR_TIMELINE.md) for the full CMR search and individual HH observations.
+
 Use the two independent change maps to examine agreement at an inlet or across the full 711 × 446 cell NISAR crop. The optical map is a comparison reference. Clouds, shadow, ambiguous classes, tile gaps, source no-data and conflicting overlap labels remain visible.
 
 ## Start with 36PXU

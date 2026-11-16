@@ -199,9 +199,9 @@
         <p>The locator shows the dam and the study inlet. The pale blue outline is the historical HydroLAKES shoreline. The live topographic basemap loads when connected.</p>
         <p><a href="https://www.openstreetmap.org/way/306787728" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://www.geonames.org/search.html?country=SD" target="_blank" rel="noopener">GeoNames</a> · <a href="https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer" target="_blank" rel="noopener">Esri basemap attribution</a></p>
         <h3>Load more observations</h3>
-        <p>Choose a processed pipeline comparator HTML file or the two SCL GeoTIFFs with the inlet mask. Files are read on this device.</p>
-        <label for="add-data" class="file-label">Processed comparator or inlet GeoTIFFs</label>
-        <input id="add-data" type="file" accept=".html,.tif,.tiff" multiple>
+        <p>Choose a processed radar observation JSON, a comparator HTML, or the SCL GeoTIFFs and inlet mask. Files are read on this device.</p>
+        <label for="add-data" class="file-label">Processed observation files</label>
+        <input id="add-data" type="file" accept=".json,.html,.tif,.tiff" multiple>
         <p id="import-status" role="status"></p>
         <button class="outline" type="button" id="load-sentinel">Load Sentinel‑2 scenes</button>
       </div>

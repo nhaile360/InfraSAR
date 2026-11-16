@@ -20,8 +20,8 @@ SCENES = {
 }
 
 
-def load_token():
-    for line in (WORKSPACE / ".env").read_text(encoding="utf-8").splitlines():
+def load_token(path=WORKSPACE / ".env"):
+    for line in path.read_text(encoding="utf-8").splitlines():
         key, _, value = line.partition("=")
         if key.strip() == "EARTHDATA_TOKEN":
             value = value.strip()

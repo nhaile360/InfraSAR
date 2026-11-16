@@ -480,7 +480,7 @@ function updateDates(){
   }else if(toolState.view==="timeline"){
     const current=toolState.events[toolState.time];
     a.textContent=current?formatDate(current.date):"";
-    b.textContent=current?.record?(current.record.type==="water"?"Sentinel‑2":"NISAR"):"DAHITI";
+    b.textContent=current?.record?(current.record.type==="water"?"Sentinel‑2":"NISAR · "+current.record.maturity):"DAHITI";
   }else{
     if(toolState.view==="points"){
       const observation=(toolState.layer==="water"?pilotWater():pilotRadar())[1];
@@ -705,16 +705,18 @@ function updateDateComparison(){
   section.hidden=!extended;
   if(!extended)return;
   const type=pair[0]?.type, kind=type==="radar"?"NISAR radar":"Sentinel‑2 optical";
-  const canSelect=record&&loaded[record.type].size>2&&(!type||record.type===type)&&
+  const first=type&&loaded[type].get(pair[0].time);
+  const eligible=record&&[...loaded[record.type].values()].some(other=>other.time!==record.time&&comparable(record,other));
+  const canSelect=eligible&&loaded[record.type].size>2&&(!first||comparable(first,record))&&
     pair.length<2&&!pair.some(({time})=>time===record.time);
   $("select-date").disabled=!canSelect;
   $("open-swipe").disabled=pair.length!==2;
   $("clear-dates").hidden=!pair.length;
   const selected=pair.map(({time})=>formatDate(time)).join(" and ");
   if(pair.length===2)$("pair-message").textContent=kind+" selected · "+selected+".";
-  else if(type)$("pair-message").textContent="Selected "+selected+". Choose another "+kind+" date.";
+  else if(type)$("pair-message").textContent="Selected "+selected+". Choose a compatible "+kind+" date.";
   else if(!record)$("pair-message").textContent="This date has a height reading. Choose a date with an image to compare.";
-  else $("pair-message").textContent="Select two dates from the same sensor using the timeline.";
+  else $("pair-message").textContent="Select two dates with matching sensor and radar product settings.";
 }
 function selectTimelineDate(){
   const record=toolState.events[toolState.time]?.record;
@@ -727,7 +729,7 @@ function selectTimelineDate(){
 function compareTimelineDates(){
   const [a,b]=toolState.timelinePair;
   if(!a||!b||a.type!==b.type||utc(a.time)>=utc(b.time)||
-    !loaded[a.type].has(a.time)||!loaded[b.type].has(b.time))return;
+    !comparable(loaded[a.type].get(a.time),loaded[b.type].get(b.time)))return;
   toolState.pairByLayer[a.type]=[a.time,b.time];toolState.layer=a.type;
   setView("swipe");
   $("drag").focus({preventScroll:true});
@@ -848,8 +850,14 @@ function updateTimeline(){
   $("time-count").textContent=radarCount+" radar passes · "+waterCount+" water maps";
   const messages=[];
   if(e.record?.type==="radar"){
+    const record=e.record;
+    messages.push(showTime(record.time)+" · "+record.maturity+" "+[record.version,record.release,record.mode].filter(Boolean).join(" / "));
+    messages.push(record.optical.length
+      ? "Independent Sentinel‑2 evidence from "+formatDate(record.optical[0].datetime||record.optical[0].date)
+      : "Radar only for this pass");
+    if (Number.isInteger(record.cells)) messages.push(Math.round(record.cells/size*100)+"% of crop has usable HH");
     for(const [key,i] of Object.entries(toolState.points))
-      if(i!==null)messages.push("Point "+key+" "+dbText(e.record.raw[i],2));
+      if(i!==null)messages.push("Point "+key+" HH "+dbText(e.record.raw[i],2));
   }
   if(e.record?.type==="water"){
     for(const [key,i] of Object.entries(toolState.points))
@@ -1102,6 +1110,9 @@ async function importLocal(files){
       if(/\.html$/i.test(file.name)){
         await addBundle(bundleFromHtml(await file.text()));
         touched=true;
+      }else if(/\.json$/i.test(file.name)){
+        await addRadarObservation(JSON.parse(await file.text()));
+        touched=true;
       }else if(/\.tiff?$/i.test(file.name)){
         const raw=await readClassTiff(await file.arrayBuffer());
         const date=opticalDays.find(d=>file.name.includes(d));
@@ -1116,7 +1127,7 @@ async function importLocal(files){
             touched=true;
           }
         }else{throw new Error("Use the Aug 26 or Oct 15 Sentinel‑2 SCL GeoTIFF, or the outlined patch mask.")}
-      }else{throw new Error("Choose a scored comparator HTML or an aligned GeoTIFF.")}
+      }else{throw new Error("Choose a processed radar JSON, comparator HTML or aligned GeoTIFF.")}
     }catch(error){
       status.textContent=file.name+" · "+error.message;
       if(touched)refreshData();
@@ -1160,6 +1171,7 @@ async function loadSentinel(){
 }
 async function init(){
   for(const bundle of seed.bundles)await addBundle(bundle);
+  for(const record of seed.radar_observations||[])await addRadarObservation(record);
   if(seed.patch)baseMask=await unpack(seed.patch);
   createCharts();
   activateMap();
