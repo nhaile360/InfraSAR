@@ -34,9 +34,15 @@ jobs:
           python scripts/build_site.py
       - name: Test the site without network resources
         run: python scripts/smoke_site.py dist/index.html
-      - uses: actions/upload-pages-artifact@v3
+      - name: Capture before and after screenshots
+        run: |
+          python -m http.server 8128 --bind 127.0.0.1 --directory dist &
+          python scripts/capture_design_review.py https://nhaile360.github.io/InfraSAR/ before
+          python scripts/capture_design_review.py http://127.0.0.1:8128/ after
+      - uses: actions/upload-artifact@v4
         with:
-          path: dist/
+          name: infrasar-design-screenshots
+          path: design-screenshots/
 
   deploy:
     if: github.ref == 'refs/heads/main' && (github.event.repository.has_pages || github.event_name == 'workflow_dispatch')
