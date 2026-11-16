@@ -367,6 +367,7 @@ def check_single_observation(page):
         const row = toolState.events[toolState.time].record;
         const index = toolState.points.A;
         return row.raw[index] === pilotRadar()[0].raw[index]
+            && comparable(row, pilotRadar()[0])
             && !comparable(row, {...row, maturity:"VALIDATED"})
             && !comparable(row, {...row, mode:"SHSH"});
     }""")

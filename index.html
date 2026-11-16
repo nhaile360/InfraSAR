@@ -477,10 +477,11 @@ function validGrid(value) {
 const loaded = {radar:new Map(), water:new Map(), pairs:new Map()};
 function radarRecord(record, raw, optical) {
   const parts = record.id.split("_");
+  const release = record.release || record.id.match(/_(P\d{5})_/)?.[1];
   const maturity = record.maturity || (parts[2] === "PR" ? "PROVISIONAL" : "Unknown maturity");
   return {type:"radar",time:record.datetime,id:record.id,raw,maturity,optical,
-    version:record.version || (parts[12] === "P05023" ? "1.0.11" : null),
-    release:record.release || parts[12], mode:record.mode || parts[9],
+    version:record.version || (release === "P05023" ? "1.0.11" : null),
+    release, mode:record.mode || parts[9],
     geometry:parts.slice(5,9).join(":"),cells:record.valid_cells};
 }
 function comparable(a, b) {
